@@ -1,0 +1,4 @@
+#!/bin/bash
+if [[ `/docker/create "$1" "$2"` ]]; then
+  /docker/start "$1"
+fi
