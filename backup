@@ -1,0 +1,7 @@
+#!/bin/bash
+if [[ -z "$1" ]]; then
+  echo 'Enter name of container to backup'
+  exit 255
+fi
+
+docker export "$1" > /docker/images/$1.`date +%Y%M%d%H%m`.tar
