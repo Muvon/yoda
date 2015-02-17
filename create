@@ -6,7 +6,7 @@ fi
 
 image='centos:7'
 if [[ -f "$2" ]]; then
-  ./import ${2%%.*} $2
+  /docker/import ${2%%.*} $2
   image=$2
 fi
 
