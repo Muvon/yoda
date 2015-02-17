@@ -1,0 +1,7 @@
+#!/bin/bash
+if [[ -z "$1" ]]; then
+  echo 'Usage: '$0' container-name'
+  exit 255
+fi
+
+docker exec -t -i $1 bash

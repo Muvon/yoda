@@ -1,0 +1,12 @@
+#!/bin/bash
+if [[ -z "$1" || -z "$2" ]]; then
+  echo 'Usage: '$0' name file.tar'
+  exit 255
+fi
+
+if [[ ! -f "$2" ]]; then
+  echo 'Cant find file '$2
+  exit 255
+fi
+
+docker import - "$1" < "$2"

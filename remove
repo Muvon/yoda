@@ -1,0 +1,8 @@
+#!/bin/bash
+running=$(/docker/inspect/running "$1");
+if [[ "$running" == "true" ]]; then
+  /docker/stop "$1"
+fi
+
+test -f /docker/containers/$1 && mv /docker/containers/$1 /docker/trash/container-$1-`date +%Y%m%d%H%M`
+docker rm "$1"

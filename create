@@ -1,0 +1,19 @@
+#!/bin/bash
+if [[ -z "$1" ]]; then
+  echo 'Usage: '$0' name-of-container [image-to-run]'
+  exit 255
+fi
+
+image='centos:7'
+if [[ -f "$2" ]]; then
+  ./import ${2%%.*} $2
+  image=$2
+fi
+
+init="/docker/containers/$1"
+if [[ ! -f $init ]]; then
+  cp -f /docker/init $init
+fi
+
+docker create --name "$1" --hostname "$1" --restart=always --cap-add=NET_ADMIN \
+  -v $init:/init -v /storage:/storage -i -t $image /init
