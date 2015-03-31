@@ -64,6 +64,11 @@ The init file will be moved to trash folder
 
 ## Inspect scripts
 
+### Get id of container
+```bash
+/docker/inspect/id [container-name]
+```
+
 ### Get ip of running container
 
 ```bash
