@@ -1,16 +1,17 @@
 #!/bin/bash
 [[ -z "$1" ]] &&  echo 'Usage: '$0' name-of-container [image-to-run]' && exit 255
-
+docker=$(realpath `dirname $0`)
 image=$([[ -z "$2" ]] && echo 'centos:7' || echo $2)
 if [[ -f "$2" ]]; then
-  /docker/import ${2%%.*} $2
+  $docker/import ${2%%.*} $2
   image=$2
 fi
 
-init="/docker/containers/$1"
+init=$docker"/containers/$1"
 if [[ ! -f $init ]]; then
-  cp -f /docker/init $init
+  cp -f $docker/init $init
 fi
 
+test ! -d /storage/$1 && mkdir /storage/$1
 docker create --name "$1" --hostname "$1" --restart=always --cap-add=NET_ADMIN \
-  -v $init:/init -v /storage:/storage -i -t $image /init
+  -v $init:/init -v /storage/$1:/storage -i -t $image /init
