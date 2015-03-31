@@ -1,7 +1,7 @@
 #!/bin/bash
 [[ -z "$1" ]] &&  echo 'Usage: '$0' name-of-container [image-to-run]' && exit 255
 
-image='centos:7'
+image=$([[ -z "$2" ]] && echo 'centos:7' || echo $2)
 if [[ -f "$2" ]]; then
   /docker/import ${2%%.*} $2
   image=$2
