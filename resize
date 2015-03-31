@@ -1,9 +1,6 @@
 #!/bin/bash
 # Resize docker using devicemapper storage
-if [[ -z $1 || -z $2 ]]; then
-  echo 'Usage: '$0' [container-name] [size-in-gb]'
-  exit 255
-fi
+[[ -z $1 || -z $2 ]] && echo 'Usage: '$0' [container-name] [size-in-gb]' && exit 255
 
 CID=$(/docker/inspect/id "$1")
 DEV=$(basename $(echo /dev/mapper/docker-*-$CID))

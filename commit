@@ -1,7 +1,4 @@
 #!/bin/bash
-if [[ -z "$1" ]]; then
-  echo 'Usage: '$0' name-of-container'
-  exit 255
-fi
+[[ -z "$1" ]] && echo 'Usage: '$0' name-of-container' && exit 255
 
 docker commit "$1"

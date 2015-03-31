@@ -1,7 +1,4 @@
 #!/bin/bash
-if [[ -z "$1" ]]; then
-  echo 'Usage: '$0' container-name'
-  exit 255
-fi
+[[ -z "$1" ]] && echo 'Usage: '$0' container-name' && exit 255
 
 docker exec -t -i $1 bash
