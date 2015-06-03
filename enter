@@ -1,4 +1,4 @@
 #!/bin/bash
 [[ -z "$1" ]] && echo 'Usage: '$0' container-name' && exit 255
-
-docker exec -t -i $1 bash
+docker=$(realpath `dirname $0`)
+$docker/exec $1 bash

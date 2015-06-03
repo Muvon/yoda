@@ -62,17 +62,17 @@ If you wanna remove container just run:
 ```
 The init file will be moved to trash folder
 
-## Inspect scripts
+## Utils for inspect containers and more
 
 ### Get id of container
 ```bash
-/docker/inspect/id [container-name]
+/docker/utils/id [container-name]
 ```
 
 ### Get ip of running container
 
 ```bash
-/docker/inspect/ip [container-name]
+/docker/utils/ip [container-name]
 ```
 
 ### Get state of container
@@ -80,5 +80,13 @@ The init file will be moved to trash folder
 If you need to know state of container - running or not, just use the speical command
 
 ```bash
-/docker/inspect/running [container-name]
+/docker/utils/running [container-name]
+```
+
+### Create custop IP-range bridge for docker
+
+If you wanna assign ips to containers by self you can create custom IP-range bridge to use for it
+
+```bash
+/docker/utils/create-bridge [ip-range-with-cidr]
 ```

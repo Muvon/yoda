@@ -1,6 +1,6 @@
 #!/bin/bash
 docker=$(realpath `dirname $0`)
-running=$($docker/inspect/running "$1");
+running=$($docker/utils/running "$1");
 if [[ "$running" == "true" ]]; then
   $docker/stop "$1"
 fi
