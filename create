@@ -3,7 +3,7 @@
 docker=$(realpath `dirname $0`)
 image=$([[ -z "$2" ]] && echo 'centos:7' || echo $2)
 if [[ -f "$2" ]]; then
-  $docker/import ${2%%.*} $2
+  $docker/utils/import ${2%%.*} $2
   image=$2
 fi
 

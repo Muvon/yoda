@@ -1,4 +1,4 @@
 #!/bin/bash
 [[ -z "$1" ]] && echo 'Usage: '$0' container-name' && exit 255
 docker=$(realpath `dirname $0`)
-$docker/exec $1 bash
+$docker/utils/exec $1 bash
