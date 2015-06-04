@@ -5,5 +5,6 @@ if [[ "$running" == "true" ]]; then
   $docker/stop "$1"
 fi
 
+test ! -d $docker/trash && mkdir $_
 test -f $docker/containers/$1 && mv $_ $docker/trash/container-$1-`date +%Y%m%d%H%M`
 docker rm "$1"

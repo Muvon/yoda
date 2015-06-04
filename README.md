@@ -90,3 +90,10 @@ If you wanna assign ips to containers by self you can create custom IP-range bri
 ```bash
 /docker/utils/create-bridge [ip-range-with-cidr]
 ```
+
+### Resize fixed size of your docker
+
+If you wanna resize docker container use helper script
+```bash
+/docker/utils/resize container size-in-gb
+```

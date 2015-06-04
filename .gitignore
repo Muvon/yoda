@@ -1,4 +1,4 @@
-containers/*
-config/*
-images/*
-trash/*
+containers/**
+config/**
+images/**
+trash/**
