@@ -13,6 +13,6 @@ if [[ ! -f $init ]]; then
   cp -f $docker/init $init
 fi
 
-test ! -d /storage/$1 && mkdir $_
+test ! -d $docker/storage/$1 && mkdir -p $_
 docker create --name "$1" --hostname "$1" --restart=always --cap-add=NET_ADMIN \
-  -v $init:/init -v /storage/$1:/storage $OPTS -i -t $image /init
+  -v $init:/init -v $docker/storage/$1:/storage $OPTS -i -t $image /init
