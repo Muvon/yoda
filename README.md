@@ -9,11 +9,11 @@ git clone git@github.com:dmitrykuzmenkov/docker.git
 ```
 
 ### MACOS
+
 1. Install coreutils: brew install coreutils
-2. Download docker-machine and install it: docker-machine create --driver virtualbox --virtualbox-hostonly-cidr "172.16.1.1/16" dev
-3. Enter machine (docker-machine ssh dev) and edit config /var/lib/boot2docker/profile add to EXTRA_FLAGS: -bip=172.17.42.1/16 -dns 172.17.42.1 -dns 8.8.8.8
-4. Add route to docker via machine: sudo route add 172.17.0.0 172.16.0.100
-5. Add to ~/.profile autoload docker-machine environment: eval (docker-machine env dev) 
+2. Download docker-machine and install it (use vmwarefusion as driver if you want): docker-machine create --driver virtualbox --virtualbox-hostonly-cidr "172.16.1.1/16" dev
+3. Add route to docker via machine: sudo route add 172.17.0.0 `docker-machine ip dev`
+4. Add to ~/.profile autoload docker-machine environment: eval (docker-machine env dev)
 
 ## Usage
 
