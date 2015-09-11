@@ -8,12 +8,36 @@ Just clone it from git in /docker/ directory:
 git clone git@github.com:dmitrykuzmenkov/docker.git
 ```
 
-### MACOS
+Dont forget to install docker running
 
-1. Install coreutils: brew install coreutils
-2. Download docker-machine and install it (use vmwarefusion as driver if you want): docker-machine create --driver virtualbox --virtualbox-hostonly-cidr "172.16.1.1/16" dev
-3. Add route to docker via machine: sudo route add 172.17.0.0 `docker-machine ip dev`
-4. Add to ~/.profile autoload docker-machine environment: eval (docker-machine env dev)
+```bash
+curl -sSL https://get.docker.com/ | sh
+```
+
+### Linux
+Use native docker in your distribution. Just install it and run as is.
+
+### MACOS
+There are known issues running docker on VirtualBox and VMWare fusion. I advice to use Parallels.
+
+1. First you have to install virtual machine with linux distribution and docker inside it.
+2. Open port 2376 on your linux destribution and run docker on your virtual machine using command:
+```
+docker -d -D -g /var/lib/docker -H unix:// -H tcp://0.0.0.0:2376 --tls=false
+```
+Use -s aufs for setup storage driver.
+3. Install docker of same version on your MACOS
+4. Install coreutils: brew install coreutils
+5. Add route to docker via machine: sudo route add 172.17.0.0 #HERE IP OF YOUR VM#
+6. Add custom config to your bash environment:
+```
+set -x DOCKER_TLS_VERIFY "";
+set -x DOCKER_HOST "tcp://#HERE IP OF YOUR VM#:2376";
+set -x DOCKER_CERT_PATH "";
+```
+
+### Windows
+Are you kidding? Still working on Windows? Drop it and replace with Linux or OS X.
 
 ## Usage
 
