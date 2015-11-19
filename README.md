@@ -61,14 +61,14 @@ Dont forget to make it executable.
 
 Just run:
 ```bash
-/docker/start [container-name]
+docker start [container-name]
 ```
 
 ### Stop container
 
 If you want to stop running container you should execute in shell
 ```bash
-/docker/stop [container-name]
+docker stop [container-name]
 ```
 
 ### How to create and start a container

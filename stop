@@ -1,4 +1,0 @@
-#!/bin/bash
-[[ -z "$1" ]] && echo 'Usage: '$0' name-of-container' && exit 255
-
-docker stop "$1"
