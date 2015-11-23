@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Resize docker using devicemapper storage
 [[ -z $1 || -z $2 ]] && echo 'Usage: '$0' [container-name] [size-in-gb]' && exit 255
 docker=$(realpath `dirname $0`/..)

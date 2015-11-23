@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Example Init script for container
 echo 'Container started...'
 echo 'Press Ctrl + P, Ctrl + Q to make it background'

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 [[ -z $1 ]] && echo 'Usage: '$0' ip-range-with-cidr' && exit 255
 
 # default for docker0 is 172.17.42.1/16

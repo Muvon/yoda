@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 [[ -z "$1" ]] &&  echo 'Usage: OPTS="" '$0' name-of-container [image-to-run]' && exit 255
 docker=$(realpath `dirname $0`)
 image=$([[ -z "$2" ]] && echo 'centos:7' || echo $2)

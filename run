@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 docker=$(realpath `dirname $0`)
 if [[ $docker`/create "$1" "$2"` ]]; then
   $docker/start "$1"
