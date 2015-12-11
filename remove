@@ -2,7 +2,7 @@
 docker=$(realpath `dirname $0`)
 running=$($docker/utils/running "$1");
 if [[ "$running" == "true" ]]; then
-  $docker/stop "$1"
+  docker stop "$1"
 fi
 
 test ! -d $docker/trash && mkdir $_
