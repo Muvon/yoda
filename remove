@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-docker=$(realpath `dirname $0`)
+docker=$(cd `dirname $0` && pwd)
 running=$($docker/utils/running "$1");
 if [[ "$running" == "true" ]]; then
   docker stop "$1"
