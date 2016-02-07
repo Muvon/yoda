@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 [[ -z "$1" ]] && echo 'Usage: '$0' [container-name]' && exit 255
-docker=$(realpath `dirname $0`/..)
+docker=$(cd `dirname $0`/.. && pwd)
 test ! -d $docker/images && mkdir $_
 docker export "$1" > $docker/images/$1.`date +%Y%M%d%H%m`.tar
