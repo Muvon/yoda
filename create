@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 [[ -z "$1" ]] &&  echo 'Usage: OPTS="" '$0' name-of-container [image-to-run]' && exit 255
 docker=$(cd `dirname $0` && pwd)
-image=$([[ -z "$2" ]] && echo 'centos:7' || echo $2)
-if [[ -f "$2" ]]; then
-  $docker/utils/import ${2%%.*} $2
-  image=$2
+image=${2-centos:7}
+if [[ -f "$image" ]]; then
+  $docker/utils/import ${image%%.*} $image
 fi
 
 test ! -d $docker/containers && mkdir $_
