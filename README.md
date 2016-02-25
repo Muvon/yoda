@@ -23,7 +23,7 @@ There are known issues running docker on VirtualBox and VMWare fusion. I advice 
 1. First you have to install virtual machine with linux distribution and docker inside it.
 2. Open port 2376 on your linux destribution and run docker on your virtual machine using command:
 ```
-docker -d -D -g /var/lib/docker -H unix:// -H tcp://0.0.0.0:2376 --tls=false
+docker daemon -D -g /var/lib/docker -H unix:// -H tcp://0.0.0.0:2376 --tls=false
 ```
 Use -s aufs for setup storage driver.
 3. Install docker of same version on your MACOS
