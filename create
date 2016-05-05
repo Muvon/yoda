@@ -1,17 +1,42 @@
 #!/usr/bin/env bash
-[[ -z "$1" ]] &&  echo 'Usage: OPTS="" '$0' name-of-container [image-to-run]' && exit 255
+for p in "$@"; do
+  case $p in
+    --image=*)
+      image=${p#*=}
+      ;;
+    --ip=*)
+      ip=${p#*=}
+      ;;
+    --options=*)
+      options=${p#*=}
+      ;;
+    *)
+      name=$p
+      ;;
+  esac
+done
+
+[[ -z "$name" || -z "$ip" ]] &&  echo 'Usage: '$0' [--image=docker-image] [--options=docker-options] --ip=172.10.10.1 name-of-container' && exit 255
 docker=$(cd `dirname $0` && pwd)
-image=${2-centos:7}
+net="docker-net"
+subnet="172.10.0.0/16"
+image=${image-centos:7}
 if [[ -f "$image" ]]; then
   $docker/utils/import ${image%%.*} $image
 fi
 
+docker network inspect $net 1>/dev/null 2>&1
+if [[ "$?" != "0" ]]; then
+  docker network create --subnet="$subnet" $net
+fi
+
 test ! -d $docker/containers && mkdir $_
-init=$docker"/containers/$1"
+init=$docker"/containers/$name"
 if [[ ! -f $init ]]; then
   cp -f $docker/init $init
 fi
 
-test ! -d $docker/storage/$1 && mkdir -p $_
-docker create --name "$1" --hostname "$1" --restart=always --cap-add=NET_ADMIN \
-  -v $init:/init -v $docker/storage/$1:/storage $OPTS -i -t $image /init
+test ! -d $docker/storage/$name && mkdir -p $_
+docker create --name "$name" --net "$net" --ip "$ip" --hostname "$name" --restart=always \
+  -v $init:/init -v $docker/storage/$name:/storage $options -i -t $image /init
+
