@@ -18,16 +18,24 @@ done
 
 [[ -z "$name" || -z "$ip" ]] &&  echo 'Usage: '$0' [--image=docker-image] [--options=docker-options] --ip=172.10.10.1 name-of-container' && exit 255
 docker=$(cd `dirname $0` && pwd)
-net="docker-net"
-subnet="172.10.0.0/16"
-image=${image-centos:7}
+source "$docker/config.sh"
+
+# Try to create image if not exists
+image_count=$(docker images --filter "label=$CONTAINER_LABEL" --format '{{.ID}}')
+if [[ -z "$image_count" ]]; then
+  echo 'Creating base image for containers: '$CONTAINER_IMAGE
+  docker build --rm=true --label $CONTAINER_LABEL -t $CONTAINER_IMAGE - < Dockerfile 
+fi
+
+image=${image-$CONTAINER_IMAGE}
 if [[ -f "$image" ]]; then
   $docker/utils/import ${image%%.*} $image
 fi
 
-docker network inspect $net 1>/dev/null 2>&1
+docker network inspect $CONTAINER_NETWORK_NAME 1>/dev/null 2>&1
 if [[ "$?" != "0" ]]; then
-  docker network create --subnet="$subnet" $net
+  echo "Creating network interface $CONTAINER_NETWORK_NAME with subnet $CONTAINER_NETWORK_SUBNET"
+  docker network create --subnet="$CONTAINER_NETWORK_SUBNET" $CONTAINER_NETWORK_NAME
 fi
 
 test ! -d $docker/containers && mkdir $_
@@ -37,6 +45,7 @@ if [[ ! -f $init ]]; then
 fi
 
 test ! -d $docker/storage/$name && mkdir -p $_
-docker create --name "$name" --net "$net" --ip "$ip" --hostname "$name" --restart=always \
-  -v $init:/init -v $docker/storage/$name:/storage $options -i -t $image /init
+echo $image
+docker create --name "$name" --net "$CONTAINER_NETWORK_NAME" --ip "$ip" --hostname "$name" --restart=always \
+  -v $init:/init -v $docker/storage/$name:/home/box $options -it $image
 
