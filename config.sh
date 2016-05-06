@@ -1,5 +1,6 @@
-CONTAINER_LABEL='docker'
-CONTAINER_IMAGE='docker:latest'
-CONTAINER_NETWORK_NAME='docker-net'
+#!/usr/bin/env bash
+CONTAINER_LABEL='yoda'
+CONTAINER_IMAGE='yoda:latest'
+CONTAINER_NETWORK_NAME='yodanet'
 CONTAINER_NETWORK_SUBNET='172.10.0.0/16'
 
