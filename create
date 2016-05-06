@@ -53,5 +53,5 @@ if [[ -n "$ip" ]]; then
 fi
 
 docker create --name "$name" --net "$CONTAINER_NETWORK_NAME" $arg_opts --hostname "$name" --restart=always \
-  -v $init:/init -v $docker/storage/$name:/home/box $options -it $image
+  -v $init:/init -v $docker/storage/$name:/home/yoda $options -it $image
 
