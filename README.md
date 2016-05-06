@@ -1,11 +1,11 @@
-# Docker manage scripts
+# Yoda - is a tool that helps to manage docker containers
 ## Installation guide
 
-### Get docker scripts package
+### Get yoda package first
 
 Just clone it from git in /docker/ directory:
 ```bash
-git clone git@github.com:dmitrykuzmenkov/docker.git
+git clone git@github.com:dmitrykuzmenkov/yoda.git
 ```
 
 Dont forget to install docker running
