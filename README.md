@@ -49,7 +49,7 @@ To create new container just use the command
 ```
 
 container-name - name of container to run
---ip - ip for container in subnet 172.10.0.0/16
+--ip - (optional) ip for container in subnet 172.10.0.0/16. If not provided docker will assign it automatic
 --image - (optional) docker image to use for container creation
 --options - (optional) other args that will be passed to docker create command
 

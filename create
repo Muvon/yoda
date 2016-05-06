@@ -16,7 +16,7 @@ for p in "$@"; do
   esac
 done
 
-[[ -z "$name" || -z "$ip" ]] &&  echo 'Usage: '$0' [--image=docker-image] [--options=docker-options] --ip=172.10.10.1 name-of-container' && exit 255
+[[ -z "$name" ]] &&  echo 'Usage: '$0' [--image=docker-image] [--options=docker-options] [--ip=172.10.10.1] name-of-container' && exit 255
 docker=$(cd `dirname $0` && pwd)
 source "$docker/config.sh"
 
@@ -45,7 +45,13 @@ if [[ ! -f $init ]]; then
 fi
 
 test ! -d $docker/storage/$name && mkdir -p $_
-echo $image
-docker create --name "$name" --net "$CONTAINER_NETWORK_NAME" --ip "$ip" --hostname "$name" --restart=always \
+
+# Make extra opts for create command depends on parameters
+arg_opts=''
+if [[ -n "$ip" ]]; then
+  arg_opts=arg_opts' --ip "'$ip'"'
+fi
+
+docker create --name "$name" --net "$CONTAINER_NETWORK_NAME" $arg_opts --hostname "$name" --restart=always \
   -v $init:/init -v $docker/storage/$name:/home/box $options -it $image
 
