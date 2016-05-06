@@ -1,4 +1,4 @@
-# Yoda - is a tool that helps to manage docker containers
+# Yoda
 ## Installation guide
 
 ### Get yoda package first
