@@ -16,7 +16,17 @@ for p in "$@"; do
   esac
 done
 
-[[ -z "$name" ]] &&  echo 'Usage: '$0' [--image=docker-image] [--options=docker-options] [--ip=172.10.10.1] name-of-container' && exit 255
+if [[ -z "$name" ]]; then
+  echo 'Usage: '$0' [options] container-name'
+  echo "Where [options] are:"
+  echo "  --image"
+  echo "    Docker image to use for creating current container. Default is yoda"
+  echo "  --ip"
+  echo "    IP address for container in subnet of docker network yodanet. Default is autoassigned by docker"
+  echo "  --options"
+  echo "    Optional arguments as a string to pass for docker create command"
+  exit 1
+fi
 docker=$(cd `dirname $0` && pwd)
 source "$docker/config.sh"
 
