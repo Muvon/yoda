@@ -7,6 +7,9 @@ for p in "$@"; do
     --ip=*)
       ip=${p#*=}
       ;;
+    --expose=*)
+      expose=${p#*=}
+      ;;
     --options=*)
       options=${p#*=}
       ;;
@@ -23,6 +26,8 @@ if [[ -z "$name" ]]; then
   echo "    Docker image to use for creating current container. Default is yoda"
   echo "  --ip"
   echo "    IP address for container in subnet of docker network yodanet. Default is autoassigned by docker"
+  echo "  --expose"
+  echo "    Expose selected ports in container. Default is none"
   echo "  --options"
   echo "    Optional arguments as a string to pass for docker create command"
   exit 1
@@ -60,6 +65,10 @@ test ! -d $docker/storage/$name && mkdir -p $_
 arg_opts=''
 if [[ -n "$ip" ]]; then
   arg_opts=arg_opts' --ip "'$ip'"'
+fi
+
+if [[ -n "$expose" ]]; then
+  arg_opts=arg_opts' --expose "'$expose'"'
 fi
 
 docker create --name "$name" --net "$CONTAINER_NETWORK_NAME" $arg_opts --hostname "$name" --restart=always \

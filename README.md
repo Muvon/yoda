@@ -45,12 +45,13 @@ Are you kidding? Still working on Windows? Drop it and replace with Linux or OS 
 
 To create new container just use the command
 ```bash
-/docker/create --image=[docker-image] --ip=[container-ip] --options=[more-docker-args] [container-name]
+/docker/create --image=[docker-image] --ip=[container-ip] --expose=[expose-ports] --options=[more-docker-args] [container-name]
 ```
 
 container-name - name of container to run
 --ip - (optional) ip for container in subnet 172.10.0.0/16. If not provided docker will assign it automatic
 --image - (optional) docker image to use for container creation
+--expose - (optional) expose selected ports from container to host
 --options - (optional) other args that will be passed to docker create command
 
 ### Init script for container
