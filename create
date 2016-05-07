@@ -45,17 +45,20 @@ image_count=$(docker images --filter "label=$CONTAINER_LABEL" --format '{{.ID}}'
 if [[ -z "$image_count" ]]; then
   echo 'Creating base image for containers: '$CONTAINER_IMAGE
   docker build --rm=true --label $CONTAINER_LABEL -t $CONTAINER_IMAGE - < Dockerfile 
+  [[ "$?" != "0" ]] && echo 'Error while building main yoda image' && exit 1
 fi
 
 image=${image-$CONTAINER_IMAGE}
 if [[ -f "$image" ]]; then
   $docker/utils/import ${image%%.*} $image
+  [[ "$?" != "0" ]] && echo 'Error while importing image' && exit 1
 fi
 
 docker network inspect $CONTAINER_NETWORK_NAME 1>/dev/null 2>&1
 if [[ "$?" != "0" ]]; then
   echo "Creating network interface $CONTAINER_NETWORK_NAME with subnet $CONTAINER_NETWORK_SUBNET"
   docker network create --subnet="$CONTAINER_NETWORK_SUBNET" $CONTAINER_NETWORK_NAME
+  [[ "$?" != "0" ]] && echo 'Error while creating network' && exit 1
 fi
 
 test ! -d $docker/containers && mkdir $_
