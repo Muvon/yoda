@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 docker=$(cd `dirname $0` && pwd)
+[[ -z "$1" ]] && echo 'Usage: '$0' container-name' && exit 1
+
 running=$($docker/utils/running "$1");
 if [[ "$running" == "true" ]]; then
   docker stop "$1"
