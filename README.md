@@ -45,7 +45,7 @@ Are you kidding? Still working on Windows? Drop it and replace with Linux or OS 
 
 To create new container just use the command
 ```bash
-/docker/create --image=[docker-image] --ip=[container-ip] --expose=[expose-ports] --options=[more-docker-args] [container-name]
+/docker/create --image=[docker-image] --ip=[container-ip] --expose=[expose-ports] --options=[more-docker-args] [--args=cmd-args] [container-name]
 ```
 
 container-name - name of container to run
@@ -53,6 +53,7 @@ container-name - name of container to run
 --image - (optional) docker image to use for container creation
 --expose - (optional) expose selected ports from container to host
 --options - (optional) other args that will be passed to docker create command
+--args - (optional) arguments to be passed to entrypoint of container
 
 ### Init script for container
 
