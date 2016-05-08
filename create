@@ -41,10 +41,10 @@ docker=$(cd `dirname $0` && pwd)
 source "$docker/config.sh"
 
 # Try to create image if not exists
-image_count=$(docker images --filter "label=$CONTAINER_LABEL" --format '{{.ID}}')
+image_count=$(docker images --format '{{.ID}}' "${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION}")
 if [[ -z "$image_count" ]]; then
   echo 'Creating base image for containers: '$CONTAINER_IMAGE
-  docker build --rm=true --label $CONTAINER_LABEL -t $CONTAINER_IMAGE - < Dockerfile 
+  docker build --rm=true -t ${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION} -t ${CONTAINER_IMAGE}:latest - < Dockerfile
   [[ "$?" != "0" ]] && echo 'Error while building main yoda image' && exit 1
 fi
 
