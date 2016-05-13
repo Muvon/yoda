@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo -n 'Stopping...'
+echo -n 'Starting...'
 for container in $(docker ps --format '{{.Names}}'); do
  docker start $container 1> /dev/null 2>&1 &
 done
