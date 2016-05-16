@@ -44,7 +44,7 @@ source "$docker/config.sh"
 image_count=$(docker images --format '{{.ID}}' "${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION}")
 if [[ -z "$image_count" ]]; then
   echo 'Creating base image for containers: '$CONTAINER_IMAGE
-  docker build --rm=true -t ${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION} -t ${CONTAINER_IMAGE}:latest - < $0 dockerfile
+  yoda dockerfile | docker build --rm=true -t ${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION} -t ${CONTAINER_IMAGE}:latest -
   [[ "$?" != "0" ]] && echo 'Error while building main yoda image' && exit 1
 fi
 
