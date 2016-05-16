@@ -1,0 +1,12 @@
+USER root
+RUN yum -y install ruby which libyaml-devel glibc-headers autoconf gcc-c++\
+  glibc-devel patch readline-devel zlib-devel libffi-devel openssl-devel\
+  make bzip2 automake libtool bison sqlite-devel
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+
+USER box
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+RUN curl -L get.rvm.io | bash -s stable --rails
+RUN echo 'source /home/box/.rvm/scripts/rvm' >> ~/.bashrc
+RUN bash -l -c 'rvm install 2.3.0'
+RUN echo 'rvm use 2.3.0' >> ~/.bashrc

@@ -1,0 +1,14 @@
+USER root
+RUN yum -y install gcc gcc-c++ make zlib zlib-devel openssl openssl-devel postgresql-devel postgresql-contrib git libxml2 libxml2-devel libxslt libxslt-devel
+RUN curl -sS https://www.python.org/ftp/python/3.5.1/Python-3.5.1.tgz > python.tgz
+RUN gunzip python.tgz
+RUN tar xf python.tar
+RUN cd Python-3.5.1 && ./configure --prefix=/usr && make -j4 && make install && ldconfig && cd ..
+RUN rm -fr Python-3.5.1
+RUN rm -f python.tar
+
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py > get-pip.py
+RUN python3 get-pip.py
+RUN rm -f get-pip.py
+
+USER box

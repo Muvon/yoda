@@ -1,0 +1,10 @@
+USER root
+RUN yum -y install epel-release
+RUN yum -y install nodejs npm
+
+USER box
+RUN npm update npm
+RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | bash
+RUN source ~/.nvm/nvm.sh && nvm install 0.12
+RUN echo 'source ~/.nvm/nvm.sh' >> ~/.bashrc
+RUN echo 'nvm use 0.12' >> ~/.bashrc
