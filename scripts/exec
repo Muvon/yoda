@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 [[ -z $2 ]] && echo 'Usage: '$0' container-name command-to-be-executed' && exit 255
 
-docker exec -t -i $1 $2
+docker exec -it $1 $2
