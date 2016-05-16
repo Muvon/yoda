@@ -2,11 +2,11 @@
 ## Installation guide
 
 ### Get yoda package first
+1. First clone it to any directory.
+2. Open that directory in shell.
+3. Run make && make install commands
+4. Enjoy
 
-Just clone it from git in /docker/ directory:
-```bash
-git clone git@github.com:dmitrykuzmenkov/yoda.git
-```
 
 Dont forget to install docker running
 
@@ -40,12 +40,13 @@ set -x DOCKER_CERT_PATH "";
 Are you kidding? Still working on Windows? Drop it and replace with Linux or OS X.
 
 ## Usage
+There is one main bin file to manipulate all Yoda possibilities. Its called yoda.
+Use it like this: yoda [command] [arguments]
+For more help run yoda [command] --help
 
 ### Create new container
-
-To create new container just use the command
 ```bash
-/docker/create --image=[docker-image] --ip=[container-ip] --expose=[expose-ports] --options=[more-docker-args] [--args=cmd-args] [container-name]
+yoda create --image=[docker-image] --ip=[container-ip] --expose=[expose-ports] --options=[more-docker-args] [--args=cmd-args] [container-name]
 ```
 
 container-name - name of container to run
@@ -55,47 +56,37 @@ container-name - name of container to run
 --options - (optional) other args that will be passed to docker create command
 --args - (optional) arguments to be passed to entrypoint of container
 
+### Start container
+```bash
+yoda start [container-name]
+```
+
+### Stop container
+```bash
+yoda stop [container-name]
+```
+
+### Entering running container
+```bash
+yoda enter [container-name]
+```
+
+Its easy to enter using bash into specific container
+
+### Remove container
+```bash
+yoda remove [container-name]
+```
+
+Container config will be moved into trash folder. But all other data will be destoyed by docker.
+
+
 ### Init script for container
 
 You can create special bash script which will be run as you start your new container.
 If you want to make docker named test, you should create init script bash-init /docker/containers/test which will be executed asap container started.
 Dont forget to make it executable.
 
-### Start container
-
-Just run:
-```bash
-docker start [container-name]
-```
-
-### Stop container
-
-If you want to stop running container you should execute in shell
-```bash
-docker stop [container-name]
-```
-
-### How to create and start a container
-
-If you wanna create and start container asap you can use shortcut for it
-```bash
-/docker/run [container-name] [container-image]
-```
-
-### How to enter running container
-
-Running container starting special init script and sleep inifity after configure. If you wanna enter it you should use special command
-```bash
-/docker/enter [container-name]
-```
-
-### Remove container
-
-If you wanna remove container just run:
-```bash
-/docker/remove [container-name]
-```
-The init file will be moved to trash folder
 
 ## Utils for inspect containers and more
 
