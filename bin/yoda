@@ -2,7 +2,7 @@
 cmd="$1"
 shift
 args="$*"
-BIN_PATH=$(cd `dirname $0` && pwd)/scripts
+BIN_PATH=$(cd `dirname $0`/.. && pwd)/scripts
 
 # todo: add --help argument to display more info on each command
 case "$cmd" in
