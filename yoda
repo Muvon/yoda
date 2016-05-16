@@ -16,7 +16,7 @@ case "$cmd" in
     docker stop $args
     ;;
   enter)
-    exec $BIN_PATH/enter $args
+    exec $BIN_PATH/exec $args bash
     ;;
   remove)
     exec $BIN_PATH/remove $args

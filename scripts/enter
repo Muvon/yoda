@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-[[ -z "$1" ]] && echo 'Usage: '$0' container-name' && exit 255
-docker=$(cd `dirname $0` && pwd)
-$docker/utils/exec $1 bash
