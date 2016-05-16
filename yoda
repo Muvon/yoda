@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+cmd="$1"
+shift
+args="$*"
+BIN_PATH=$(cd `dirname $0` && pwd)/scripts
+
+case "$cmd" in
+  create)
+    exec $BIN_PATH/create $args
+    ;;
+  start)
+    docker start $args
+    ;;
+  stop)
+    docker stop $args
+    ;;
+  enter)
+    exec $BIN_PATH/enter $args
+    ;;
+  remove)
+    exec $BIN_PATH/remove $args
+    ;;
+  help|*)
+    echo 'Usage: yoda [command] [arguments]'
+    echo 'Available commands:'
+    echo '  help – display this help'
+    echo '  create – create container using image'
+    echo '  enter – enter to running container using bash'
+    echo '  remove – remove existing container with assigned name'
+    echo '  start – start created container'
+    echo '  stop – stop create container'
+    echo 'Each command has own arguments list'
+    ;;
+esac
