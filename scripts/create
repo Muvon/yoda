@@ -37,14 +37,14 @@ if [[ -z "$name" ]]; then
   echo "    Entrypoint command arguments to init script"
   exit 1
 fi
-docker=$(cd `dirname $0` && pwd)
+docker=$(cd `dirname $0`/.. && pwd)
 source "$docker/config.sh"
 
 # Try to create image if not exists
 image_count=$(docker images --format '{{.ID}}' "${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION}")
 if [[ -z "$image_count" ]]; then
   echo 'Creating base image for containers: '$CONTAINER_IMAGE
-  docker build --rm=true -t ${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION} -t ${CONTAINER_IMAGE}:latest - < Dockerfile
+  docker build --rm=true -t ${CONTAINER_IMAGE}:${CONTAINER_IMAGE_VERSION} -t ${CONTAINER_IMAGE}:latest - < $0 dockerfile
   [[ "$?" != "0" ]] && echo 'Error while building main yoda image' && exit 1
 fi
 
