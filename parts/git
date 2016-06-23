@@ -1,3 +1,0 @@
-USER root
-RUN yum -y install git
-USER box
