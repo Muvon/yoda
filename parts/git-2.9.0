@@ -1,6 +1,7 @@
 USER root
-RUN yum -y install perl-devel gettext make autoconf zlib-devel openssl-devel
+RUN yum -y install perl-devel gettext make autoconf zlib-devel openssl-devel curl-devel openssh-clients
 RUN curl -LSs https://github.com/git/git/archive/v2.9.0.tar.gz | tar -xzf -
-RUN cd git-2.9.0 && make configure && ./configure --prefix=/usr --without-tcltk && make && make install && rm -fr git-2.9.0
+RUN cd git-2.9.0 && make configure && ./configure --prefix=/usr --without-tcltk && make && make install
+RUN rm -fr git-2.9.0
 
 USER box
