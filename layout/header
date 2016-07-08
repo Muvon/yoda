@@ -1,11 +1,7 @@
 FROM centos:7
 MAINTAINER Dmitry Kuzmenkov <dmitry@wagh.ru>
 
-RUN useradd box
-RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
-WORKDIR /home/box
-USER box
-
-ENV LANGUAGE en_US:en
-ENV LANG en_US.UTF-8
-ENV LC_ALL en_US.UTF-8
+RUN useradd box && localedef -c -i en_US -f UTF-8 en_US.UTF-8
+ENV LANGUAGE=en_US:en \
+  LANG=en_US.UTF-8 \
+  LC_ALL en_US.UTF-8
