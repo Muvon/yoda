@@ -1,4 +1,3 @@
-USER root
 RUN yum -y install gcc gcc-c++ make zlib zlib-devel \
   openssl openssl-devel postgresql-devel postgresql-contrib \
   git libxml2 libxml2-devel libxslt libxslt-devel && \
@@ -10,5 +9,3 @@ RUN yum -y install gcc gcc-c++ make zlib zlib-devel \
   curl -sS https://bootstrap.pypa.io/get-pip.py > get-pip.py && \
   python3 get-pip.py && \
   rm -f get-pip.py
-
-USER box

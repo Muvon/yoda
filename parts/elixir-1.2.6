@@ -1,4 +1,3 @@
-USER root
 RUN yum -y install epel-release && \
   yum -y install gcc gcc-c++ glibc-devel make ncurses-devel openssl-devel \
   autoconf java-1.8.0-openjdk-devel wxBase.x86_64 \
@@ -9,6 +8,4 @@ RUN yum -y install epel-release && \
   mkdir -p /opt && \
   curl -LSs https://github.com/elixir-lang/elixir/archive/v1.2.6.tar.gz | tar -xzf - -C /opt && \
   cd /opt/elixir-1.2.6 && make clean test
-
-USER box
 ENV PATH "$PATH:/opt/elixir-1.2.6/bin"
