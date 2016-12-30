@@ -43,6 +43,13 @@ custom_run() {
   fi
 }
 
+allow_dev_only() {
+  if [[ $ENV != 'dev' ]]; then
+    echo "Your environment: $ENV. This command is allowed only in 'dev' environment."
+    return 1
+  fi
+}
+
 case "$cmd" in
   init)
     if [[ -e docker ]]; then
@@ -69,6 +76,7 @@ case "$cmd" in
     ;;
 
   add)
+    allow_dev_only
     arg_name="$*"
     if [[ -z "$arg_name" ]]; then
       echo "Did you mean '$YODA_CMD --name=container'? '$YODA_CMD help' for more info." && exit 1
