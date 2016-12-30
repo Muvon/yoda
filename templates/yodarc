@@ -14,7 +14,7 @@ SOURCE_PATH="$(pwd)"
 
 # Build scripts depended
 export DOCKER_ROOT
-DOCKER_ROOT=$(cd `dirname $BASH_SOURCE` && pwd)
+DOCKER_ROOT=$(cd ${BASH_SOURCE%/*} && pwd)
 
 # HOSTNAME variable workout
 export HOSTNAME=${HOSTNAME:-`hostname`}
