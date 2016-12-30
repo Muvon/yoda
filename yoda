@@ -30,6 +30,7 @@ done
 custom_run() {
   script=$1
   shift
+  echo "Custom run: $DOCKER_ROOT/$script"
   if [[ -e $DOCKER_ROOT/$script && ! -x $DOCKER_ROOT/$script ]]; then
     echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
     return 1
