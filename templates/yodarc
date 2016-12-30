@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+export REVISION=${REVISION:-`git rev-parse HEAD`}
+
+export SOURCE_PATH
+SOURCE_PATH="$(pwd)"
+
+# Build scripts depended
+export DOCKER_ROOT
+DOCKER_ROOT=$(cd `dirname $BASH_SOURCE` && pwd)
+
+# HOSTNAME variable workout
+export HOSTNAME=${HOSTNAME:-`hostname`}
+
+# It also used as filter by labels
+# docker ps --filter 'label=com.docker.compose.project=yasen'
+export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"%name%"}
+export COMPOSE_HTTP_TIMEOUT=${COMPOSE_HTTP_TIMEOUT:-300}
+export COMPOSE_FILE="$DOCKER_ROOT/docker-compose.${ENV:-dev}.yml"
+
+# Wait # seconds before kill -9 stopping container
+export STOP_WAIT_TIMEOUT=${STOP_WAIT_TIMEOUT:-10}

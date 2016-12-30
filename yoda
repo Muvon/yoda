@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+set -e
+(
+  set -x
+  which docker
+  which docker-compose
+  which sed
+  (( $(echo $BASH_VERSION | cut -d. -f1) >= 4 )) || exit 1
+) >/dev/null
+
+if [[ -z "$1" ]]; then
+  echo "No command specified. Run '$0 command'" && exit 1
+fi
+cmd=$1
+shift
+
+# shellcheck source=docker/.yodarc
+test -e docker/.yodarc && source $_
+
+# shellcheck source=docker/env.sh
+test -e docker/env.sh && source $_
+
+for p in "$@"; do
+  case $p in
+    --name=*)
+      arg_name=${p##*=}
+      ;;
+    *)
+      ;;
+  esac
+done
+
+case "$cmd" in
+  init)
+    project_name=${arg_name:-$(basename `pwd`)}
+    username=$(git config --global user.name || echo 'Unknown maintainer')
+    useremail=$(git config --global user.email || echo 'noreply@yoda.org')
+
+    touch .dockerignore
+    mkdir -p docker/{templates,images,containers,configs,scripts}
+    cp "$(dirname $0)"/templates/env.sh docker
+    cp "$(dirname $0)"/templates/cluster.yml docker
+    cp "$(dirname $0)"/templates/Buildfile docker/images
+    sed "s/%user%/$username/g;s/%email%/$useremail/g;" "$(dirname $0)"/templates/Dockerfile > docker/images/Dockerfile-base
+    cp "$(dirname $0)"/templates/gitignore docker/.gitignore
+    sed "s/%name%/$project_name/g" "$(dirname $0)"/templates/yodarc > docker/.yodarc
+    ;;
+
+  add)
+    if [[ -z "$arg_name" ]]; then
+      echo "Did you mean '$0 --name=container'? '$0 help' for more info." && exit 1
+    fi
+    container_path="docker/containers/$arg_name"
+    mkdir -p $container_path
+    sed "s/%name%/$arg_name/g" "$(dirname $0)"/templates/container.yml > $container_path/container.yml
+    cp "$(dirname $0)"/templates/entrypoint $container_path
+    ;;
+
+  compose)
+    # Get containers to build
+    containers=$(cat docker/cluster.yml | grep ^$ENV: | cut -d ':' -f2)
+    bash "$(dirname $0)/compose.sh" $containers
+    ;;
+
+  build)
+    bash "$(dirname $0)/build.sh"
+    ;;
+
+  start)
+    $0 compose > $COMPOSE_FILE
+    $0 build
+    docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d
+    ;;
+
+  stop)
+    docker-compose stop -t $STOP_WAIT_TIMEOUT
+    ;;
+
+
+  help)
+    echo "Usage: $0 command arguments"
+    echo
+    echo "Commands available:"
+    echo "  help      Display this information"
+    echo "  init      Prepare deployment folder in project"
+    echo "  add       Add new container skeleton structure to project"
+    echo "  build     Build images for current project"
+    echo "  compose   Display generated compose file for current environment"
+    echo "  start     Start all services for current project"
+    echo "  stop      Stop all services for current project"
+    echo
+    echo "Arguments available for each command:"
+    echo
+    ;;
+
+  *)
+    echo "Unknown command '$cmd'"
+    echo "Run '$0 help' to see more info"
+    ;;
+esac
