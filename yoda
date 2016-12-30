@@ -23,6 +23,21 @@ for p in "$@"; do
   esac
 done
 
+# Use custom start layout if there is start file
+custom_run() {
+  script=$1
+  shift
+  if [[ -e $DOCKER_ROOT/$script && ! -x $DOCKER_ROOT/$script ]]; then
+    echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
+    return 1
+  fi
+
+  if [[ -x $DOCKER_ROOT/$script ]]; then
+    exec $DOCKER_ROOT/$script "$*"
+    exit 0
+  fi
+}
+
 case "$cmd" in
   init)
     project_name=${arg_name:-$(basename `pwd`)}
@@ -50,22 +65,26 @@ case "$cmd" in
     ;;
 
   compose)
+    custom_run compose
     # Get containers to build
     containers=$(cat docker/cluster.yml | grep ^$ENV: | cut -d ':' -f2)
     bash "$(dirname $0)/compose.sh" $containers
     ;;
 
   build)
+    custom_run build
     bash "$(dirname $0)/build.sh"
     ;;
 
   start)
+    custom_run start "$*"
     $0 compose > $COMPOSE_FILE
     $0 build
     docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d "$*"
     ;;
 
   stop)
+    custom_run stop "$*"
     docker-compose stop -t $STOP_WAIT_TIMEOUT "$*"
     ;;
 
