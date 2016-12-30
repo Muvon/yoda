@@ -62,7 +62,7 @@ case "$cmd" in
       exit 1
     fi
 
-    project_name=${arg_name:-$(basename `pwd`)}
+    project_name=${arg_name:-"${PWD##*/}"}
     username=$(git config --global user.name || echo 'Unknown maintainer')
     useremail=$(git config --global user.email || echo 'noreply@yoda.org')
 
