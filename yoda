@@ -51,7 +51,7 @@ case "$cmd" in
     touch .dockerignore
     mkdir -p docker/{templates,images,containers,configs,scripts}
     cp $YODA_PATH/templates/env.sh docker
-    cp $YODA_PATH/templates/cluster.yml docker
+    cp $YODA_PATH/templates/Envfile docker
     cp $YODA_PATH/templates/Buildfile docker/images
     sed "s/%user%/$username/g;s/%email%/$useremail/g;" $YODA_PATH/templates/Dockerfile > docker/images/Dockerfile-base
     cp $YODA_PATH/templates/gitignore docker/.gitignore
@@ -71,7 +71,7 @@ case "$cmd" in
   compose)
     custom_run compose
     # Get containers to build
-    containers=$(cat docker/cluster.yml | grep ^$ENV: | cut -d ':' -f2)
+    containers=$(cat docker/Envfile | grep ^$ENV: | cut -d ':' -f2)
     bash "$YODA_PATH/compose.sh" $containers
     ;;
 

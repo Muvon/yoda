@@ -35,7 +35,7 @@ yoda add --name=test
 ```
 
 Change template for docker-compose.yml file in docker/containers/test/container.yml.
-Now add this container to cluster.yml file.
+Now add this container to Envfile file.
 
 We are done. Build it and start with just one command now:
 
@@ -51,5 +51,5 @@ Done!
 3. You can have several containers depends on one image.
 4. Each container has own folder with separated yml template for docker-compose and custom configs in docker/containers folder.
 5. You can setup and use any BASH variables in file docker/env.sh. Its pregenerated for you.
-6. cluster.yml is main file that has all info about what should be built and in which environment.
+6. Envfile is main file that has all info about what should be built and in which environment.
 7. Each container can be build and start multiple time.
