@@ -116,6 +116,16 @@ case "$cmd" in
     docker-compose stop -t $STOP_WAIT_TIMEOUT "$*"
     ;;
 
+  deploy)
+    if [[ -z "$GIT_URL" ]]; then
+      echo "GIT_URL is empty. Are you sure you are in git repository?"
+      exit 1
+    fi
+
+    custom_run deploy "$*"
+    bash "$YODA_PATH/deploy.sh" "$*"
+    ;;
+
   help)
     YODA_CMD=$YODA_CMD bash "$YODA_PATH/help.sh"
     ;;

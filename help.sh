@@ -11,6 +11,7 @@ Commands available:
   compose   Display generated compose file for current environment
   start     Start all services for current project
   stop      Stop all services for current project
+  deploy    Deploy project on one or all nodes
 
 Usage:
   $YODA_CMD version
@@ -37,4 +38,13 @@ Usage:
 
   $YODA_CMD stop [CONTAINER...]
     Stop all containers or only passed with arguments
+
+  $YODA_CMD deploy [options]
+    Deploy single-node or whole cluster
+    Options are:
+      --host=host         Deploy only on this host (single-node deploy)
+      --env=environment   Deploy on all nodes with that environment (Envfile will be used)
+      --rev=revision      Set custom revision to be deployed or rollback to
+      --branch=gitbranch  What branch will be deployed. Default is master
+      --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.
 EOF
