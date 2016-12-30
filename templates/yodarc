@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export YODA_VERSION="%yoda_version%"
 export REVISION=${REVISION:-`git rev-parse HEAD`}
 
 export SOURCE_PATH
