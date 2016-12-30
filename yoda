@@ -25,6 +25,9 @@ for p in "$@"; do
     --name=*)
       arg_name=${p##*=}
       ;;
+    --composer=*)
+      arg_composer=${p##*=}
+      ;;
     *)
       ;;
   esac
@@ -76,7 +79,7 @@ case "$cmd" in
     custom_run compose
     # Get containers to build
     containers=$(cat docker/Envfile | grep ^$ENV: | cut -d ':' -f2)
-    bash "$YODA_PATH/compose.sh" $containers
+    COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/compose.sh" $containers
     ;;
 
   build)
