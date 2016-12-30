@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 export YODA_VERSION="%yoda_version%"
-export REVISION=${REVISION:-`git rev-parse HEAD 2>/dev/null`}
+
+commit=$(git rev-parse HEAD 2>/dev/null)
+export REVISION=${REVISION:-$commit}
+export REVISION_TAG
+REVISION_TAG="$(git describe --exact-match $commit 2>/dev/null)"
 
 export SOURCE_PATH
 SOURCE_PATH="$(pwd)"
