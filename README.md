@@ -31,10 +31,10 @@ You can setup docker build options in file docker/images/Buildfile.
 Now you can add container to your project.
 
 ```bash
-yoda add --name=test
+yoda add container-name
 ```
 
-Change template for docker-compose.yml file in docker/containers/test/container.yml.
+Change template for docker-compose.yml file in docker/containers/container-name/container.yml.
 Now add this container to Envfile file.
 
 We are done. Build it and start with just one command now:
