@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
-
+YODA_CMD='yoda'
 if [[ -z "$1" ]]; then
-  echo "No command specified. Run '$0 command'. '$0 help' for more info." && exit 1
+  echo "No command specified. Run '$YODA_CMD command'. '$YODA_CMD help' for more info." && exit 1
 fi
 cmd=$1
 shift
@@ -41,7 +41,7 @@ case "$cmd" in
 
   add)
     if [[ -z "$arg_name" ]]; then
-      echo "Did you mean '$0 --name=container'? '$0 help' for more info." && exit 1
+      echo "Did you mean '$YODA_CMD --name=container'? '$YODA_CMD help' for more info." && exit 1
     fi
     container_path="docker/containers/$arg_name"
     mkdir -p $container_path
@@ -62,16 +62,16 @@ case "$cmd" in
   start)
     $0 compose > $COMPOSE_FILE
     $0 build
-    docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d
+    docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d "$*"
     ;;
 
   stop)
-    docker-compose stop -t $STOP_WAIT_TIMEOUT
+    docker-compose stop -t $STOP_WAIT_TIMEOUT "$*"
     ;;
 
 
   help)
-    echo "Usage: $0 command arguments"
+    echo "Usage: $YODA_CMD command arguments"
     echo
     echo "Commands available:"
     echo "  help      Display this information"
@@ -82,12 +82,34 @@ case "$cmd" in
     echo "  start     Start all services for current project"
     echo "  stop      Stop all services for current project"
     echo
-    echo "Arguments available for each command:"
+    echo "Usage:"
+    echo "  $YODA_CMD help"
+    echo "    Display help information"
     echo
+    echo "  $YODA_CMD init"
+    echo "    Prepare dockerized skeleton in project directory"
+    echo
+    echo "  $YODA_CMD add [options]"
+    echo "    Add container skeleton to project"
+    echo
+    echo "    Options are:"
+    echo "      --name=container – name of container (required)"
+    echo
+    echo "  $YODA_CMD build"
+    echo "    Build images for current project"
+    echo
+    echo "  $YODA_CMD compose"
+    echo "    Display generated docker-compose file in stdout"
+    echo
+    echo "  $YODA_CMD start [CONTAINER...]"
+    echo "    Start all containers or only passed with arguments"
+    echo
+    echo "  $YODA_CMD stop [CONTAINER...]"
+    echo "    Stop all containers or only passed with arguments"
     ;;
 
   *)
     echo "Unknown command '$cmd'"
-    echo "Run '$0 help' to see more info"
+    echo "Run '$YODA_CMD help' to see more info"
     ;;
 esac
