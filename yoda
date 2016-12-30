@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
 set -e
-(
-  set -x
-  which docker
-  which docker-compose
-  which sed
-  (( $(echo $BASH_VERSION | cut -d. -f1) >= 4 )) || exit 1
-) >/dev/null
 
 if [[ -z "$1" ]]; then
-  echo "No command specified. Run '$0 command'" && exit 1
+  echo "No command specified. Run '$0 command'. '$0 help' for more info." && exit 1
 fi
 cmd=$1
 shift
