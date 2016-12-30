@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-lock_file=$DOCKER_ROOT/.build.lock
+lock_file="$DOCKER_ROOT/.build.lock"
 lock() {
   touch $lock_file
 }
