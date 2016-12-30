@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-[[ -z "$1" || -z "$2" ]] && echo 'Usage: '$0' [name] [file.tar]' && exit 255
-
-[[ ! -f "$2" ]] && echo 'Cant find file '$2 && exit 255
-
-docker import - "$1" < "$2"

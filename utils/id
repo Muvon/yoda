@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-[[ -z $1 ]] && echo 'Usage: '$0' [container-name]' && exit 255
-docker inspect --format '{{ .Id }}' "$1"

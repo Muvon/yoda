@@ -1,3 +1,0 @@
-RUN curl -sS http://fallabs.com/kyotocabinet/pkg/kyotocabinet-1.2.76.tar.gz | tar -xzf - && \
-  cd kyotocabinet-1.2.76 && ./configure --prefix=/usr && make -j4 && make install && ldconfig && cd .. && \
-  rm -fr kyotocabinet-1.2.76
