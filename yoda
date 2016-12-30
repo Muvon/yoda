@@ -2,6 +2,8 @@
 set -e
 YODA_CMD='yoda'
 YODA_VERSION='0.1-dev'
+YODA_PATH=$(dirname `test -h $0 && readlink $0 || echo $0`)
+
 if [[ -z "$1" ]]; then
   echo "No command specified. Run '$YODA_CMD command'. '$YODA_CMD help' for more info." && exit 1
 fi
@@ -47,12 +49,12 @@ case "$cmd" in
 
     touch .dockerignore
     mkdir -p docker/{templates,images,containers,configs,scripts}
-    cp "$(dirname $0)"/templates/env.sh docker
-    cp "$(dirname $0)"/templates/cluster.yml docker
-    cp "$(dirname $0)"/templates/Buildfile docker/images
-    sed "s/%user%/$username/g;s/%email%/$useremail/g;" "$(dirname $0)"/templates/Dockerfile > docker/images/Dockerfile-base
-    cp "$(dirname $0)"/templates/gitignore docker/.gitignore
-    sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" "$(dirname $0)"/templates/yodarc > docker/.yodarc
+    cp $YODA_PATH/templates/env.sh docker
+    cp $YODA_PATH/templates/cluster.yml docker
+    cp $YODA_PATH/templates/Buildfile docker/images
+    sed "s/%user%/$username/g;s/%email%/$useremail/g;" $YODA_PATH/templates/Dockerfile > docker/images/Dockerfile-base
+    cp $YODA_PATH/templates/gitignore docker/.gitignore
+    sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > docker/.yodarc
     ;;
 
   add)
@@ -61,8 +63,8 @@ case "$cmd" in
     fi
     container_path="docker/containers/$arg_name"
     mkdir -p $container_path
-    sed "s/%name%/$arg_name/g" "$(dirname $0)"/templates/container.yml > $container_path/container.yml
-    cp "$(dirname $0)"/templates/entrypoint $container_path
+    sed "s/%name%/$arg_name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
+    cp $YODA_PATH/templates/entrypoint $container_path
     ;;
 
   compose)
