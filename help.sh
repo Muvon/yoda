@@ -1,40 +1,42 @@
 #!/usr/bin/env bash
-echo "Usage: $YODA_CMD command arguments"
+cat <<EOF
+Usage: $YODA_CMD command arguments
+
+Commands available:
+  version   Display version of Yoda
+  help      Display this information
+  init      Prepare deployment folder in project
+  add       Add new container skeleton structure to project
+  build     Build images for current project
+  compose   Display generated compose file for current environment
+  start     Start all services for current project
+  stop      Stop all services for current project
 echo
-echo "Commands available:"
-echo "  version   Display version of Yoda"
-echo "  help      Display this information"
-echo "  init      Prepare deployment folder in project"
-echo "  add       Add new container skeleton structure to project"
-echo "  build     Build images for current project"
-echo "  compose   Display generated compose file for current environment"
-echo "  start     Start all services for current project"
-echo "  stop      Stop all services for current project"
+Usage:
+  $YODA_CMD version
+    Display current Yoda version
 echo
-echo "Usage:"
-echo "  $YODA_CMD version"
-echo "    Display current Yoda version"
+  $YODA_CMD help
+    Display help information
 echo
-echo "  $YODA_CMD help"
-echo "    Display help information"
+  $YODA_CMD init
+    Prepare dockerized skeleton in project directory
 echo
-echo "  $YODA_CMD init"
-echo "    Prepare dockerized skeleton in project directory"
+  $YODA_CMD add [options]
+    Add container skeleton to project
 echo
-echo "  $YODA_CMD add [options]"
-echo "    Add container skeleton to project"
+    Options are:
+      --name=container – name of container (required)
 echo
-echo "    Options are:"
-echo "      --name=container – name of container (required)"
+  $YODA_CMD build
+    Build images for current project
 echo
-echo "  $YODA_CMD build"
-echo "    Build images for current project"
+  $YODA_CMD compose
+    Display generated docker-compose file in stdout
 echo
-echo "  $YODA_CMD compose"
-echo "    Display generated docker-compose file in stdout"
+  $YODA_CMD start [CONTAINER...]
+    Start all containers or only passed with arguments
 echo
-echo "  $YODA_CMD start [CONTAINER...]"
-echo "    Start all containers or only passed with arguments"
-echo
-echo "  $YODA_CMD stop [CONTAINER...]"
-echo "    Stop all containers or only passed with arguments"
+  $YODA_CMD stop [CONTAINER...]
+    Stop all containers or only passed with arguments
+EOF
