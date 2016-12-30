@@ -22,12 +22,6 @@ test -e docker/env.sh && source $_
 
 for p in "$@"; do
   case $p in
-    --name=*)
-      arg_name=${p##*=}
-      ;;
-    --composer=*)
-      arg_composer=${p##*=}
-      ;;
     *)
       ;;
   esac
@@ -66,16 +60,21 @@ case "$cmd" in
     ;;
 
   add)
+    arg_name="$*"
     if [[ -z "$arg_name" ]]; then
       echo "Did you mean '$YODA_CMD --name=container'? '$YODA_CMD help' for more info." && exit 1
     fi
-    container_path="docker/containers/$arg_name"
-    mkdir -p $container_path
-    sed "s/%name%/$arg_name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
-    cp $YODA_PATH/templates/entrypoint $container_path
+
+    for name in $arg_name; do
+      container_path="docker/containers/$name"
+      mkdir -p $container_path
+      sed "s/%name%/$name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
+      cp $YODA_PATH/templates/entrypoint $container_path
+    done
     ;;
 
   compose)
+    arg_composer="$*"
     custom_run compose
     # Get containers to build
     containers=$(cat docker/Envfile | grep ^$ENV: | cut -d ':' -f2)
