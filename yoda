@@ -104,9 +104,14 @@ case "$cmd" in
 
     for name in $arg_name; do
       container_path="docker/containers/$name"
+      if [[ -d $container_path ]]; then
+        echo "Container exists: '$name'. Skipping: '$container_path'."
+        continue
+      fi
       mkdir -p $container_path
       sed "s/%name%/$name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
       cp $YODA_PATH/templates/entrypoint $container_path
+      sed "s/^dev\:\(.*\)/dev\:\1 $name/" docker/Envfile > docker/.Envfile.swp && mv docker/.Envfile.swp $_
     done
     ;;
 
