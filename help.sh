@@ -21,8 +21,9 @@ Usage:
   $YODA_CMD help
     Display help information
 
-  $YODA_CMD init
+  $YODA_CMD init [folder]
     Prepare dockerized skeleton in project directory
+    folder    Initialize all structure in folder with that name. Default: yoda
 
   $YODA_CMD add [CONTAINER...]
     Add container or bunch of containers skeleton to project
@@ -35,7 +36,7 @@ Usage:
 
   $YODA_CMD compose [COMPOSE_SCRIPT]
     Display generated docker-compose file in stdout.
-    COMPOSE_SCRIPT – executable script who will process each container template, replace something and return as plain text. Container templates goes to stdin and 2 addition arguments are passed: --name and --sequence so name of container and number in scale map
+    COMPOSE_SCRIPT    executable script who will process each container template, replace something and return as plain text. Container templates goes to stdin and 2 addition arguments are passed: --name and --sequence so name of container and number in scale map
 
   $YODA_CMD start [CONTAINER...]
     Start all containers or only passed with arguments

@@ -17,8 +17,13 @@ shift
 
 # Auto version switch and update
 source_yoda_version=$YODA_VERSION
-# shellcheck source=docker/.yodarc
-test -e docker/.yodarc && source $_
+
+yodarc_file=$(ls */.yodarc 2>/dev/null || true)
+if [[ -n "$yodarc_file" ]]; then
+  # shellcheck source=yoda/.yodarc
+  source $yodarc_file
+fi
+
 if [[ "$source_yoda_version" != "$YODA_VERSION" ]]; then
   (
     set +e
@@ -38,7 +43,7 @@ if [[ "$source_yoda_version" != "$YODA_VERSION" ]]; then
 fi
 
 # shellcheck source=docker/env.sh
-test -e docker/env.sh && source $_
+test -e $DOCKER_ROOT/env.sh && source $_
 
 for p in "$@"; do
   case $p in
@@ -72,11 +77,14 @@ allow_dev_only() {
 
 case "$cmd" in
   init)
-    if [[ -e docker ]]; then
-      echo "Error while initializing Yoda. Folder 'docker' already exists."
-      if [[ -f docker/.yodarc ]]; then
-        source docker/.yodarc
-        echo "Initialized Yoda version: $YODA_VERSION"
+    arg_dir="$*"
+    yoda_dir=${arg_dir:-yoda}
+    if [[ -e $yoda_dir ]]; then
+      echo "Error while initializing Yoda. Folder '$yoda_dir' already exists."
+      if [[ -f $DOCKER_ROOT/.yodarc ]]; then
+        # shellcheck source=yoda/.yodarc
+        source $DOCKER_ROOT/.yodarc
+        echo "Initialized Yoda version: '$YODA_VERSION'. Yoda home path: '$DOCKER_ROOT'."
       fi
       exit 1
     fi
@@ -86,14 +94,14 @@ case "$cmd" in
     useremail=$(git config --global user.email || echo 'noreply@yoda.org')
 
     touch .dockerignore
-    mkdir -p docker/{templates,images,containers}
-    cp $YODA_PATH/templates/env.sh docker
-    cp $YODA_PATH/templates/Envfile docker
-    cp $YODA_PATH/templates/Buildfile docker/images
-    sed "s/%user%/$username/g;s/%email%/$useremail/g;" $YODA_PATH/templates/Dockerfile > docker/images/Dockerfile-base
-    cp $YODA_PATH/templates/gitignore docker/.gitignore
-    cp $YODA_PATH/templates/dockerignore docker/.dockerignore
-    sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > docker/.yodarc
+    mkdir -p $yoda_dir/{templates,images,containers}
+    cp $YODA_PATH/templates/env.sh $yoda_dir
+    cp $YODA_PATH/templates/Envfile $yoda_dir
+    cp $YODA_PATH/templates/Buildfile $yoda_dir/images
+    sed "s/%user%/$username/g;s/%email%/$useremail/g;" $YODA_PATH/templates/Dockerfile > $yoda_dir/images/Dockerfile-base
+    cp $YODA_PATH/templates/gitignore $yoda_dir/.gitignore
+    cp $YODA_PATH/templates/dockerignore $yoda_dir/.dockerignore
+    sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > $yoda_dir/.yodarc
     ;;
 
   add|delete)
@@ -104,7 +112,7 @@ case "$cmd" in
     fi
 
     for name in $arg_name; do
-      container_path="docker/containers/$name"
+      container_path="$DOCKER_ROOT/containers/$name"
       if [[ $cmd == add ]]; then
         if [[ -d $container_path ]]; then
           echo "Container exists: '$name'. Skipping: '$container_path'."
@@ -113,11 +121,10 @@ case "$cmd" in
         mkdir -p $container_path
         sed "s/%name%/$name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
         cp $YODA_PATH/templates/entrypoint $container_path
-        sed "s/^dev\:\(.*\)/dev\:\1 $name/" docker/Envfile > docker/.Envfile.swp && mv docker/.Envfile.swp $_
+        sed "s/^dev\:\(.*\)/dev\:\1 $name/" $DOCKER_ROOT/Envfile > $DOCKER_ROOT/.Envfile.swp && mv $DOCKER_ROOT/.Envfile.swp $_
       else
         test -d $container_path && rm -fr $_
-        echo "s/[!^]\s*$name//"
-        sed "s/ $name/ /" docker/Envfile > docker/.Envfile.swp && mv docker/.Envfile.swp $_
+        sed "s/ $name/ /" $DOCKER_ROOT/Envfile > $DOCKER_ROOT/.Envfile.swp && mv $DOCKER_ROOT/.Envfile.swp $_
       fi
     done
     ;;
@@ -126,7 +133,7 @@ case "$cmd" in
     arg_composer="$*"
     custom_run compose
     # Get containers to build
-    containers=$(cat docker/Envfile | grep ^$ENV: | cut -d ':' -f2)
+    containers=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | cut -d ':' -f2)
     COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/compose.sh" $containers
     ;;
 
