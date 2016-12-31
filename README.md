@@ -10,13 +10,14 @@ You have application and want dockerize it in fast way? That tool can help you w
 Yoda makes it simple to put your source code and services into docker and separate your microservices between nodes.
 
 ## Installation
-Its simple like hell. Remember you need to have bash version 4 and higher installed.
+First you need to install Yoda on your laptop. Its supereasy:
 
 ```bash
-make check && make install
+git clone git@github.com:dmitrykuzmenkov/yoda.git
+cd yoda && make check && make install
 ```
 
-Done! Run **yoda** in command line to see the results.
+Remember that you need bash version 4 or higher installed at least.
 
 ## Usage example
 OK. You have git repository with your project.  
