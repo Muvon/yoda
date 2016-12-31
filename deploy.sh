@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-for p in "$@"; do
+for p in $*; do
   case $p in
     --host=*)
       host=${p##*=}
@@ -19,7 +19,7 @@ for p in "$@"; do
   esac
 done
 
-if [[ -z "$host" || -z "$env" ]]; then
+if [[ -z "$host" && -z "$env" ]]; then
   echo "Host or environment is required to be passed."
   exit
 fi
@@ -52,10 +52,11 @@ if [[ -n "$host" ]]; then
   fi
 
   # First check known hosts
-  cat ~/.ssh/known_hosts | grep $host || ssh-keyscan $host >> ~/.ssh/known_hosts
+  cat ~/.ssh/known_hosts | grep ${host##*@} || ssh-keyscan $_ >> ~/.ssh/known_hosts
 
   # Detect git host to do keyscan check
   git_host=$(echo $GIT_URL | cut -d'@' -f2 | cut -d':' -f1)
+  yoda_git_url=$(cd ${BASH_SOURCE%/*} && git remote get-url origin || true)
 
   exec ssh -AT $host <<EOF
     set -e
@@ -64,7 +65,13 @@ if [[ -n "$host" ]]; then
       which git
     ) >/dev/null
 
-    mkdir -p ~/.yoda && cd \$_
+    if [[ ! -d ~/.yoda ]]; then
+      git clone -q $yoda_git_url ~/.yoda
+      echo "PATH=\$PATH:~/.yoda" >> ~/.bashrc
+      source ~/.bashrc
+    fi
+
+    mkdir -p ~/.deploy && cd \$_
     if [[ ! -d $COMPOSE_PROJECT_NAME ]]; then
       cat ~/.ssh/known_hosts | grep $git_host || ssh-keyscan $git_host >> ~/.ssh/known_hosts
       git clone -q $GIT_URL $COMPOSE_PROJECT_NAME
@@ -82,9 +89,9 @@ else
   pids=()
   servers=()
 
-  test ! -d $DOCKER_ROOT/deploy && mkdir -p $_
+  mkdir -p $DOCKER_ROOT/log
   for server in `cat $DOCKER_ROOT/Envfile | grep $env$ | cut -d':' -f1`; do
-    ( yoda deploy --host=$server --branch=$git_branch --rev=$rev $custom_args >> $DOCKER_ROOT/deploy/${server//@/_}.log 2>&1 ) &
+    ( yoda deploy --host=$server --branch=$git_branch --rev=$rev $custom_args >> $DOCKER_ROOT/log/${server//@/_}.log 2>&1 ) &
     pids+=($!)
     servers+=($server)
   done
