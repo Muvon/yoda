@@ -1,10 +1,12 @@
 # Yoda
-Simple tool to dockerize and manage deployment of your project
+Simple tool to dockerize and manage deployment of your project  
+
+![Alt text](/yoda.jpg?raw=true "Help you deploy I will")  
 
 ## Under development...
 
 ## What is it?
-You have application and want dockerize it in fast way? That tool can help you with it.
+You have application and want dockerize it in fast way? That tool can help you with it.  
 Yoda makes it simple to put your source code and services into docker and separate your microservices between nodes.
 
 ## Installation
@@ -17,15 +19,15 @@ make check && make install
 Done! Run **yoda** in command line to see the results.
 
 ## Usage example
-OK. You have git repository with your project.
+OK. You have git repository with your project.  
 Go into this folder and run this command to initialize environment.
 
 ```bash
 yoda init
 ```
 
-Now you will get **docker** folder created in your project.
-Next step is prepare Dockerfile that located in docker/images folder.
+Now you will get **docker** folder created in your project.  
+Next step is prepare Dockerfile that located in docker/images folder.  
 You can setup docker build options in file docker/images/Buildfile.
 
 Now you can add container to your project.
@@ -34,7 +36,7 @@ Now you can add container to your project.
 yoda add container-name
 ```
 
-Change template for docker-compose.yml file in docker/containers/container-name/container.yml.
+Change template for docker-compose.yml file in docker/containers/container-name/container.yml.  
 Now add this container to Envfile file.
 
 We are done. Build it and start with just one command now:
