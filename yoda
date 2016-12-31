@@ -86,7 +86,7 @@ case "$cmd" in
     useremail=$(git config --global user.email || echo 'noreply@yoda.org')
 
     touch .dockerignore
-    mkdir -p docker/{templates,images,containers,configs,scripts}
+    mkdir -p docker/{templates,images,containers}
     cp $YODA_PATH/templates/env.sh docker
     cp $YODA_PATH/templates/Envfile docker
     cp $YODA_PATH/templates/Buildfile docker/images

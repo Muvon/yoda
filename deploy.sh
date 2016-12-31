@@ -82,6 +82,7 @@ else
   pids=()
   servers=()
 
+  test ! -d $DOCKER_ROOT/deploy && mkdir -p $_
   for server in `cat $DOCKER_ROOT/Envfile | grep $env$ | cut -d':' -f1`; do
     ( yoda deploy --host=$server --branch=$git_branch --rev=$rev $custom_args >> $DOCKER_ROOT/deploy/${server//@/_}.log 2>&1 ) &
     pids+=($!)
