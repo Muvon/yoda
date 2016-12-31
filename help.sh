@@ -7,6 +7,7 @@ Commands available:
   help      Display this information
   init      Prepare deployment folder in project
   add       Add new container skeleton structure to project
+  delete    Delete existing container from project
   build     Build images for current project
   compose   Display generated compose file for current environment
   start     Start all services for current project
@@ -25,6 +26,9 @@ Usage:
 
   $YODA_CMD add [CONTAINER...]
     Add container or bunch of containers skeleton to project
+
+  $YODA_CMD delete [CONTAINER...]
+    Delete container or bunch of existing containers from project
 
   $YODA_CMD build
     Build images for current project

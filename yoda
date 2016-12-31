@@ -96,23 +96,29 @@ case "$cmd" in
     sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > docker/.yodarc
     ;;
 
-  add)
+  add|delete)
     allow_dev_only
     arg_name="$*"
     if [[ -z "$arg_name" ]]; then
-      echo "Did you mean '$YODA_CMD --name=container'? '$YODA_CMD help' for more info." && exit 1
+      echo "Did you mean '$YODA_CMD container'? '$YODA_CMD help' for more info." && exit 1
     fi
 
     for name in $arg_name; do
       container_path="docker/containers/$name"
-      if [[ -d $container_path ]]; then
-        echo "Container exists: '$name'. Skipping: '$container_path'."
-        continue
+      if [[ $cmd == add ]]; then
+        if [[ -d $container_path ]]; then
+          echo "Container exists: '$name'. Skipping: '$container_path'."
+          continue
+        fi
+        mkdir -p $container_path
+        sed "s/%name%/$name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
+        cp $YODA_PATH/templates/entrypoint $container_path
+        sed "s/^dev\:\(.*\)/dev\:\1 $name/" docker/Envfile > docker/.Envfile.swp && mv docker/.Envfile.swp $_
+      else
+        test -d $container_path && rm -fr $_
+        echo "s/[!^]\s*$name//"
+        sed "s/ $name/ /" docker/Envfile > docker/.Envfile.swp && mv docker/.Envfile.swp $_
       fi
-      mkdir -p $container_path
-      sed "s/%name%/$name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
-      cp $YODA_PATH/templates/entrypoint $container_path
-      sed "s/^dev\:\(.*\)/dev\:\1 $name/" docker/Envfile > docker/.Envfile.swp && mv docker/.Envfile.swp $_
     done
     ;;
 
