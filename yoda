@@ -92,6 +92,7 @@ case "$cmd" in
     cp $YODA_PATH/templates/Buildfile docker/images
     sed "s/%user%/$username/g;s/%email%/$useremail/g;" $YODA_PATH/templates/Dockerfile > docker/images/Dockerfile-base
     cp $YODA_PATH/templates/gitignore docker/.gitignore
+    cp $YODA_PATH/templates/dockerignore docker/.dockerignore
     sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > docker/.yodarc
     ;;
 
