@@ -3,11 +3,13 @@ Simple tool to dockerize and manage deployment of your project
 
 ![Alt text](/yoda.jpg?raw=true "Help you deploy I will")  
 
-## Under development...
-
 ## What is it?
-You have application and want dockerize it in fast way? That tool can help you with it.  
-Yoda makes it simple to put your source code and services into docker and separate your microservices between nodes.
+Yoda helps you to dockerize existing application and automate deployment process.
+
+1. Only BASH. No dependency shit!
+2. Requirements: git, docker, docker-compose
+3. Its simple like simplicity itself
+4. Runs on MACOS and Linux systems
 
 ## Installation
 First you need to install Yoda on your laptop. Its supereasy:
