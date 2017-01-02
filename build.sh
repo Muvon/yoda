@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-for line in "$(cat $DOCKER_ROOT/images/Buildfile)"; do
+set -e
+mapfile -t lines < $DOCKER_ROOT/images/Buildfile
+for line in "${lines[@]}"; do
   image=$(eval echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   image_id=$(docker images -q $image)
   if [[ -z "$image_id" ]]; then
