@@ -49,14 +49,15 @@ yoda start
 
 Done!
 
-## Structure and methodology
-1. You can have several images for single project and Dockerfiles for it.
-2. Each Dockerfile is located in docker/images folder and has naming convention: Dockerfile-{name}.
+## Philosophy
+1. You can have several images for single project.
+2. Each image you use must have Dockerfile located in docker/images folder and named by convetion: Dockerfile-{name}.
 3. You can have several containers depends on one image.
-4. Each container has own folder with separated yml template for docker-compose and custom configs in docker/containers folder.
+4. Each container has own folder in docker/containers with structure followed by convention in this README.
 5. You can setup and use any BASH variables in file docker/env.sh. Its pregenerated for you.
-6. Envfile is main file that has all info about what should be built and in which environment.
-7. Each container can be build and start multiple time.
+6. Envfile is main file that has all info about what should be built and in which environment, also what server runs which environment for deploy.
+7. Each container can be scaled N times and started using single template but different names.
+8. You can fully customize deploy, build, compose stages just wrapping in your own script using any language.
 
 ##  Init folder structure
 When you do yoda init in your project it creates by default yoda folder. This folder has following structure
