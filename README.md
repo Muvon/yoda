@@ -31,7 +31,7 @@ yoda init
 
 Now you will get **docker** folder created in your project.  
 Next step is prepare Dockerfile that located in docker/images folder.  
-You can setup docker build options in file docker/images/Buildfile.
+You can setup docker build options in file docker/Buildfile.
 
 Now you can add container to your project.
 
