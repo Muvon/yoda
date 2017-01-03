@@ -52,13 +52,13 @@ done
 custom_run() {
   script=$1
   shift
-  echo "Custom run: $DOCKER_ROOT/$script"
   if [[ -e $DOCKER_ROOT/$script && ! -x $DOCKER_ROOT/$script ]]; then
     echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
     return 1
   fi
 
   if [[ -x $DOCKER_ROOT/$script ]]; then
+    echo "Custom run: $DOCKER_ROOT/$script"
     exec $DOCKER_ROOT/$script "$*"
     exit 0
   fi
@@ -100,6 +100,9 @@ case "$cmd" in
     sed "s/%name%/$project_name/g;s/%yoda_version%/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > $yoda_dir/.yodarc
     ;;
 
+  upgrade)
+
+    ;;
   add|delete)
     allow_dev_only
     arg_name="$*"
