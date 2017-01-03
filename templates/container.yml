@@ -7,6 +7,6 @@
   working_dir: /src
   entrypoint: /src/docker/containers/%name%/entrypoint
   network_mode: host
-  restart: always
+  restart: unless-stopped
   cap_drop:
     - ALL
