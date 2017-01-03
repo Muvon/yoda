@@ -96,7 +96,7 @@ case "$cmd" in
       exit 1
     fi
 
-    yoda_dir=${arg_dir:-yoda}
+    yoda_dir=${arg_dir:-docker}
     if [[ -e $yoda_dir ]]; then
       >&2 echo "Error while initializing Yoda. Folder '$yoda_dir' already exists."
       exit 1
