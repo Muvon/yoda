@@ -17,4 +17,4 @@ fi
 
 $YODA_CMD compose > $COMPOSE_FILE
 $YODA_CMD build ${build_args[*]}
-docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d "$*"
+docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d $*
