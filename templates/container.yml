@@ -1,12 +1,10 @@
-%name%.#:
-  image: ${COMPOSE_PROJECT_NAME}/base:${REVISION}
-  container_name: ${COMPOSE_PROJECT_NAME}.%name%.#
-  hostname: ${HOSTNAME}.%name%.#
-  labels:
-    - role=%name%
-  working_dir: /src
-  entrypoint: /src/docker/containers/%name%/entrypoint
-  network_mode: host
-  restart: unless-stopped
-  cap_drop:
-    - ALL
+image: ${COMPOSE_PROJECT_NAME}/base:${REVISION}
+hostname: ${HOSTNAME}.%name%.#
+labels:
+  - role=%name%
+working_dir: /src
+entrypoint: /src/docker/containers/%name%/entrypoint
+network_mode: host
+restart: unless-stopped
+cap_drop:
+  - ALL
