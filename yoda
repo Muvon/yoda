@@ -125,7 +125,7 @@ case "$cmd" in
     allow_dev_only
     arg_name="$*"
     if [[ -z "$arg_name" ]]; then
-      >&2 echo "Did you mean '$YODA_CMD container'? '$YODA_CMD help' for more info."
+      >&2 echo "Did you mean '$YODA_CMD $cmd container'? '$YODA_CMD help' for more info."
       exit 1
     fi
 
