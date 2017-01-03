@@ -11,6 +11,7 @@ check:
 	which bash
 	which sed
 	which awk
+	which grep
 	test $(BASH_VERSION_OK) -eq 1 || exit 1
 
 install:

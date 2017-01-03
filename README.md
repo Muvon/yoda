@@ -39,8 +39,7 @@ Now you can add container to your project.
 yoda add container-name
 ```
 
-Change template for docker-compose.yml file in docker/containers/container-name/container.yml.  
-Now add this container to Envfile file.
+Change template for docker-compose.yml file in docker/containers/container-name/container.yml.
 
 We are done. Build it and start with just one command now:
 
