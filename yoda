@@ -52,6 +52,13 @@ done
 custom_run() {
   script=$1
   shift
+
+  # Stop recursion here get parent caller
+  called_by=$(ps -f -p $PPID | tail -1 | awk '{print $NF}')
+  if [[ "$called_by" == *"$script" ]]; then
+    return 0
+  fi
+
   if [[ -e $DOCKER_ROOT/$script && ! -x $DOCKER_ROOT/$script ]]; then
     echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
     return 1
@@ -103,6 +110,7 @@ case "$cmd" in
   upgrade)
 
     ;;
+
   add|delete)
     allow_dev_only
     arg_name="$*"
@@ -137,24 +145,6 @@ case "$cmd" in
     ;;
 
   build)
-    lock_file="$DOCKER_ROOT/.build.lock"
-    lock() {
-      touch $lock_file
-    }
-
-    unlock() {
-      test -f $lock_file && rm -f $_
-    }
-
-    if [[ -f $lock_file ]]; then
-      echo "Build is already in progress."
-      echo "If something went wrong you should just remove lock file: $lock_file"
-      exit 1
-    fi
-
-    trap unlock EXIT
-    lock
-
     custom_run build
     bash "$YODA_PATH/build.sh"
     ;;

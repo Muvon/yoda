@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 set -e
+
+lock_file="$DOCKER_ROOT/.build.lock"
+lock() {
+  touch $lock_file
+}
+
+unlock() {
+  test -f $lock_file && rm -f $_
+}
+
+if [[ -f $lock_file ]]; then
+  echo "Build is already in progress."
+  echo "If something went wrong you should just remove lock file: $lock_file"
+  exit 1
+fi
+
+trap unlock EXIT
+lock
+
 mapfile -t lines < $DOCKER_ROOT/images/Buildfile
 for line in "${lines[@]}"; do
   image=$(eval echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
