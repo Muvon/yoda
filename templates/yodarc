@@ -12,17 +12,12 @@ GIT_URL="$(git remote get-url origin 2> /dev/null || true)"
 export SOURCE_PATH
 SOURCE_PATH="$(pwd)"
 
-# Build scripts depended
 export DOCKER_ROOT
 DOCKER_ROOT=$(cd ${BASH_SOURCE%/*} && pwd)
 
-# HOSTNAME variable workout
 export HOSTNAME=${HOSTNAME:-`hostname`}
-
 export ENV=${ENV:-dev}
 
-# It also used as filter by labels
-# docker ps --filter 'label=com.docker.compose.project=yasen'
 export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"%name%"}
 export COMPOSE_HTTP_TIMEOUT=${COMPOSE_HTTP_TIMEOUT:-300}
 export COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml"
