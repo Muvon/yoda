@@ -58,6 +58,53 @@ Done!
 6. Envfile is main file that has all info about what should be built and in which environment.
 7. Each container can be build and start multiple time.
 
+##  Init folder structure
+When you do yoda init in your project it creates by default yoda folder. This folder has following structure
+
+| Path | Descrition |
+|---|---|
+| containers | This folder contains all containers with templates in your project |
+| images | It contains Dockerfiles for you images. Common naming is: Dockerfile-name. Where is name is just name of image you build with that dockerfile |
+| env.sh | Its environment for your building context. You can define custom variables and use it everywhere in builds and other scripts |
+| Buildfile | It is declarative file that describes how to build each image you have. It has simple structure **name: arguments for docker build command** where is name is your image in images folder with same name |
+| Envfile | It describes all environments and link servers for deploy with its environments you have. No limitation. You can create own environments and describe what containers must be built there |
+
+### Path: containers
+When you adding new container folder is created here with same name. For example if you add container with name **container**. Same folder will appear here.  
+This folder will contain some files.
+ 
+| File | Description |
+|---|---|
+| container.yml | Its docker-compose section without section name that describes how to build container. This file used to generate whole docker-compose.yml file for starting services |
+| container.[env].yml | Optional you can create file with template that will be used when docker-compose.yml is generated for this environment. For example if you have container.dev.yml and starting services in dev environment will use all keys from this file replacing common container.yml keys|
+| entrypoint | Its entrypoint for you container. Its optional but good practise to use this file as executable for your container starting point |
+
+### Path: env.sh
+Here you can declare BASH environment variables and use it everywhere.  
+For example you can write here IMAGE_NAME to set image name with revision and other staff and use it in Buildfile and container.yml.
+
+### Path: Buildfile
+Its simple file that have following structure:
+
+```yaml
+base: -t $IMAGE_BASE --compress
+db: -t postgres:9.5
+```
+
+Each line contains image name and build args that will be passed in **docker build** command. See more info in **docker build --help**.
+
+### Path: Envfile
+Its simple file YAML like with environment and server description:
+  
+```yaml
+user@server: production
+production: container1 container2=2
+dev: container1
+```
+
+Example file above declare server **user@server** that will be deployed as **production**. And production will contain one container1 and two container2 instances.  
+ANd in dev environment only one container with name container1 will be started.
+
 ## Yoda command line tool usage
 ```bash
 yoda command arguments
