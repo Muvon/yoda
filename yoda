@@ -88,14 +88,17 @@ check_yodarc() {
 case "$cmd" in
   init)
     arg_dir="$*"
+
+    if [[ -f $DOCKER_ROOT/.yodarc ]]; then
+      # shellcheck source=yoda/.yodarc
+      source $DOCKER_ROOT/.yodarc
+      echo "Initialized Yoda version: '$YODA_VERSION'. Yoda home path: '$DOCKER_ROOT'."
+      exit 1
+    fi
+
     yoda_dir=${arg_dir:-yoda}
     if [[ -e $yoda_dir ]]; then
       echo "Error while initializing Yoda. Folder '$yoda_dir' already exists."
-      if [[ -f $DOCKER_ROOT/.yodarc ]]; then
-        # shellcheck source=yoda/.yodarc
-        source $DOCKER_ROOT/.yodarc
-        echo "Initialized Yoda version: '$YODA_VERSION'. Yoda home path: '$DOCKER_ROOT'."
-      fi
       exit 1
     fi
 
