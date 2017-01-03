@@ -22,8 +22,8 @@ for p in $*; do
 done
 
 if [[ -z "$host" && -z "$env" ]]; then
-  echo "Host or environment is required to be passed."
-  exit
+  >&2 echo "Host or environment is required to be passed."
+  exit 1
 fi
 
 # Get needed branch
@@ -49,7 +49,7 @@ fi
 if [[ -n "$host" ]]; then
   env=$(cat $DOCKER_ROOT/Envfile | grep $host: | cut -d':' -f2 | tr -d ' ')
   if [[ -z "$env" ]]; then
-    echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
+    >&2 echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
     exit 1
   fi
 

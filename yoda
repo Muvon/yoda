@@ -6,7 +6,7 @@ YODA_BIN=$(test -h $0 && readlink $0 || echo $0)
 YODA_PATH=${YODA_BIN%/*}
 
 if [[ -z "$1" ]]; then
-  echo "No command specified. Run '$YODA_CMD command'. '$YODA_CMD help' for more info." && exit 1
+  >&2 echo "No command specified. Run '$YODA_CMD command'. '$YODA_CMD help' for more info." && exit 1
 fi
 cmd=$1
 shift
@@ -33,7 +33,7 @@ if [[ "$source_yoda_version" != "$YODA_VERSION" ]]; then
     if [[ "$switched_version" == "$YODA_VERSION" ]]; then
       exec $YODA_BIN $cmd "$*"
     else
-      echo "Failed to switch version to '$YODA_VERSION'. Using '$source_yoda_version'."
+      >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$source_yoda_version'."
     fi
   )2> /dev/null
 fi
@@ -60,7 +60,7 @@ custom_run() {
   fi
 
   if [[ -e $DOCKER_ROOT/$script && ! -x $DOCKER_ROOT/$script ]]; then
-    echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
+    >&2 echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
     return 1
   fi
 
@@ -73,14 +73,14 @@ custom_run() {
 
 allow_dev_only() {
   if [[ $ENV != 'dev' ]]; then
-    echo "Your environment: $ENV. This command is allowed only in 'dev' environment."
+    >&2 echo "Your environment: $ENV. This command is allowed only in 'dev' environment."
     return 1
   fi
 }
 
 check_yodarc() {
   if [[ ! -f $DOCKER_ROOT/.yodarc ]]; then
-    echo "Yoda is not inited. Run '$YODA_CMD init' first. More info: '$YODA_CMD help'."
+    >&2 echo "Yoda is not inited. Run '$YODA_CMD init' first. More info: '$YODA_CMD help'."
     return 1
   fi
 }
@@ -92,13 +92,13 @@ case "$cmd" in
     if [[ -f $DOCKER_ROOT/.yodarc ]]; then
       # shellcheck source=yoda/.yodarc
       source $DOCKER_ROOT/.yodarc
-      echo "Initialized Yoda version: '$YODA_VERSION'. Yoda home path: '$DOCKER_ROOT'."
+      >&2 echo "Yoda was initialized already. Yoda version: '$YODA_VERSION'. Yoda home path: '$DOCKER_ROOT'."
       exit 1
     fi
 
     yoda_dir=${arg_dir:-yoda}
     if [[ -e $yoda_dir ]]; then
-      echo "Error while initializing Yoda. Folder '$yoda_dir' already exists."
+      >&2 echo "Error while initializing Yoda. Folder '$yoda_dir' already exists."
       exit 1
     fi
 
@@ -125,7 +125,8 @@ case "$cmd" in
     allow_dev_only
     arg_name="$*"
     if [[ -z "$arg_name" ]]; then
-      echo "Did you mean '$YODA_CMD container'? '$YODA_CMD help' for more info." && exit 1
+      >&2 echo "Did you mean '$YODA_CMD container'? '$YODA_CMD help' for more info."
+      exit 1
     fi
 
     for name in $arg_name; do
@@ -176,7 +177,7 @@ case "$cmd" in
   deploy)
     check_yodarc
     if [[ -z "$GIT_URL" ]]; then
-      echo "GIT_URL is empty. Are you sure you are in git repository?"
+      >&2 echo "GIT_URL is empty. Are you sure you are in git repository?"
       exit 1
     fi
 
@@ -193,7 +194,7 @@ case "$cmd" in
     ;;
 
   *)
-    echo "Unknown command '$cmd'"
-    echo "Run '$YODA_CMD help' to see more info"
+    >&2 echo "Unknown command '$cmd'"
+    >&2 echo "Run '$YODA_CMD help' to see more info"
     ;;
 esac

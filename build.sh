@@ -11,8 +11,8 @@ unlock() {
 }
 
 if [[ -f $lock_file ]]; then
-  echo "Build is already in progress."
-  echo "If something went wrong you should just remove lock file: $lock_file"
+  >&2 echo "Build is already in progress."
+  >&2 echo "If something went wrong you should just remove lock file: $lock_file"
   exit 1
 fi
 
