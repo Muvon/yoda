@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+
 for p in $*; do
   case $p in
     --rebuild)
