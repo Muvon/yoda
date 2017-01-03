@@ -1,7 +1,7 @@
 # Yoda
 Simple tool to dockerize and manage deployment of your project  
 
-![Alt text](/yoda.jpg?raw=true "Help you deploy I will")  
+![Alt text](/img/yoda.jpg?raw=true "Help you deploy I will")  
 
 ## What is it?
 Yoda helps you to dockerize existing application and automate deployment process.
