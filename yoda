@@ -153,19 +153,19 @@ case "$cmd" in
     custom_run compose
     # Get containers to build
     containers=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | cut -d ':' -f2)
-    COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/compose.sh" $containers
+    COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/src/compose.sh" $containers
     ;;
 
   build)
     check_yodarc
     custom_run build
-    bash "$YODA_PATH/build.sh" "$*"
+    bash "$YODA_PATH/src/build.sh" "$*"
     ;;
 
   start)
     check_yodarc
     custom_run start "$*"
-    YODA_CMD=$YODA_CMD bash "$YODA_PATH/start.sh" "$*"
+    YODA_CMD=$YODA_CMD bash "$YODA_PATH/src/start.sh" "$*"
     ;;
 
   stop)
@@ -182,11 +182,11 @@ case "$cmd" in
     fi
 
     custom_run deploy "$*"
-    bash "$YODA_PATH/deploy.sh" "$*"
+    bash "$YODA_PATH/src/deploy.sh" "$*"
     ;;
 
   help)
-    YODA_CMD=$YODA_CMD bash "$YODA_PATH/help.sh"
+    YODA_CMD=$YODA_CMD bash "$YODA_PATH/src/help.sh"
     ;;
 
   version)
