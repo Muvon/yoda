@@ -78,6 +78,13 @@ allow_dev_only() {
   fi
 }
 
+check_yodarc() {
+  if [[ ! -f $DOCKER_ROOT/.yodarc ]]; then
+    echo "Yoda is not inited. Run '$YODA_CMD init' first. More info: '$YODA_CMD help'."
+    return 1
+  fi
+}
+
 case "$cmd" in
   init)
     arg_dir="$*"
@@ -107,10 +114,11 @@ case "$cmd" in
     ;;
 
   upgrade)
-
+    check_yodarc
     ;;
 
   add|delete)
+    check_yodarc
     allow_dev_only
     arg_name="$*"
     if [[ -z "$arg_name" ]]; then
@@ -136,6 +144,7 @@ case "$cmd" in
     ;;
 
   compose)
+    check_yodarc
     arg_composer="$*"
     custom_run compose
     # Get containers to build
@@ -144,11 +153,13 @@ case "$cmd" in
     ;;
 
   build)
+    check_yodarc
     custom_run build
     bash "$YODA_PATH/build.sh"
     ;;
 
   start)
+    check_yodarc
     custom_run start "$*"
     $0 compose > $COMPOSE_FILE
     $0 build
@@ -156,11 +167,13 @@ case "$cmd" in
     ;;
 
   stop)
+    check_yodarc
     custom_run stop "$*"
     docker-compose stop -t $STOP_WAIT_TIMEOUT "$*"
     ;;
 
   deploy)
+    check_yodarc
     if [[ -z "$GIT_URL" ]]; then
       echo "GIT_URL is empty. Are you sure you are in git repository?"
       exit 1
