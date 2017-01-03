@@ -19,11 +19,19 @@ fi
 trap unlock EXIT
 lock
 
+for p in $*; do
+  case $p in
+    --force)
+      force_build=1
+      ;;
+  esac
+done
+
 mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
   image=$(eval echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   image_id=$(docker images -q $image)
-  if [[ -z "$image_id" ]]; then
+  if [[ -z "$image_id" || -n "$force_build" ]]; then
     name=${line%%:*}
     build_args=${line#*:}
     docker build $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .

@@ -31,15 +31,19 @@ Usage:
   $YODA_CMD delete [CONTAINER...]
     Delete container or bunch of existing containers from project
 
-  $YODA_CMD build
+  $YODA_CMD build [options]
     Build images for current project
+    Options are:
+      --force     Force build also if image exists already. Default: not set.
 
   $YODA_CMD compose [COMPOSE_SCRIPT]
     Display generated docker-compose file in stdout.
     COMPOSE_SCRIPT    executable script who will process each container template, replace something and return as plain text. Container templates goes to stdin and 2 addition arguments are passed: --name and --sequence so name of container and number in scale map
 
-  $YODA_CMD start [CONTAINER...]
+  $YODA_CMD start [options] [CONTAINER...]
     Start all containers or only passed with arguments
+    Options are:
+      --rebuild     Rebuild all images also if they exist with that revision. Default: not set.
 
   $YODA_CMD stop [CONTAINER...]
     Stop all containers or only passed with arguments

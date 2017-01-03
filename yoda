@@ -155,15 +155,13 @@ case "$cmd" in
   build)
     check_yodarc
     custom_run build
-    bash "$YODA_PATH/build.sh"
+    bash "$YODA_PATH/build.sh" "$*"
     ;;
 
   start)
     check_yodarc
     custom_run start "$*"
-    $0 compose > $COMPOSE_FILE
-    $0 build
-    docker-compose up --no-build --remove-orphans -t $STOP_WAIT_TIMEOUT -d "$*"
+    YODA_CMD=$YODA_CMD bash "$YODA_PATH/start.sh" "$*"
     ;;
 
   stop)
