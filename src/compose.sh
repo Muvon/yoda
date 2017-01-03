@@ -25,9 +25,9 @@ fi
 
 echo "# Build args $0 $*"
 echo 'version: "2"'
-echo 'networks:'
-echo "  ${COMPOSE_PROJECT_NAME}:"
-echo '    driver: host'
+# echo 'networks:'
+# echo "  default:"
+# echo '    driver: host'
 echo 'services:'
 
 for p in ${!SCALE_MAP[*]}; do

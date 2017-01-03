@@ -6,8 +6,7 @@
     - role=%name%
   working_dir: /src
   entrypoint: /src/docker/containers/%name%/entrypoint
-  networks:
-    - ${COMPOSE_PROJECT_NAME}
+  network_mode: host
   restart: unless-stopped
   cap_drop:
     - ALL
