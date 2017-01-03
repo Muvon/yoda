@@ -36,6 +36,6 @@ for line in "${lines[@]}"; do
     build_args=${line#*:}
     docker build $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
   else
-    echo "Image '$image' is already exist."
+    echo "Image '$image' exists already."
   fi
 done
