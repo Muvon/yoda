@@ -171,7 +171,7 @@ case "$cmd" in
   stop)
     check_yodarc
     custom_run stop "$*"
-    docker-compose stop -t $STOP_WAIT_TIMEOUT "$*"
+    YODA_CMD=$YODA_CMD "$YODA_PATH/src/stop.sh" "$*"
     ;;
 
   deploy)
