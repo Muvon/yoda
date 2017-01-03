@@ -12,7 +12,7 @@ done
 
 build_args=()
 if [[ -n "$rebuild" ]]; then
-  build_args+=('--force')
+  build_args+=('--rebuild')
 fi
 
 $YODA_CMD compose > $COMPOSE_FILE

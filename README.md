@@ -104,7 +104,7 @@ Options are:
 
 | Options | Description | Default |
 |---|---|:---:|
-| --force | Force build also if image exists already | omited |
+| --rebuild | Force build also if image exists already | omited |
 
 ### yoda compose [COMPOSE_SCRIPT]
 Display generated docker-compose file in stdout.

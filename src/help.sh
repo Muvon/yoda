@@ -34,7 +34,7 @@ Usage:
   $YODA_CMD build [options]
     Build images for current project
     Options are:
-      --force     Force build also if image exists already. Default: not set.
+      --rebuild     Force build also if image exists already. Default: not set.
 
   $YODA_CMD compose [COMPOSE_SCRIPT]
     Display generated docker-compose file in stdout.
