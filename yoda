@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
 YODA_CMD='yoda'
-YODA_VERSION='0.2-dev'
+YODA_SOURCE_VERSION='0.2-dev'
+# YODA_VERSION redefined when you are in project dir
+YODA_VERSION=$YODA_SOURCE_VERSION
 YODA_BIN=$(test -h $0 && readlink $0 || echo $0)
 YODA_PATH=${YODA_BIN%/*}
 
@@ -12,18 +14,16 @@ cmd=$1
 shift
 
 # Auto version switch and update
-source_yoda_version=$YODA_VERSION
-
 yodarc_file=$(ls */.yodarc 2>/dev/null || true)
 if [[ -n "$yodarc_file" ]]; then
   # shellcheck source=yoda/.yodarc
   source $yodarc_file
 fi
 
-if [[ "$source_yoda_version" != "$YODA_VERSION" ]]; then
+if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" ]]; then
   (
     set +e
-    echo "Current Yoda version: '$source_yoda_version'."
+    echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
     echo "Switching to project Yoda version: '$YODA_VERSION'."
     cd $YODA_PATH
     git fetch
@@ -33,7 +33,7 @@ if [[ "$source_yoda_version" != "$YODA_VERSION" ]]; then
     if [[ "$switched_version" == "$YODA_VERSION" ]]; then
       exec $YODA_BIN $cmd "$*"
     else
-      >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$source_yoda_version'."
+      >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
     fi
   )2> /dev/null
 fi
@@ -118,6 +118,7 @@ case "$cmd" in
 
   upgrade)
     check_yodarc
+    echo $YODA_VERSION
     ;;
 
   add|delete)
