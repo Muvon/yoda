@@ -3,7 +3,7 @@ BASH_EXISTS := $(shell which bash)
 SHELL := $(shell which bash)
 YODA_DIR := $(shell pwd)
 INSTALL_TO = /usr/local/bin
-BASH_VERSION_OK := $(shell test "$${BASH_VERSION//[!0-9]/}" -gt 4 && echo 1 || echo 0)
+BASH_VERSION_OK := $(shell test "$${BASH_VERSION%%.*}" -gt 4 && echo 1 || echo 0)
 
 check:
 	which docker
