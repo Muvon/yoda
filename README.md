@@ -21,6 +21,11 @@ cd yoda && make check && make install
 
 Remember that you need bash version 4 or higher installed at least.
 
+## Knowledge requirements
+1. [Docker](https://docs.docker.com) and its main concept
+2. [Image and container](https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/) understanding
+3. You know [Docker Compose](https://docs.docker.com/compose/overview/) and and [its file syntax](https://docs.docker.com/compose/compose-file/).
+
 ## Usage example
 OK. You have git repository with your project.  
 Go into this folder and run this command to initialize environment.
