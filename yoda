@@ -124,24 +124,8 @@ case "$cmd" in
 
   upgrade)
     check_yodarc
-    declare -A upgrades
-    proj_major=${YODA_VERSION%.*}
-    proj_minor=${YODA_VERSION#*.}
-    for file in $YODA_PATH/upgrades/*; do
-      file=${file##*/}
-      version=${file#version-*}
-      major=${version%.*}
-      minor=${version#*.}
-
-      if [[ $major -gt $proj_major || ( $major -eq $proj_major && $minor -gt $proj_minor ) ]]; then
-        echo "Upgrade: $version"
-        upgrades[$version]=1
-        exec $YODA_PATH/upgrades/$file
-      fi
-    done
-    if [[ -z "${upgrades[@]}" ]]; then
-      echo 'No upgrades found. You have the latest version in this project.'
-    fi
+    allow_dev_only
+    bash "$YODA_PATH/src/upgrade.sh" "$YODA_PATH/upgrades"
     ;;
 
   add|delete)
