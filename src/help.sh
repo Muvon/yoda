@@ -48,6 +48,7 @@ Usage:
     Start all containers or only passed with arguments
     Options are:
       --rebuild     Rebuild all images also if they exist with that revision. Default: not set.
+      --recreate    Force recreate containers. Default: not set.
 
   $YODA_CMD stop [CONTAINER...]
     Stop all containers or only passed with arguments

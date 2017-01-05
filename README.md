@@ -177,6 +177,7 @@ Options are:
 | Options | Description | Default |
 |---|---|:---:|
 | --rebuild | Rebuild all images also if they exist with that revision | omited |
+| --recreate | Force recreate containers |
 
 ### yoda stop [CONTAINER...]
 Stop all containers or only passed with arguments
