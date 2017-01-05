@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# This is for migration purpose
+# Initial version – do nothing
+# In each script of upgrade you should manually replace YODA_VERSION in rc file

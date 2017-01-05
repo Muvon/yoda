@@ -123,6 +123,7 @@ Commands available:
 | version | Display version of Yoda |
 | help | Display this information |
 | init | Prepare deployment folder in project |
+| upgrade | Upgrade to new version of initialized Yoda in project |
 | add |  Add new container skeleton structure to project |
 | delete | Delete existing container from project |
 | build |  Build images for current project |
@@ -143,6 +144,9 @@ Prepare dockerized skeleton in project directory
 | Command | Description | Default |
 |---|---|---|
 | folder | Initialize all structure in folder with that name | yoda |
+
+### yoda upgrade
+Upgrade to new version of initialized Yoda in project.
 
 ### yoda add [CONTAINER...]
 Add container or bunch of containers skeleton to project

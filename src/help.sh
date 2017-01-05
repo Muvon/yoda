@@ -6,6 +6,7 @@ Commands available:
   version   Display version of Yoda
   help      Display this information
   init      Prepare deployment folder in project
+  upgrade   Upgrade to new version of initialized Yoda in project
   add       Add new container skeleton structure to project
   delete    Delete existing container from project
   build     Build images for current project
@@ -24,6 +25,9 @@ Usage:
   $YODA_CMD init [folder]
     Prepare dockerized skeleton in project directory
     folder    Initialize all structure in folder with that name. Default: yoda
+
+  $YODA_CMD upgrade
+    Upgrade to new version of initialized Yoda in project
 
   $YODA_CMD add [CONTAINER...]
     Add container or bunch of containers skeleton to project
