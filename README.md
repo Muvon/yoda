@@ -130,6 +130,7 @@ Commands available:
 | compose |  Display generated compose file for current environment |
 | start |  Start all services for current project |
 | stop | Stop all services for current project |
+| status | Display current status of services |
 | deploy | Deploy project on one or all nodes |
 
 ### yoda version
@@ -179,6 +180,9 @@ Options are:
 
 ### yoda stop [CONTAINER...]
 Stop all containers or only passed with arguments
+
+### yoda status
+Display current status of services
 
 ### yoda deploy [options]
 Deploy single-node or whole cluster  

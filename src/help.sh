@@ -52,6 +52,9 @@ Usage:
   $YODA_CMD stop [CONTAINER...]
     Stop all containers or only passed with arguments
 
+  $YODA_CMD status
+    Display current status of services
+
   $YODA_CMD deploy [options]
     Deploy single-node or whole cluster
     Options are:

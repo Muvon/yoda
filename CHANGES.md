@@ -10,6 +10,7 @@ It supports next commands:
  - build
  - start
  - stop
+ - status
  - deploy
  - version
  - help

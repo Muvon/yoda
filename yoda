@@ -182,6 +182,11 @@ case "$cmd" in
     bash "$YODA_PATH/src/stop.sh" "$*"
     ;;
 
+  status)
+    check_yodarc
+    docker-compose ps
+    ;;
+
   deploy)
     check_yodarc
     if [[ -z "$GIT_URL" ]]; then
