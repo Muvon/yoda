@@ -38,7 +38,7 @@ for p in ${!SCALE_MAP[*]}; do
     {
       if [[ -f "$env_container_file" ]]; then
         for line in "${lines[@]}"; do
-          if [[ "$line" =~ ^[a-z]+\: ]]; then
+          if [[ "$line" =~ ^[a-z_]+\: ]]; then
             if cat $env_container_file | grep "${line%%:*}:" >/dev/null; then
               remove=1
             else
