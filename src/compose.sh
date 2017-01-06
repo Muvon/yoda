@@ -28,7 +28,7 @@ declare -A IMAGE_MAP
 mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
   k=$(echo $line | cut -d: -f1)
-  v=$(echo $line | cut -d: -f2 | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  v=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   IMAGE_MAP[$k]=$v
 done
 
