@@ -105,6 +105,7 @@ case "$cmd" in
   add|delete)
     check_yodarc
     allow_dev_only
+
     arg_name="$*"
     if [[ -z "$arg_name" ]]; then
       >&2 echo "Did you mean '$YODA_CMD $cmd container'? '$YODA_CMD help' for more info."
@@ -112,20 +113,7 @@ case "$cmd" in
     fi
 
     for name in $arg_name; do
-      container_path="$DOCKER_ROOT/containers/$name"
-      if [[ $cmd == add ]]; then
-        if [[ -d $container_path ]]; then
-          echo "Container exists: '$name'. Skipping: '$container_path'."
-          continue
-        fi
-        mkdir -p $container_path
-        sed "s/%name%/$name/g" $YODA_PATH/templates/container.yml > $container_path/container.yml
-        cp $YODA_PATH/templates/entrypoint $container_path
-        sed "s/^dev\:\(.*\)/dev\:\1 $name/" $DOCKER_ROOT/Envfile > $DOCKER_ROOT/.Envfile.swp && mv $DOCKER_ROOT/.Envfile.swp $_
-      else
-        test -d $container_path && rm -fr $_
-        sed "s/ $name/ /" $DOCKER_ROOT/Envfile > $DOCKER_ROOT/.Envfile.swp && mv $DOCKER_ROOT/.Envfile.swp $_
-      fi
+      YODA_PATH=$YODA_PATH bash "$YODA_PATH/src/$cmd.sh" "$name"
     done
     ;;
 
