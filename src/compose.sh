@@ -32,8 +32,8 @@ for line in "${lines[@]}"; do
   IMAGE_MAP[$k]=$v
 done
 
-echo "# Build args $0 $*"
-echo 'version: "2"'
+echo "# Build args: $*"
+echo 'version: "2.1"'
 echo 'services:'
 
 for p in ${!SCALE_MAP[*]}; do
