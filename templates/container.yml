@@ -1,4 +1,4 @@
-image: ${COMPOSE_PROJECT_NAME}/base:${REVISION}
+image: base
 hostname: ${HOSTNAME}.%name%.#
 labels:
   - role=%name%

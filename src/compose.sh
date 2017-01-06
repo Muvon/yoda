@@ -23,6 +23,15 @@ if [[ -z "${SCALE_MAP[@]}" ]]; then
   exit 1
 fi
 
+# Parse Buildfile to get imagenames
+declare -A IMAGE_MAP
+mapfile -t lines < $DOCKER_ROOT/Buildfile
+for line in "${lines[@]}"; do
+  k=$(echo $line | cut -d: -f1)
+  v=$(echo $line | cut -d: -f2 | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  IMAGE_MAP[$k]=$v
+done
+
 echo "# Build args $0 $*"
 echo 'version: "2"'
 echo 'services:'
@@ -38,6 +47,14 @@ for p in ${!SCALE_MAP[*]}; do
     {
       if [[ -f "$env_container_file" ]]; then
         for line in "${lines[@]}"; do
+          # Check if we using shortcut for image declaration
+          if [[ "$line" =~ ^image\: ]]; then
+            image=$(echo $line | cut -d' ' -f2)
+            echo "image: ${IMAGE_MAP[$image]:-$image}"
+            continue
+          fi
+
+          # Try to find keys should be replaced with env container file
           if [[ "$line" =~ ^[a-z_]+\: ]]; then
             if cat $env_container_file | grep "${line%%:*}:" >/dev/null; then
               remove=1
