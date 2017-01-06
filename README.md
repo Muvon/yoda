@@ -85,6 +85,9 @@ This folder will contain some files.
 | container.[env].yml | Optional you can create file with template that will be used when docker-compose.yml is generated for this environment. For example if you have container.dev.yml and starting services in dev environment will use all keys from this file replacing common container.yml keys|
 | entrypoint | Its entrypoint for you container. Its optional but good practise to use this file as executable for your container starting point |
 
+#### What is container.yml
+This file contains valid docker-compose section for current service. container_name is immutable and declared by Yoda internaly. You can specify image key here with shortcut to image from Buildfile. For example if your Buildfile describe image with key "base" you can put here just **image: base** and Yoda automatic will replace base to image from build params specified in Buildfile.
+
 ### Path: env.sh
 Here you can declare BASH environment variables and use it everywhere.  
 For example you can write here IMAGE_NAME to set image name with revision and other staff and use it in Buildfile and container.yml.
