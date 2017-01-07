@@ -146,7 +146,7 @@ case "$cmd" in
 
   status)
     check_yodarc
-    docker-compose ps
+    YODA_CMD=$YODA_CMD bash "$YODA_PATH/src/status.sh"
     ;;
 
   deploy)
