@@ -45,16 +45,16 @@ for p in ${!SCALE_MAP[*]}; do
     env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
     mapfile -t lines < "$DOCKER_ROOT/containers/$p/container.yml"
     {
-      if [[ -f "$env_container_file" ]]; then
-        for line in "${lines[@]}"; do
-          # Check if we using shortcut for image declaration
-          if [[ "$line" =~ ^image\: ]]; then
-            image=$(echo $line | cut -d' ' -f2)
-            echo "image: ${IMAGE_MAP[$image]:-$image}"
-            continue
-          fi
+      for line in "${lines[@]}"; do
+        # Check if we using shortcut for image declaration
+        if [[ "$line" =~ ^image\: ]]; then
+          image=$(echo $line | cut -d' ' -f2)
+          echo "image: ${IMAGE_MAP[$image]:-$image}"
+          continue
+        fi
 
-          # Try to find keys should be replaced with env container file
+        # Try to find keys should be replaced with env container file
+        if [[ -f "$env_container_file" ]]; then
           if [[ "$line" =~ ^[a-z_]+\: ]]; then
             if cat $env_container_file | grep "${line%%:*}:" >/dev/null; then
               remove=1
@@ -67,10 +67,14 @@ for p in ${!SCALE_MAP[*]}; do
               echo "$line"
             fi
           fi
-        done
+        else
+          echo "$line"
+        fi
+      done
+
+      # Add env file data?
+      if [[ -f "$env_container_file" ]]; then
         cat $env_container_file
-      else
-        printf '%s\n' "${lines[@]}"
       fi
     } | sed "s/^/    /g;s/#/$i/g" | compose_container $p $i
   done
