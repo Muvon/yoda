@@ -158,13 +158,14 @@ Add container or bunch of containers skeleton to project
 ### yoda delete [CONTAINER...]
 Delete container or bunch of existing containers from project
 
-### yoda build [options]
-Build images for current project
+### yoda build [options] [IMAGES...]
+Build images for current project. You can pass optional images you want to build. Default is every image from Buildfile.
 Options are:
 
 | Options | Description | Default |
 |---|---|:---:|
 | --rebuild | Force build also if image exists already | omited |
+
 
 ### yoda compose [COMPOSE_SCRIPT]
 Display generated docker-compose file in stdout.

@@ -23,13 +23,28 @@ for p in $*; do
   case $p in
     --rebuild)
       rebuild=1
+      shift
       ;;
   esac
 done
 
+# Get images we should build
+declare -A images
+for image in $*; do
+  images[$image]=1
+done
+
 mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
-  image=$(eval echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  build_image=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  image=$(eval echo $build_image)
+  build_id=${line%%:*}
+  # Skip images that we dont need to build
+  if [[ -n "${images[*]}" && -z "${images[$build_image]}" && -z "${images[$build_id]}" ]]; then
+    echo "Image '$image' is skipped."
+    continue
+  fi
+
   image_id=$(docker images -q $image)
   if [[ -z "$image_id" || -n "$rebuild" ]]; then
     name=${line%%:*}

@@ -25,5 +25,7 @@ if [[ -n "$recreate" ]]; then
 fi
 
 $YODA_CMD compose > $COMPOSE_FILE
-$YODA_CMD build ${build_args[*]}
+# Get images we need to build
+images=$(cat $COMPOSE_FILE | grep image: | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
+$YODA_CMD build ${build_args[*]} $images
 docker-compose up ${compose_args[*]} -t $STOP_WAIT_TIMEOUT -d $*

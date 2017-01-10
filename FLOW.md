@@ -33,6 +33,7 @@ Build has very simple flow.
 | Stage | Description |
 |---|---|
 | Read Buildfile | First we check Buildfile with information what to build. |
+| Should build image | If yoda build gets optional images passed it will check should we build that image or no. If no just skip and go next |
 | Check existing image | Next we check if there was such image already built and if yes – skip it. |
 | Build | Pass to docker build command arguments we found in Buildfile on first stage. |
 
