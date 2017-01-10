@@ -38,10 +38,11 @@ mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
   build_image=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   image=$(eval echo $build_image)
+  echo -n "Image '$image' is "
   build_id=${line%%:*}
   # Skip images that we dont need to build
   if [[ -n "${images[*]}" && -z "${images[$build_image]}" && -z "${images[$build_id]}" ]]; then
-    echo "Image '$image' is skipped."
+    echo 'skipped.'
     continue
   fi
 
@@ -49,8 +50,9 @@ for line in "${lines[@]}"; do
   if [[ -z "$image_id" || -n "$rebuild" ]]; then
     name=${line%%:*}
     build_args=${line#*:}
+    echo 'building.'
     docker build $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
   else
-    echo "Image '$image' exists already."
+    echo 'built already.'
   fi
 done
