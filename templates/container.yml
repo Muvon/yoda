@@ -1,9 +1,9 @@
 image: base
-hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.%name%.#
+hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.{{name}}.#
 labels:
-  - role=%name%
+  - role={{name}}
 working_dir: /src
-entrypoint: /src/docker/containers/%name%/entrypoint
+entrypoint: /src/docker/containers/{{name}}/entrypoint
 network_mode: bridge
 restart: unless-stopped
 cap_drop:

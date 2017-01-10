@@ -24,7 +24,7 @@ Compose generates docker-compose.yml file using all containers templates section
 |---|---|
 | Scale map | Parse all arguments with container=#amount and create scale map that contains which container we should generate to docker-compose.yml file and how much times. |
 | Merge custom env container | We merge all containers depends on scale map to one output as docker-compose.yml syntax. If we have container.ENV.yml we merge it with replacing container.yml template keys with new keys from current environment. |
-| Replacements | Each template has special parameters that are replaced in generation stage. **%name%** – name of container, **#** – number of container in scale map starting with 0. |
+| Replacements | Each template has special parameters that are replaced in generation stage. **{{name}}** – name of container, **#** – number of container in scale map starting with 0. |
 | Custom composer | For each container template generation we call custom composer script if it was passed as COMPOSE_SCRIPT var with --name and --sequence arguments as name of container and number of container in scale map.  |
 
 ## yoda build

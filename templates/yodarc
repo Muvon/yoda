@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export YODA_VERSION="%yoda_version%"
+export YODA_VERSION="{{yoda_version}}"
 
 commit="$(git rev-parse HEAD 2>/dev/null || true)"
 export REVISION=${REVISION:-$commit}
@@ -18,7 +18,7 @@ DOCKER_ROOT=$(cd ${BASH_SOURCE%/*} && pwd)
 export HOSTNAME=${HOSTNAME:-`hostname`}
 export ENV=${ENV:-dev}
 
-export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"%name%"}
+export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"{{name}}"}
 export COMPOSE_HTTP_TIMEOUT=${COMPOSE_HTTP_TIMEOUT:-300}
 export COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml"
 
