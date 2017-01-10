@@ -13,7 +13,6 @@ check:
 	which docker-compose
 	which bash
 	which sed
-	which awk
 	which grep
 	test -n 'bash >= 4' -a -n "$(call IF_VER_GT, $(BASH_VERSION), 4)"
 	test -n 'docker >= 1.12' -a -n "$(call IF_VER_GT, $(DOCKER_VERSION), 1.12)"

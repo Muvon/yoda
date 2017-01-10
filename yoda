@@ -60,7 +60,7 @@ custom_run() {
   shift
 
   # Stop recursion here get parent caller
-  called_by=$(ps -f -p $PPID | tail -1 | awk '{print $NF}')
+  called_by=$(ps -o command -p $PPID | tail -n 1 | cut -d' ' -f2)
   if [[ "$called_by" == *"$script" ]]; then
     return 0
   fi
@@ -128,7 +128,7 @@ case "$cmd" in
 
   build)
     check_yodarc
-    custom_run build
+    custom_run build "$*"
     bash "$YODA_PATH/src/build.sh" "$*"
     ;;
 
