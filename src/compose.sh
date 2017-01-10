@@ -14,7 +14,9 @@ declare -A SCALE_MAP
 for p in "$@"; do
   service=$(echo $p | cut -d'=' -f1)
   count=$(echo $p | cut -d'=' -f2)
-  count=${count//[!0-9]/}
+  if [[ "$service" == "$count" ]]; then
+    count=1
+  fi
   SCALE_MAP["$service"]=$(( ${count:-1} - 1 )) # Start index using 0
 done
 
