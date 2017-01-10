@@ -35,7 +35,7 @@ Usage:
   $YODA_CMD delete [CONTAINER...]
     Delete container or bunch of existing containers from project
 
-  $YODA_CMD build [options]
+  $YODA_CMD build [options] [IMAGES...]
     Build images for current project
     Options are:
       --rebuild     Force build also if image exists already. Default: not set.
