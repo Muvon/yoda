@@ -46,8 +46,15 @@ if [[ -n "$custom_args" ]]; then
   echo "Custom arguments: $custom_args"
 fi
 
-if [[ -n "$host" ]]; then
+deploy() {
+  host=$1
+  if [[ -z "$host" ]]; then
+    >&2 echo "No host specified for deploy."
+    exit 1
+  fi
+
   env=$(cat $DOCKER_ROOT/Envfile | grep $host: | cut -d':' -f2 | tr -d ' ')
+
   if [[ -z "$env" ]]; then
     >&2 echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
     exit 1
@@ -85,25 +92,29 @@ if [[ -n "$host" ]]; then
 
     ENV=$env REVISION=$rev $custom_args exec yoda start
 EOF
-
   echo "Deploy to $host with environment $env and git branch $git_branch finished."
+}
+
+pids=()
+servers=()
+mkdir -p $DOCKER_ROOT/log
+
+if [[ -n "$host" ]]; then
+  servers=($host)
 else
-  pids=()
-  servers=()
-
-  mkdir -p $DOCKER_ROOT/log
-  for server in `cat $DOCKER_ROOT/Envfile | grep $env$ | cut -d':' -f1`; do
-    ( yoda deploy --host=$server --branch=$git_branch --rev=$rev $custom_args >> $DOCKER_ROOT/log/${server//@/_}.log 2>&1 ) &
-    pids+=($!)
-    servers+=($server)
-  done
-
-  echo "Deploying to ${#servers[*]} nodes"
-  for idx in ${!pids[@]}; do
-    if wait ${pids[$idx]}; then
-      echo "${servers[$idx]} – succeed"
-    else
-      echo "${servers[$idx]} – failed"
-    fi
-  done
+  servers=(`cat $DOCKER_ROOT/Envfile | grep $env$ | cut -d':' -f1`)
 fi
+
+for server in ${servers[*]}; do
+  ( deploy $host >> $DOCKER_ROOT/log/${server//@/_}.log 2>&1 ) &
+  pids+=($!)
+done
+
+echo "Deploying to ${#servers[*]} nodes"
+for idx in ${!pids[@]}; do
+  if wait ${pids[$idx]}; then
+    echo "${servers[$idx]} – succeed"
+  else
+    echo "${servers[$idx]} – failed"
+  fi
+done
