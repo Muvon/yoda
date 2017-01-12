@@ -53,7 +53,7 @@ deploy() {
     exit 1
   fi
 
-  env=$(cat $DOCKER_ROOT/Envfile | grep $host: | cut -d':' -f2 | tr -d ' ')
+  env=$(grep $host: $DOCKER_ROOT/Envfile | cut -d':' -f2 | tr -d ' ')
 
   if [[ -z "$env" ]]; then
     >&2 echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
@@ -61,7 +61,7 @@ deploy() {
   fi
 
   # First check known hosts
-  cat ~/.ssh/known_hosts | grep ${host##*@} || ssh-keyscan $_ >> ~/.ssh/known_hosts
+  grep ${host##*@} ~/.ssh/known_hosts || ssh-keyscan ${host##*@} >> $_
 
   # Detect git host to do keyscan check
   git_host=$(echo $GIT_URL | cut -d'@' -f2 | cut -d':' -f1)
@@ -82,7 +82,7 @@ deploy() {
 
     mkdir -p ~/.deploy && cd \$_
     if [[ ! -d $COMPOSE_PROJECT_NAME ]]; then
-      cat ~/.ssh/known_hosts | grep $git_host || ssh-keyscan $git_host >> ~/.ssh/known_hosts
+      grep $git_host ~/.ssh/known_hosts || ssh-keyscan $git_host >> \$_
       git clone -q $GIT_URL $COMPOSE_PROJECT_NAME
     fi
     cd $COMPOSE_PROJECT_NAME && git fetch -p
@@ -100,9 +100,9 @@ servers=()
 mkdir -p $DOCKER_ROOT/log
 
 if [[ -n "$host" ]]; then
-  servers=(`cat $DOCKER_ROOT/Envfile | grep -E "^$host:" | cut -d':' -f1`)
+  servers=(`grep -E "^$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 else
-  servers=(`cat $DOCKER_ROOT/Envfile | grep $env$ | cut -d':' -f1`)
+  servers=(`grep $env$ $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 fi
 
 for server in ${servers[*]}; do

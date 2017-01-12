@@ -59,7 +59,7 @@ for p in ${!SCALE_MAP[*]}; do
         # Try to find keys should be replaced with env container file
         if [[ -f "$env_container_file" ]]; then
           if [[ "$line" =~ ^[a-z_]+\: ]]; then
-            if cat $env_container_file | grep "${line%%:*}:" >/dev/null; then
+            if grep "${line%%:*}:" $env_container_file >/dev/null; then
               remove=1
             else
               remove=0
