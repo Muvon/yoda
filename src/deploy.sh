@@ -100,7 +100,7 @@ servers=()
 mkdir -p $DOCKER_ROOT/log
 
 if [[ -n "$host" ]]; then
-  servers=($host)
+  servers=(`cat $DOCKER_ROOT/Envfile | grep -E "^$host:" | cut -d':' -f1`)
 else
   servers=(`cat $DOCKER_ROOT/Envfile | grep $env$ | cut -d':' -f1`)
 fi
