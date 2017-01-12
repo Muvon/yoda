@@ -1,5 +1,4 @@
 image: base
-hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.{{name}}.#
 labels:
   - role={{name}}
 working_dir: /src

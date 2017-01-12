@@ -42,6 +42,7 @@ for p in ${!SCALE_MAP[*]}; do
   for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
     echo "  $p.$i:"
     echo "    container_name: ${COMPOSE_PROJECT_NAME}.$p.$i"
+    echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$p.$i"
 
     remove=0
     env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
