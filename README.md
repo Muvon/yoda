@@ -135,6 +135,7 @@ Commands available:
 | stop | Stop all services for current project |
 | status | Display current status of services |
 | deploy | Deploy project on one or all nodes |
+| destroy | Remove all created services by start command and all local images with volumes |
 
 ### yoda version
 Display current Yoda version
@@ -200,3 +201,6 @@ Options are:
 | --rev | Set custom revision to be deployed or rollback to | - |
 | --branch | What branch will be deployed. | master |
 | --args | Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed | - |
+
+### yoda destroy
+Remove all created services by start command and all local images with volumes

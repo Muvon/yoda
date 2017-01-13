@@ -144,6 +144,12 @@ case "$cmd" in
     bash "$YODA_PATH/src/stop.sh" "$*"
     ;;
 
+  destroy)
+    check_yodarc
+    custom_run destroy
+    bash "$YODA_PATH/src/destroy.sh"
+    ;;
+
   status)
     check_yodarc
     YODA_CMD=$YODA_CMD bash "$YODA_PATH/src/status.sh"

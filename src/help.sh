@@ -14,6 +14,7 @@ Commands available:
   start     Start all services for current project
   stop      Stop all services for current project
   deploy    Deploy project on one or all nodes
+  destroy   Remove all created services by start command and all local images with volumes
 
 Usage:
   $YODA_CMD version
@@ -64,4 +65,7 @@ Usage:
       --rev=revision      Set custom revision to be deployed or rollback to
       --branch=gitbranch  What branch will be deployed. Default is master
       --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.
+
+  $YODA_CMD destroy
+    Remove all created services by start command and all local images with volumes
 EOF
