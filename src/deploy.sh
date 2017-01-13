@@ -111,10 +111,29 @@ for server in ${servers[*]}; do
 done
 
 echo "Deploying to ${#servers[*]} nodes"
-for idx in ${!pids[@]}; do
-  if wait ${pids[$idx]}; then
-    echo "${servers[$idx]} – succeed"
-  else
-    echo "${servers[$idx]} – failed"
+finished=()
+clear=
+while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
+  if [[ -n "$clear" ]]; then
+    sleep 1
+    echo -en "\e[${#pids[@]}A"
   fi
+
+  clear=1
+  for idx in "${!pids[@]}"; do
+    pid=${pids[$idx]}
+
+    status=
+    if ! ps -p $pid >/dev/null ; then
+      finished[$pid]=1
+      if wait $pid; then
+        status='succeed'
+      else
+        status='failed'
+      fi
+    else
+      status='processing'
+    fi
+    echo -e "\e[2K\r${servers[$idx]} – $status"
+  done
 done
