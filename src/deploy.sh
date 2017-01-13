@@ -110,16 +110,21 @@ for server in ${servers[*]}; do
   pids+=($!)
 done
 
-echo "Deploying to ${#servers[*]} nodes"
+echo "Nodes: ${#servers[*]}"
+echo "Started: $(date)"
+start_ts=$(date +%s)
 finished=()
 clear=
+elapsed=0
 while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   if [[ -n "$clear" ]]; then
     sleep 1
-    echo -en "\e[${#pids[@]}A"
+    elapsed=$((`date +%s` - $start_ts))
+    echo -en "\e[${#pids[@]}A\e[1A"
   fi
 
   clear=1
+  echo -e "\e[2K\rElapsed: $elapsed s"
   for idx in "${!pids[@]}"; do
     pid=${pids[$idx]}
 
@@ -137,3 +142,4 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     echo -e "\e[2K\r${servers[$idx]} – $status"
   done
 done
+echo "Finished: $(date)"
