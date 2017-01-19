@@ -111,7 +111,7 @@ for server in ${servers[*]}; do
 done
 
 echo "Nodes: ${#servers[*]}"
-echo "Started: $(date)"
+echo "Started: $(date -u)"
 start_ts=$(date +%s)
 finished=()
 clear=
@@ -142,4 +142,4 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     echo -e "\e[2K\r${servers[$idx]} – $status"
   done
 done
-echo "Finished: $(date)"
+echo "Finished: $(date -u)"
