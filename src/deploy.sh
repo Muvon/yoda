@@ -106,7 +106,7 @@ else
 fi
 
 for server in ${servers[*]}; do
-  ( deploy $host >> $DOCKER_ROOT/log/${server//@/_}.log 2>&1 ) &
+  ( deploy $server >> $DOCKER_ROOT/log/${server//@/_}.log 2>&1 ) &
   pids+=($!)
 done
 
