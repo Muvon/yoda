@@ -60,7 +60,7 @@ Usage:
   ${c_bold}$YODA_CMD deploy [options]${c_normal}
     Deploy single-node or whole cluster
     Options are:
-      --host=host         Deploy only on this host (single-node deploy)
+      --host=host         Deploy on single host or using host regexp pattern (Envfile will be used)
       --env=environment   Deploy on all nodes with that environment (Envfile will be used)
       --rev=revision      Set custom revision to be deployed or rollback to
       --branch=gitbranch  What branch will be deployed. Default is master

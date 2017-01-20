@@ -38,4 +38,11 @@ Build has very simple flow.
 | Build | Pass to docker build command arguments we found in Buildfile on first stage. |
 
 ## yoda deploy
-TODO: add info about deploy stage after finish with host matching logic
+Deploy allows you to deploy source code using host pattern or environment from Envfile.
+
+| Stage | Description |
+|---|---|
+| Required arguments | Check what we use: host or env argument |
+| Get servers to deploy on | Using host as patter we get all servers from Envfile to be deployed. If we have environment argument we use it to parse servers from Envfile |
+| Deploy each server | Run deploy process on each server in parallel |
+| Processing | Waiting for result of each paralleled process we started before. Write logs and output success of failure message to terminal |

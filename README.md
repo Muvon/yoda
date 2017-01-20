@@ -196,7 +196,7 @@ Options are:
 
 | Options | Description | Default |
 |---|---|:---:|
-| --host | Deploy only on this host (single-node deploy) | - |
+| --host | Deploy on single host or using host regexp pattern (Envfile will be used) | - |
 | --env | Deploy on all nodes with that environment (Envfile will be used) | - |
 | --rev | Set custom revision to be deployed or rollback to | - |
 | --branch | What branch will be deployed. | master |
