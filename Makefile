@@ -14,6 +14,7 @@ check:
 	which bash
 	which sed
 	which grep
+	which tput
 	test -n 'bash >= 4' -a -n "$(call IF_VER_GT, $(BASH_VERSION), 4)"
 	test -n 'docker >= 1.12' -a -n "$(call IF_VER_GT, $(DOCKER_VERSION), 1.12)"
 	test -n 'docker-compose >= 1.8' -a -n "$(call IF_VER_GT, $(DOCKER_COMPOSE_VERSION), 1.8)"

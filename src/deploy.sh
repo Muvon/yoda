@@ -132,12 +132,12 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     if ! ps -p $pid >/dev/null ; then
       finished[$pid]=1
       if wait $pid; then
-        status='succeed'
+        status="${c_green}${c_bold}succeed${c_normal}"
       else
-        status='failed'
+        status="${c_red}${c_bold}failed${c_normal}"
       fi
     else
-      status='processing'
+      status="${c_yellow}${c_bold}processing${c_normal}"
     fi
     echo -e "\e[2K\r${servers[$idx]} – $status"
   done

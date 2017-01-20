@@ -9,6 +9,10 @@ YODA_PATH=${YODA_BIN%/*}
 
 export YODA_CMD YODA_SOURCE_VERSION YODA_VERSION YODA_BIN YODA_PATH
 
+# Colored output support
+# shellcheck source=lib/color.sh
+source $YODA_PATH/lib/color.sh
+
 # Forbid to run as root
 if [[ "$(id -u)" -eq 0 ]]; then
   >&2 echo "You are not allowed to run Yoda as root."
