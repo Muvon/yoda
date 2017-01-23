@@ -67,7 +67,7 @@ custom_run() {
 
   # Stop recursion here get parent caller
   called_by=$(ps -o command -p $PPID | tail -n 1 | cut -d' ' -f2)
-  if [[ "$called_by" == *"$script" ]]; then
+  if [[ "$called_by" == "$DOCKER_ROOT/$script" ]]; then
     return 0
   fi
 
