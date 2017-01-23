@@ -102,7 +102,7 @@ mkdir -p $DOCKER_ROOT/log
 if [[ -n "$host" ]]; then
   servers=(`grep -E "^$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 else
-  servers=(`grep $env$ $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  servers=(`grep -E ":\s*$env\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 fi
 
 for server in ${servers[*]}; do
