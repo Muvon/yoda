@@ -77,7 +77,6 @@ custom_run() {
   fi
 
   if [[ -x $DOCKER_ROOT/$script ]]; then
-    echo "Custom run: $DOCKER_ROOT/$script"
     exec $DOCKER_ROOT/$script "$*"
     exit 0
   fi
