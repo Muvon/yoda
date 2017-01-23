@@ -1,22 +1,21 @@
 #!/usr/bin/env bash
 set -e
-
-for p in $*; do
+for p in "$@"; do
   case $p in
     --host=*)
-      host=${p##*=}
+      host=${p#*=}
       ;;
     --env=*)
-      env=${p##*=}
+      env=${p#*=}
       ;;
     --rev=*)
-      rev=${p##*=}
+      rev=${p#*=}
       ;;
     --branch=*)
-      branch=${p##*=}
+      branch=${p#*=}
       ;;
     --args=*)
-      custom_args=${p##*=}
+      custom_args=${p#*=}
       ;;
   esac
 done
@@ -76,8 +75,6 @@ deploy() {
 
     if [[ ! -d ~/.yoda ]]; then
       git clone -q $yoda_git_url ~/.yoda
-      echo "PATH=\$PATH:~/.yoda" >> ~/.bashrc
-      source ~/.bashrc
     fi
 
     mkdir -p ~/.deploy && cd \$_
@@ -89,8 +86,7 @@ deploy() {
     git checkout -f $git_branch && git reset --hard origin/$git_branch
     git pull --rebase origin $git_branch
     git clean -fdx
-
-    ENV=$env REVISION=$rev $custom_args exec yoda start
+    PATH=\$PATH:~/.yoda ENV=$env REVISION=$rev $custom_args exec yoda start
 EOF
   echo "Deploy to $host with environment $env and git branch $git_branch finished."
 }

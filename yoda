@@ -43,7 +43,7 @@ if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
     git checkout $YODA_VERSION
     switched_version=$(grep "YODA_VERSION=$YODA_VERSION" $YODA_BIN)
     if [[ "$switched_version" == "$YODA_VERSION" ]]; then
-      exec $YODA_BIN $cmd "$*"
+      exec $YODA_BIN $cmd "$@"
     else
       >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
     fi
@@ -77,7 +77,7 @@ custom_run() {
   fi
 
   if [[ -x $DOCKER_ROOT/$script ]]; then
-    exec $DOCKER_ROOT/$script "$*"
+    exec $DOCKER_ROOT/$script "$@"
     exit 0
   fi
 }
@@ -98,7 +98,7 @@ check_yodarc() {
 
 case "$cmd" in
   init)
-    bash "$YODA_PATH/src/init.sh" "$*"
+    bash "$YODA_PATH/src/init.sh" "$@"
     ;;
 
   upgrade)
@@ -133,20 +133,20 @@ case "$cmd" in
 
   build)
     check_yodarc
-    custom_run build "$*"
-    bash "$YODA_PATH/src/build.sh" "$*"
+    custom_run build "$@"
+    bash "$YODA_PATH/src/build.sh" "$@"
     ;;
 
   start)
     check_yodarc
-    custom_run start "$*"
-    bash "$YODA_PATH/src/start.sh" "$*"
+    custom_run start "$@"
+    bash "$YODA_PATH/src/start.sh" "$@"
     ;;
 
   stop)
     check_yodarc
-    custom_run stop "$*"
-    bash "$YODA_PATH/src/stop.sh" "$*"
+    custom_run stop "$@"
+    bash "$YODA_PATH/src/stop.sh" "$@"
     ;;
 
   destroy)
@@ -167,8 +167,8 @@ case "$cmd" in
       exit 1
     fi
 
-    custom_run deploy "$*"
-    bash "$YODA_PATH/src/deploy.sh" "$*"
+    custom_run deploy "$@"
+    bash "$YODA_PATH/src/deploy.sh" "$@"
     ;;
 
   help)
