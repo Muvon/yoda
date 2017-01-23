@@ -133,25 +133,6 @@ case "$cmd" in
 
   build)
     check_yodarc
-
-    lock_file="$DOCKER_ROOT/.build.lock"
-    lock() {
-      touch $lock_file
-    }
-
-    unlock() {
-      test -f $lock_file && rm -f $_
-    }
-
-    if [[ -f $lock_file ]]; then
-      >&2 echo "Build is already in progress."
-      >&2 echo "If something went wrong you should just remove lock file: $lock_file"
-      exit 1
-    fi
-
-    trap unlock EXIT
-    lock
-
     custom_run build "$*"
     bash "$YODA_PATH/src/build.sh" "$*"
     ;;
