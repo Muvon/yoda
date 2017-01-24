@@ -52,7 +52,7 @@ deploy() {
     exit 1
   fi
 
-  env=$(grep $host: $DOCKER_ROOT/Envfile | cut -d':' -f2 | cut -d'.' -f1 | tr -d ' ')
+  env=$(grep $host: $DOCKER_ROOT/Envfile | cut -d':' -f2 | tr -d ' ')
 
   if [[ -z "$env" ]]; then
     >&2 echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
