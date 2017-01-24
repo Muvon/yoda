@@ -79,6 +79,6 @@ for p in ${!SCALE_MAP[*]}; do
       if [[ -f "$env_container_file" ]]; then
         cat $env_container_file
       fi
-    } | sed "s/^/    /g;s/#/$i/g" | compose_container $p $i
+    } | sed "s/^/    /g" | compose_container $p $i
   done
 done
