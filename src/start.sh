@@ -19,7 +19,7 @@ if [[ -n "$rebuild" ]]; then
   build_args+=('--rebuild')
 fi
 
-compose_args=('--no-build')
+compose_args=('--no-build' '--remove-orphans')
 if [[ -n "$recreate" ]]; then
   compose_args+=('--force-recreate')
 fi
