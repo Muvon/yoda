@@ -66,12 +66,8 @@ deploy() {
   git_host=$(echo $GIT_URL | cut -d'@' -f2 | cut -d':' -f1)
   yoda_git_url=$(cd ${BASH_SOURCE%/*} && git remote get-url origin || true)
 
-  exec ssh -AT $host <<EOF
+  ssh -AT $host <<EOF
     set -e
-    (
-      set -x
-      which git
-    ) >/dev/null
 
     if [[ ! -d ~/.yoda ]]; then
       git clone -q $yoda_git_url ~/.yoda
