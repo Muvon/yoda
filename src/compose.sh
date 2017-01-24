@@ -35,7 +35,7 @@ for line in "${lines[@]}"; do
 done
 
 echo "# Build args: $*"
-echo 'version: "2.1"'
+echo 'version: "2"'
 echo 'services:'
 
 for p in ${!SCALE_MAP[*]}; do
