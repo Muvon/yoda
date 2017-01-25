@@ -65,11 +65,13 @@ deploy() {
   # Detect git host to do keyscan check
   git_host=$(echo $GIT_URL | cut -d'@' -f2 | cut -d':' -f1)
   yoda_git_url=$(cd ${BASH_SOURCE%/*} && git remote get-url origin || true)
+  yoda_git_host=$(echo $yoda_git_url | cut -d'@' -f2 | cut -d':' -f1)
 
   ssh -AT $host <<EOF
     set -e
 
     if [[ ! -d ~/.yoda ]]; then
+      grep $yoda_git_host ~/.ssh/known_hosts || ssh-keyscan $yoda_git_host >> \$_
       git clone -q $yoda_git_url ~/.yoda
     fi
 
