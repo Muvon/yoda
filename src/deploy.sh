@@ -109,6 +109,7 @@ echo "Started: $(date -u)"
 start_ts=$(date +%s)
 finished=()
 elapsed=0
+exit_code=0
 
 while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   elapsed=$((`date +%s` - $start_ts))
@@ -123,6 +124,7 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
       if wait $pid; then
         status="${c_green}${c_bold}succeed${c_normal}"
       else
+        exit_code=1
         status="${c_red}${c_bold}failed${c_normal}"
       fi
     else
@@ -137,3 +139,4 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   sleep 1
 done
 echo "Finished: $(date -u)"
+exit $exit_code

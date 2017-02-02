@@ -192,6 +192,7 @@ Display current status of services
 
 ### yoda deploy [options]
 Deploy single-node or whole cluster  
+It exit with code 0 for success and 1 for failure (if something went wrong also on one node of all).
 Options are:
 
 | Options | Description | Default |
