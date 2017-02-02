@@ -108,17 +108,12 @@ echo "Nodes: ${#servers[*]}"
 echo "Started: $(date -u)"
 start_ts=$(date +%s)
 finished=()
-clear=
 elapsed=0
-while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
-  if [[ -n "$clear" ]]; then
-    sleep 1
-    elapsed=$((`date +%s` - $start_ts))
-    echo -en "\e[${#pids[@]}A\e[1A"
-  fi
 
-  clear=1
-  echo -e "\e[2K\rElapsed: $elapsed s"
+while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
+  elapsed=$((`date +%s` - $start_ts))
+  tput el
+  echo "Elapsed: $elapsed s"
   for idx in "${!pids[@]}"; do
     pid=${pids[$idx]}
 
@@ -133,7 +128,12 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     else
       status="${c_yellow}${c_bold}processing${c_normal}"
     fi
-    echo -e "\e[2K\r${servers[$idx]} – $status"
+    tput el
+    echo "${servers[$idx]} – $status"
   done
+
+  tput cuu1
+  seq ${#pids[@]} | tput cuu1
+  sleep 1
 done
 echo "Finished: $(date -u)"
