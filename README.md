@@ -123,19 +123,19 @@ Commands available:
 
 | Command | Description |
 |---|---|
-| version | Display version of Yoda |
-| help | Display this information |
-| init | Prepare deployment folder in project |
-| upgrade | Upgrade to new version of initialized Yoda in project |
-| add |  Add new container skeleton structure to project |
-| delete | Delete existing container from project |
-| build |  Build images for current project |
-| compose |  Display generated compose file for current environment |
-| start |  Start all services for current project |
-| stop | Stop all services for current project |
-| status | Display current status of services |
-| deploy | Deploy project on one or all nodes |
-| destroy | Remove all created services by start command and all local images with volumes |
+| [version](#yoda-version) | Display version of Yoda |
+| [help](#yoda-help) | Display this information |
+| [init](#yoda-init-folder) | Prepare deployment folder in project |
+| [upgrade](#yoda-upgrade) | Upgrade to new version of initialized Yoda in project |
+| [add](#yoda-add-container) |  Add new container skeleton structure to project |
+| [delete](#yoda-delete-container) | Delete existing container from project |
+| [build](#yoda-build-options-images) |  Build images for current project |
+| [compose](#yoda-compose-compose_script) |  Display generated compose file for current environment |
+| [start](#yoda-start-options-container) |  Start all services for current project |
+| [stop](#yoda-stop-container) | Stop all services for current project |
+| [status](#yoda-status) | Display current status of services |
+| [deploy](#yoda-deploy-options) | Deploy project on one or all nodes |
+| [destroy](#yoda-destroy) | Remove all created services by start command and all local images with volumes |
 
 ### yoda version
 Display current Yoda version
