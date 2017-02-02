@@ -108,11 +108,18 @@ echo "Nodes: ${#servers[*]}"
 echo "Started: $(date -u)"
 start_ts=$(date +%s)
 finished=()
+clear=
 elapsed=0
 exit_code=0
 
 while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
-  elapsed=$((`date +%s` - $start_ts))
+  if [[ -n "$clear" ]]; then
+    elapsed=$((`date +%s` - $start_ts))
+    tput cuu1
+    seq ${#pids[@]} | xargs -I0 tput cuu1
+    sleep 1
+  fi
+
   tput el
   echo "Elapsed: $elapsed s"
   for idx in "${!pids[@]}"; do
@@ -132,11 +139,8 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     fi
     tput el
     echo "${servers[$idx]} – $status"
+    clear=1
   done
-
-  tput cuu1
-  seq ${#pids[@]} | xargs -I0 tput cuu1
-  sleep 1
 done
 echo "Finished: $(date -u)"
 exit $exit_code
