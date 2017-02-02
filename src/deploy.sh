@@ -133,7 +133,7 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   done
 
   tput cuu1
-  seq ${#pids[@]} | tput cuu1
+  seq ${#pids[@]} | xargs -I0 tput cuu1
   sleep 1
 done
 echo "Finished: $(date -u)"
