@@ -71,7 +71,7 @@ When you do yoda init in your project it creates by default yoda folder. This fo
 |---|---|
 | containers | This folder contains all containers with templates in your project |
 | images | It contains Dockerfiles for you images. Common naming is: Dockerfile-name. Where is name is just name of image you build with that dockerfile |
-| env.sh | Its environment for your building context. You can define custom variables and use it everywhere in builds and other scripts |
+| env.sh | Its environment for your building context. You can define custom variables and use it everywhere in builds and other scripts. Its common for every environments you have. Optionally you can create special file for current environment. For example env.dev.sh. And this file will be read right after common file env.sh was read. |
 | Buildfile | It is declarative file that describes how to build each image you have. It has simple structure **name: arguments for docker build command** where is name is your image in images folder with same name |
 | Envfile | It describes all environments and link servers for deploy with its environments you have. No limitation. You can create own environments and describe what containers must be built there |
 

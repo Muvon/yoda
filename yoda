@@ -53,6 +53,9 @@ fi
 # shellcheck source=docker/env.sh
 test -e $DOCKER_ROOT/env.sh && source $_
 
+# shellcheck source=docker/env.dev.sh
+test -e $DOCKER_ROOT/env.$ENV.sh && source $_
+
 for p in "$@"; do
   case $p in
     *)
