@@ -114,10 +114,10 @@ exit_code=0
 
 while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   if [[ -n "$clear" ]]; then
+    sleep 1
     elapsed=$((`date +%s` - $start_ts))
     tput cuu1
     seq ${#pids[@]} | xargs -I0 tput cuu1
-    sleep 1
   fi
 
   tput el
