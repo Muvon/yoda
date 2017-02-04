@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export YODA_VERSION="{{yoda_version}}"
 
-commit="$(git rev-parse HEAD 2>/dev/null || true)"
+commit="$(git rev-parse HEAD 2>/dev/null || echo 'latest')"
 export REVISION=${REVISION:-$commit}
 export REVISION_TAG
 REVISION_TAG="$(git describe --exact-match $commit 2>/dev/null || true)"
