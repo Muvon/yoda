@@ -26,12 +26,12 @@ fi
 
 $YODA_CMD compose > $COMPOSE_FILE
 # Get images we need to build
-compose_images=$(grep image: $COMPOSE_FILE | sed 's|image:\([a-zA-Z][0-9\-\_]+\)|\1|' | tr -d ' ' | sort | uniq)
+compose_images=$(grep image: $COMPOSE_FILE | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
 
 images=()
 services=()
 for service in "$@"; do
-  image=$(grep image: $DOCKER_ROOT/containers/$service/container.yml | cut -d':' -f1 | tr -d ' ')
+  image=$(grep image: $DOCKER_ROOT/containers/$service/container.yml | cut -d':' -f2 | tr -d ' ')
   images+=($image)
 
   service=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | grep -oE "\b$service(=[0-9]+)?\b")

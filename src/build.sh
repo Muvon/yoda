@@ -19,7 +19,7 @@ fi
 trap unlock EXIT
 lock
 
-for p in $*; do
+for p in "$@"; do
   case $p in
     --rebuild)
       rebuild=1
@@ -30,7 +30,7 @@ done
 
 # Get images we should build
 declare -A images
-for image in $*; do
+for image in "$@"; do
   images[$image]=1
 done
 
