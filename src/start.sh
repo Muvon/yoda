@@ -26,7 +26,7 @@ fi
 
 $YODA_CMD compose > $COMPOSE_FILE
 # Get images we need to build
-images=$(grep image: $COMPOSE_FILE | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
+compose_images=$(grep image: $COMPOSE_FILE | sed 's|image:\([a-zA-Z][0-9\-\_]+\)|\1|' | tr -d ' ' | sort | uniq)
 
 images=()
 services=()
@@ -48,5 +48,5 @@ for service in "$@"; do
   done
 done
 
-$YODA_CMD build ${build_args[*]} ${images[*]}
+$YODA_CMD build ${build_args[*]} ${images[*]:-$compose_images}
 docker-compose up ${compose_args[*]} -t $STOP_WAIT_TIMEOUT -d ${services[*]}
