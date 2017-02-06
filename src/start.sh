@@ -34,7 +34,7 @@ for service in "$@"; do
   image=$(grep image: $DOCKER_ROOT/containers/$service/container.yml | cut -d':' -f2 | tr -d ' ')
   images+=($image)
 
-  service=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | grep -oE "\b$service(=[0-9]+)?\b")
+  service=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | sed "s|^$ENV||" | grep -oE "\b$service(=[0-9]+)?\b")
 
   if [[ "$service" == *"="* ]]; then
     count=$(echo $service | cut -d'=' -f2)
