@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-docker-compose stop -t $STOP_WAIT_TIMEOUT $*
+# shellcheck source=../lib/container.sh
+source $YODA_PATH/lib/container.sh
+containers=$(get_containers "$@")
+docker-compose stop -t $STOP_WAIT_TIMEOUT $containers
