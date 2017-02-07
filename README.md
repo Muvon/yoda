@@ -135,6 +135,7 @@ Commands available:
 | [stop](#yoda-stop-container) | Stop all services for current project |
 | [status](#yoda-status) | Display current status of services |
 | [deploy](#yoda-deploy-options) | Deploy project on one or all nodes |
+| [rollback](#yoda-rollback-options) | Rollback project on one or all nodes to previos revision |
 | [destroy](#yoda-destroy) | Remove all created services by start command and all local images with volumes |
 
 ### yoda version
