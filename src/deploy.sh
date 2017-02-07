@@ -84,8 +84,11 @@ deploy() {
     git checkout -f $git_branch && git reset --hard origin/$git_branch
     git pull --rebase origin $git_branch
     git clean -fdx
-    PATH=\$PATH:~/.yoda ENV=$env REVISION=$rev $custom_args exec yoda start
-    echo $rev >> .deploy/$COMPOSE_PROJECT_NAME.revision
+    PATH=\$PATH:~/.yoda ENV=$env REVISION=$rev $custom_args yoda start
+    {
+      source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
+      echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision
+    }
 EOF
   echo "Deploy to $host with environment $env and git branch $git_branch finished."
 }
