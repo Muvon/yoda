@@ -46,3 +46,13 @@ Deploy allows you to deploy source code using host pattern or environment from E
 | Get servers to deploy on | Using host as patter we get all servers from Envfile to be deployed. If we have environment argument we use it to parse servers from Envfile |
 | Deploy each server | Run deploy process on each server in parallel |
 | Processing | Waiting for result of each paralleled process we started before. Write logs and output success of failure message to terminal |
+
+## yoda rollback
+Rollback allows you to easy go back to previous revision with deploy.
+
+| Stage | Description |
+|---|---|
+| Required arguments | Check what we use: host or env argument |
+| Get servers to check revision on | Using host as pattern we get all servers from Envfile to be deployed. If we have environment argument we use it to parse servers from Envfile |
+| Compare revision | Comparing revisions from each host and detect can we rollback automatic or no |
+| Deploy | Starting standard deploy flow on each node to detected revision for rollback |

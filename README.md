@@ -203,5 +203,10 @@ Options are:
 | --branch | What branch will be deployed. | master |
 | --args | Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed | - |
 
+### yoda rollback [options]
+Rollback to previous revision
+It exit with code 0 for success and 1 for failure (if something went wrong also on one node of all).
+Options are the same as for deploy command.
+
 ### yoda destroy
 Remove all created services by start command and all local images with volumes

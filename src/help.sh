@@ -14,6 +14,7 @@ Commands available:
   ${c_bold}start${c_normal}     Start all services for current project
   ${c_bold}stop${c_normal}      Stop all services for current project
   ${c_bold}deploy${c_normal}    Deploy project on one or all nodes
+  ${c_bold}rollback{c_normal}    Rollback is another deploy but with previous revision that detected automatic
   ${c_bold}destroy${c_normal}   Remove all created services by start command and all local images with volumes
 
 Usage:
@@ -65,6 +66,10 @@ Usage:
       --rev=revision      Set custom revision to be deployed or rollback to
       --branch=gitbranch  What branch will be deployed. Default is master
       --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.
+
+  ${c_bold}$YODA_CMD rollback [options]${c_normal}
+    Rollback to previous revision on selected host or environment
+    Options are the same as for deploy command.
 
   ${c_bold}$YODA_CMD destroy${c_normal}
     Remove all created services by start command and all local images with volumes
