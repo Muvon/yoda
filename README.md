@@ -16,7 +16,7 @@ First you need to install Yoda on your laptop. Its supereasy:
 
 ```bash
 git clone git@github.com:dmitrykuzmenkov/yoda.git
-cd yoda && make check && make install
+cd yoda && make check && sudo make install
 ```
 
 Remember that you need bash version 4 or higher installed at least.
