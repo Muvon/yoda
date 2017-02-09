@@ -32,23 +32,3 @@ get_containers() {
 
   echo ${containers[*]}
 }
-
-get_images() {
-  images=()
-
-  for service in "$@"; do
-    service=$(echo $service | sed "s|^$COMPOSE_PROJECT_NAME\.||")
-
-    # Get real name of container
-    container=$service
-    if [[ "$service" =~ ^.*\.[0-9]+$ ]]; then
-      container=${service%.*}
-    fi
-
-    image=$(grep image: $DOCKER_ROOT/containers/$container/container.yml | cut -d':' -f2 | tr -d ' ')
-    images+=($image)
-  done
-
-  result=$(printf "%s\n" ${images[*]} | sort -u | tr '\n' ' ')
-  echo ${result:0:-1}
-}
