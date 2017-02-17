@@ -7,6 +7,7 @@ compose_container() {
   else
     cat -
   fi
+  echo
 }
 
 # Parse map
