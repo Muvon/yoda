@@ -111,7 +111,16 @@ done
 echo "Nodes: ${#servers[*]}"
 echo "Started: $(date -u)"
 start_ts=$(date +%s)
+
 finished=()
+is_succeed() {
+  if [[ "${finished[$1]}" == "0" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 clear=
 elapsed=0
 exit_code=0
@@ -131,12 +140,14 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
 
     status=
     if ! ps -p $pid >/dev/null ; then
-      finished[$pid]=1
-      if wait $pid; then
+      # Check array first to prevent "not a child of this shell"
+      if is_succeed $pid || wait $pid; then
         status="${c_green}${c_bold}succeed${c_normal}"
+        finished[$pid]=0
       else
         exit_code=1
         status="${c_red}${c_bold}failed${c_normal}"
+        finished[$pid]=$exit_code
       fi
     else
       status="${c_yellow}${c_bold}processing${c_normal}"
