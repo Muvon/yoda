@@ -51,7 +51,7 @@ for line in "${lines[@]}"; do
     name=${line%%:*}
     build_args=${line#*:}
     echo 'building.'
-    docker build $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
+    docker build --network host $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
   else
     echo 'built already.'
   fi
