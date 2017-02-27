@@ -109,6 +109,7 @@ for server in ${servers[*]}; do
 done
 
 echo "Nodes: ${#servers[*]}"
+echo "Logs: $DOCKER_ROOT/log"
 echo "Started: $(date -u)"
 start_ts=$(date +%s)
 
