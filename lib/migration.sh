@@ -14,3 +14,8 @@ change_version() {
   cat $rcfile | sed 's|\(YODA_VERSION=\)"'$old'"|\1"'$new'"|g' > $rcfile.swp
   mv -f $rcfile.swp $rcfile
 }
+
+update_yodarc() {
+  sed "s/{{name}}/$COMPOSE_PROJECT_NAME/g;s/{{yoda_version}}/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > $DOCKER_ROOT/.yodarc
+
+}
