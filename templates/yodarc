@@ -9,6 +9,9 @@ REVISION_TAG="$(git describe --exact-match $commit 2>/dev/null || true)"
 export GIT_URL
 GIT_URL="$(git config --get remote.origin.url 2> /dev/null || true)"
 
+export GIT_BRANCH
+GIT_BRANCH="$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo 'master')"
+
 export SOURCE_PATH
 SOURCE_PATH="$(pwd)"
 
