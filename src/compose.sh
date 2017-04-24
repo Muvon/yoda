@@ -39,14 +39,38 @@ echo "# Build args: $*"
 echo 'version: "2"'
 echo 'services:'
 
+# name, sequence
+# Remove .0 suffix if we have only one container of such type
+get_container_name() {
+  container_name="$1.$2"
+  if [[ ${SCALE_MAP[$1]:-0} == 0 ]]; then
+    container_name=$1
+  fi
+
+  echo -n "$container_name"
+}
+
+adapt_link() {
+  link=$(echo "$1" | tr -d ' -\n')
+  for n in $(seq 0 ${SCALE_MAP[$link]:-0}); do
+    echo -n '  - '
+    get_container_name "$link" "$n"
+    echo
+  done
+}
+
+context=
+get_context() {
+  if [[ "$line" =~ ^[a-z_]+: ]]; then
+    echo -n "$line" | cut -d ':' -f1 | tr -d ' '
+  else
+    echo -n "$context"
+  fi
+}
+
 for p in ${!SCALE_MAP[*]}; do
-  scaling=$(seq 0 ${SCALE_MAP[$p]:-0})
-  for i in $scaling; do
-    container_name="$p.$i"
-    # Remove .0 suffix if we have only one container of such type
-    if [[ $scaling == 0 ]]; then
-      container_name=$p
-    fi
+  for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
+    container_name=$(get_container_name "$p" "$i")
 
     echo "  $container_name:"
     echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
@@ -57,17 +81,27 @@ for p in ${!SCALE_MAP[*]}; do
     mapfile -t lines < "$DOCKER_ROOT/containers/$p/container.yml"
     {
       for line in "${lines[@]}"; do
+        context=$(get_context "$line")
+
         # Check if we using shortcut for image declaration
-        if [[ "$line" =~ ^image\: ]]; then
-          image=$(echo $line | cut -d' ' -f2)
+        if [[ "$line" =~ ^image: ]]; then
+          image=$(echo "$line" | cut -d' ' -f2)
           echo "image: ${IMAGE_MAP[$image]:-$image}"
           continue
         fi
 
+        # Convert links container name to fully qualified names
+        if [[ "$context" == "links" ]]; then
+          if [[ "$line" =~ ^\ *- ]]; then
+            adapt_link "$line"
+            continue
+          fi
+        fi
+
         # Try to find keys should be replaced with env container file
         if [[ -f "$env_container_file" ]]; then
-          if [[ "$line" =~ ^[a-z_]+\: ]]; then
-            if grep "${line%%:*}:" $env_container_file >/dev/null; then
+          if [[ "$line" =~ ^[a-z_]+: ]]; then
+            if grep "${line%%:*}:" "$env_container_file" >/dev/null; then
               remove=1
             else
               remove=0
@@ -85,7 +119,21 @@ for p in ${!SCALE_MAP[*]}; do
 
       # Add env file data?
       if [[ -f "$env_container_file" ]]; then
-        cat $env_container_file
+        # Little shit with duplicated code
+        mapfile -t lines < "$env_container_file"
+        for line in "${lines[@]}"; do
+          context=$(get_context "$line")
+
+          # Convert links container name to fully qualified names
+          if [[ "$context" == "links" ]]; then
+            if [[ "$line" =~ ^\ *- ]]; then
+              adapt_link "$line"
+              continue
+            fi
+          fi
+
+          echo "$line"
+        done
       fi
     } | sed "s/^/    /g" | compose_container $p $i
   done
