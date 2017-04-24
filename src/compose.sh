@@ -40,10 +40,17 @@ echo 'version: "2"'
 echo 'services:'
 
 for p in ${!SCALE_MAP[*]}; do
-  for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
-    echo "  $p.$i:"
-    echo "    container_name: ${COMPOSE_PROJECT_NAME}.$p.$i"
-    echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$p.$i"
+  scaling=$(seq 0 ${SCALE_MAP[$p]:-0})
+  for i in $scaling; do
+    container_name="$p.$i"
+    # Remove .0 suffix if we have only one container of such type
+    if [[ $scaling == 0 ]]; then
+      container_name=$p
+    fi
+
+    echo "  $container_name:"
+    echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
+    echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
 
     remove=0
     env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
