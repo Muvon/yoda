@@ -17,7 +17,7 @@ check:
 	which grep
 	which tput
 	test -n 'bash >= 4' -a -n "$(call IF_VER_GT, $(BASH_VERSION), 4)"
-	test -n 'docker >= 17.04' -a -n "$(call IF_VER_GT, $(DOCKER_VERSION), 17.04)"
+	test -n 'docker >= 1.13' -a -n "$(call IF_VER_GT, $(DOCKER_VERSION), 1.13)"
 	test -n 'docker-compose >= 1.12' -a -n "$(call IF_VER_GT, $(DOCKER_COMPOSE_VERSION), 1.12)"
 	test -n 'git >= 1.9' -a -n "$(call IF_VER_GT, $(GIT_VERSION), 1.9)"
 
