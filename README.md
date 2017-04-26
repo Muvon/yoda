@@ -114,6 +114,15 @@ dev: container1
 Example file above declare server **user@server** that will be deployed as **production**. And production will contain one container1 and two container2 instances.  
 ANd in dev environment only one container with name container1 will be started.
 
+## Path: Startfile
+This file allow you to manage flow of start your complex service.  
+
+```yaml
+dev: container2 container1=2
+```
+
+In this example you [yoda start](#yoda-start-options-container) command first will be started container2 and after that services with container1 will be started as chunks by 2.
+
 ## Yoda command line tool usage
 ```bash
 yoda command arguments
@@ -184,6 +193,8 @@ Options are:
 |---|---|:---:|
 | --rebuild | Rebuild all images also if they exist with that revision | omited |
 | --recreate | Force recreate containers |
+
+You also can manager flow of start and restart of you containers using [Startfile](#path-startfile)  
 
 ### yoda stop [CONTAINER...]
 Stop all containers or only passed with arguments
