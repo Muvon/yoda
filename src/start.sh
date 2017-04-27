@@ -2,6 +2,8 @@
 set -e
 # shellcheck source=../lib/container.sh
 source $YODA_PATH/lib/container.sh
+source $YODA_PATH/lib/yaml.sh
+source $YODA_PATH/lib/array.sh
 
 for p in "$@"; do
   case $p in
@@ -30,6 +32,10 @@ if [[ -n "$recreate" ]]; then
   compose_args+=('--force-recreate')
 fi
 
+service_stop() {
+  docker-compose stop -t $STOP_WAIT_TIMEOUT $1
+}
+
 service_up() {
   docker-compose up ${compose_args[*]} -t $STOP_WAIT_TIMEOUT -d $1
 }
@@ -44,9 +50,17 @@ $YODA_CMD build ${build_args[*]} $images
 
 if [[ -z "$force" && -f $DOCKER_ROOT/Startfile ]]; then
   running_containers=()
+  parse_yaml "$DOCKER_ROOT/Startfile" cfg
+  eval "flow=(\${cfg_${ENV}[flow]}) wait=(\${cfg_${ENV}[wait]}) stop=(\${cfg_${ENV}[stop]})"
+  array_flip wait_index "${wait[@]}"
 
-  flow=$(grep $ENV: $DOCKER_ROOT/Startfile | cut -d: -f2)
-  for service in $flow; do
+  # Stopping services first before recreating
+  echo "Stopping: ${stop[*]}"
+  service_stop "${stop[*]}"
+
+  # Starting services using declared flow
+  echo "Starting services by flow: ${flow[*]}"
+  for service in "${flow[@]}"; do
     count=$(get_count "$service" 0)
     service=$(get_service "$service")
     service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ')
@@ -59,6 +73,13 @@ if [[ -z "$force" && -f $DOCKER_ROOT/Startfile ]]; then
     else
       echo "Starting all chunks of $service: $service_containers"
       service_up "$service_containers"
+    fi
+
+    # We should wait for this container?
+    if [[ -n "${wait_index[$service]}" ]]; then
+      echo "Waiting for: ${service_containers[*]}"
+      wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | tr -d ' ' | tr '\n' ' ')
+      docker wait $wait_containers
     fi
     running_containers+=($service_containers)
   done

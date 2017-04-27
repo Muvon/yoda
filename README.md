@@ -121,10 +121,19 @@ ANd in dev environment only one container with name container1 will be started.
 This file allow you to manage flow of start your complex service.  
 
 ```yaml
-dev: container2 container1=2
+dev:
+  flow: deploy container2 container1=2
+  stop: container2
+  wait: deploy
 ```
+- **flow** - It declares flow of starting services. It contains container or container=chunk where is chunk - number that devide starting by chunks
+- **stop** - each service repsented here will be stopped before start
+- **wait** - After run up command with container sometimes you need to wait for exit code of it. This section declares which containers we should wait for
 
-In this example you [yoda start](#yoda-start-options-container) command first will be started container2 and after that services with container1 will be started as chunks by 2.
+
+In this example you [yoda start](#yoda-start-options-container) command first will stop container2 if its running.  
+After that it will start deploy, then container2 and then container1 services will be started as chunks by 2.  
+Also we wait for exit code for deploy container.
 
 ## Path: docker/.yodarc
 This is locked environment file for yoda inited in current project with yoda version and other useful common files. Plese dont edit this file because it rewrites on yoda upgrade.  
