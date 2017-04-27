@@ -13,6 +13,10 @@ for p in "$@"; do
       recreate=1
       shift
       ;;
+    --force)
+      force=1
+      shift
+      ;;
   esac
 done
 
@@ -42,7 +46,7 @@ containers=$(get_containers "$@")
 
 $YODA_CMD build ${build_args[*]} $images
 
-if [[ -f $DOCKER_ROOT/Startfile ]]; then
+if [[ -z "$force" && -f $DOCKER_ROOT/Startfile ]]; then
   running_containers=()
 
   flow=$(grep $ENV: $DOCKER_ROOT/Startfile | cut -d: -f2)

@@ -17,6 +17,9 @@ for p in "$@"; do
     --args=*)
       custom_args=${p#*=}
       ;;
+    --force)
+      force=1
+      ;;
   esac
 done
 
@@ -67,6 +70,12 @@ deploy() {
   yoda_git_url=$(cd ${BASH_SOURCE%/*} && git remote get-url origin || true)
   yoda_git_host=$(echo $yoda_git_url | cut -d'@' -f2 | cut -d':' -f1)
 
+  # Get custom args for start command
+  start_args=()
+  if [[ -n "$force" ]]; then
+    start_args+=('--force')
+  fi
+
   ssh -AT $host <<EOF
     set -e
 
@@ -84,7 +93,7 @@ deploy() {
     git checkout -f $git_branch && git reset --hard origin/$git_branch
     git pull --rebase origin $git_branch
     git clean -fdx
-    PATH=\$PATH:~/.yoda ENV=$env GIT_BRANCH=$git_branch REVISION=$rev $custom_args yoda start
+    PATH=\$PATH:~/.yoda ENV=$env GIT_BRANCH=$git_branch REVISION=$rev $custom_args yoda start ${start_args[*]}
     {
       source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
       echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision

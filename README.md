@@ -193,6 +193,7 @@ Options are:
 |---|---|:---:|
 | --rebuild | Rebuild all images also if they exist with that revision | omited |
 | --recreate | Force recreate containers |
+| --force | Should start containers excluding Startenv file |
 
 You also can manager flow of start and restart of you containers using [Startfile](#path-startfile)  
 
@@ -214,6 +215,7 @@ Options are:
 | --rev | Set custom revision to be deployed or rollback to | - |
 | --branch | What branch will be deployed. | master |
 | --args | Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed | - |
+| --force | Pass this flag to [yoda start](#yoda-start-options-container) command
 
 ### yoda rollback [options]
 Rollback to previous revision
