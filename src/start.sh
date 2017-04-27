@@ -33,7 +33,7 @@ if [[ -n "$recreate" ]]; then
 fi
 
 service_stop() {
-  docker-compose stop -t $STOP_WAIT_TIMEOUT $1
+  docker-compose stop -t $STOP_WAIT_TIMEOUT $1 || true
 }
 
 service_up() {
