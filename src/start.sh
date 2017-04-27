@@ -34,10 +34,6 @@ service_up() {
   docker-compose up ${compose_args[*]} -t $STOP_WAIT_TIMEOUT -d $1
 }
 
-service_stop() {
-  docker-compose stop -t $STOP_WAIT_TIMEOUT $1 || true
-}
-
 $YODA_CMD compose > $COMPOSE_FILE
 # Get images we need to build
 images=$(grep image: $COMPOSE_FILE | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
@@ -52,13 +48,12 @@ if [[ -z "$force" && -f $DOCKER_ROOT/Startfile ]]; then
   flow=$(grep $ENV: $DOCKER_ROOT/Startfile | cut -d: -f2)
   for service in $flow; do
     count=$(get_count "$service" 0)
+    service=$(get_service "$service")
     service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ')
-
     if (( $count > 0 )); then
       printf -v join_string "%.0s- " $(seq 1 $count)
       echo "$service_containers" | paste -d ' ' $join_string | while read chunk; do
         echo "Starting chunks of $service by $count: $chunk"
-        service_stop "$chunk"
         service_up "$chunk"
       done
     else
