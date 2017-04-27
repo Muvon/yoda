@@ -90,7 +90,10 @@ This file contains valid docker-compose section for current service. container_n
 
 ### Path: env.sh
 Here you can declare BASH environment variables and use it everywhere.  
-For example you can write here IMAGE_NAME to set image name with revision and other staff and use it in Buildfile and container.yml.
+
+For example you can write here IMAGE_NAME to set image name with revision and other staff and use it in Buildfile and container.yml.  
+
+If you need custom env.sh file for environment you can just create it with name as env.dev.sh that will extend default env.sh file with new variables defined there.
 
 ### Path: Buildfile
 Its simple file that have following structure:
@@ -122,6 +125,11 @@ dev: container2 container1=2
 ```
 
 In this example you [yoda start](#yoda-start-options-container) command first will be started container2 and after that services with container1 will be started as chunks by 2.
+
+## Path: docker/.yodarc
+This is locked environment file for yoda inited in current project with yoda version and other useful common files. Plese dont edit this file because it rewrites on yoda upgrade.  
+
+If you want you can redefine all variables in [env.sh](#path-envsh) file.  
 
 ## Yoda command line tool usage
 ```bash
@@ -176,6 +184,7 @@ Options are:
 | Options | Description | Default |
 |---|---|:---:|
 | --rebuild | Force build also if image exists already | omited |
+| --push | Should we push builded images to repository if we have REPOSITORY_URL defined in [env.sh](#path-envsh) file | omited |
 
 
 ### yoda compose [COMPOSE_SCRIPT]

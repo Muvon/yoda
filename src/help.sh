@@ -41,6 +41,7 @@ Usage:
     Build images for current project
     Options are:
       --rebuild     Force build also if image exists already. Default: not set.
+      --push        Should we push builded images to repository if we have REPOSITORY_URL defined in env.sh file. Default: not set
 
   ${c_bold}$YODA_CMD compose [COMPOSE_SCRIPT]${c_normal}
     Display generated docker-compose file in stdout.
@@ -51,6 +52,7 @@ Usage:
     Options are:
       --rebuild     Rebuild all images also if they exist with that revision. Default: not set.
       --recreate    Force recreate containers. Default: not set.
+      --force       Should start containers excluding Startenv file. Default: not set.
 
   ${c_bold}$YODA_CMD stop [CONTAINER...]${c_normal}
     Stop all containers or only passed with arguments
@@ -66,6 +68,7 @@ Usage:
       --rev=revision      Set custom revision to be deployed or rollback to
       --branch=gitbranch  What branch will be deployed. Default is master
       --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.
+      --force             Should start containers excluding Startenv file
 
   ${c_bold}$YODA_CMD rollback [options]${c_normal}
     Rollback to previous revision on selected host or environment

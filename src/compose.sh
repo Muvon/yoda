@@ -32,6 +32,9 @@ mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
   k=$(echo $line | cut -d: -f1)
   v=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  if [[ -n "$REGISTRY_URL" ]]; then
+    v="$REGISTRY_URL/$v"
+  fi
   IMAGE_MAP[$k]=$v
 done
 

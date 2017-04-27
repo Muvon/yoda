@@ -25,6 +25,10 @@ for p in "$@"; do
       rebuild=1
       shift
       ;;
+    --push)
+      push=1
+      shift
+      ;;
   esac
 done
 
@@ -33,6 +37,10 @@ declare -A images
 for image in "$@"; do
   images[$image]=1
 done
+
+if [[ -n "$REGISTRY_URL" ]]; then
+  echo "Using docker registry: $REGISTRY_URL"
+fi
 
 mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
@@ -54,5 +62,11 @@ for line in "${lines[@]}"; do
     docker build --network host $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
   else
     echo 'built already.'
+  fi
+
+  # If we had setup REPOSITORY_URL and should push
+  if [[ -n "$push" && -n "$REGISTRY_URL" ]]; then
+    docker tag "$image" "$REGISTRY_URL/$image"
+    docker push "$REGISTRY_URL/$image"
   fi
 done

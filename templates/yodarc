@@ -27,3 +27,4 @@ export COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml"
 
 # Wait # seconds before kill -9 stopping container
 export STOP_WAIT_TIMEOUT=${STOP_WAIT_TIMEOUT:-10}
+export REGISTRY_URL=""
