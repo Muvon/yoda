@@ -13,13 +13,7 @@ get_containers() {
       containers+=($service)
     else
       service=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | sed "s|^$ENV||" | grep -oE "\b$service(=[0-9]+)?\b")
-
-      if [[ "$service" == *"="* ]]; then
-        count=$(echo $service | cut -d'=' -f2)
-        service=$(echo $service | cut -d'=' -f1)
-      else
-        count=1
-      fi
+      count=$(get_count "$service" 1)
 
       for n in $(seq 0 $((count - 1))); do
         containers+=($service.$n)
@@ -31,4 +25,18 @@ get_containers() {
   done
 
   echo ${containers[*]}
+}
+
+get_count() {
+  service=$1
+  default=$2
+
+  if [[ "$service" == *"="* ]]; then
+    count=$(echo "$service" | cut -d'=' -f2)
+    service=$(echo "$service" | cut -d'=' -f1)
+  else
+    count=$default
+  fi
+
+  echo "$count"
 }

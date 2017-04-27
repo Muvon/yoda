@@ -51,13 +51,7 @@ if [[ -z "$force" && -f $DOCKER_ROOT/Startfile ]]; then
 
   flow=$(grep $ENV: $DOCKER_ROOT/Startfile | cut -d: -f2)
   for service in $flow; do
-    if [[ "$service" == *"="* ]]; then
-      count=$(echo $service | cut -d'=' -f2)
-      service=$(echo $service | cut -d'=' -f1)
-    else
-      count=0
-    fi
-
+    count=$(get_count "$service" 0)
     service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ')
 
     if (( $count > 0 )); then
