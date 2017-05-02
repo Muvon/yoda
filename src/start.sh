@@ -48,47 +48,55 @@ containers=$(get_containers "$@")
 
 $YODA_CMD build ${build_args[*]} $images
 
-if [[ -z "$force" && -f $DOCKER_ROOT/Startfile ]]; then
+if [[ -z "$force" ]]; then
   running_containers=()
   parse_yaml "$DOCKER_ROOT/Startfile" cfg
   eval "flow=(\${cfg_${ENV}[flow]}) wait=(\${cfg_${ENV}[wait]}) stop=(\${cfg_${ENV}[stop]})"
   array_flip wait_index "${wait[@]}"
 
   # Stopping services first before recreating
-  echo "Stopping: ${stop[*]}"
-  service_stop "${stop[*]}"
+  if [[ -n "${stop[*]}" ]]; then
+    echo "Stopping: ${stop[*]}"
+    service_stop "${stop[*]}"
+  fi
 
   # Starting services using declared flow
-  echo "Starting services by flow: ${flow[*]}"
-  for service in "${flow[@]}"; do
-    count=$(get_count "$service" 0)
-    service=$(get_service "$service")
-    service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ')
-    if (( $count > 0 )); then
-      printf -v join_string "%.0s- " $(seq 1 $count)
-      echo "$service_containers" | paste -d ' ' $join_string | while read chunk; do
-        echo "Starting chunks of $service by $count: $chunk"
-        service_up "$chunk"
-      done
-    else
-      echo "Starting all chunks of $service: $service_containers"
-      service_up "$service_containers"
-    fi
+  if [[ -n "${flow[*]}" ]]; then
+    echo "Starting services by flow: ${flow[*]}"
+    for service in "${flow[@]}"; do
+      count=$(get_count "$service" 0)
+      service=$(get_service "$service")
+      service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ')
+      if (( $count > 0 )); then
+        printf -v join_string "%.0s- " $(seq 1 $count)
+        echo "$service_containers" | paste -d ' ' $join_string | while read chunk; do
+          echo "Starting chunks of $service by $count: $chunk"
+          service_up "$chunk"
+        done
+      else
+        echo "Starting all chunks of $service: $service_containers"
+        service_up "$service_containers"
+      fi
 
-    # We should wait for this container?
-    if [[ -n "${wait_index[$service]}" ]]; then
-      echo "Waiting for: ${service_containers[*]}"
-      wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | tr -d ' ' | tr '\n' ' ')
-      docker wait $wait_containers
-    fi
-    running_containers+=($service_containers)
-  done
+      # We should wait for this container?
+      if [[ -n "${wait_index[$service]}" ]]; then
+        echo "Waiting for: ${service_containers[*]}"
+        wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | tr -d ' ' | tr '\n' ' ')
+        docker wait $wait_containers
+      fi
+      running_containers+=($service_containers)
+    done
+  fi
 
   # Start rest of containers
-  exclude_list=$(echo "${running_containers[*]}" | tr ' ' '\n')
-  other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ' | grep -v "$exclude_list" | tr '\n' ' ')
-  echo "Starting rest of containers: $other"
-  service_up "$other"
+  if [[ -n "${running_containers[*]}" ]]; then
+    exclude_list=$(echo "${running_containers[*]}" | tr ' ' '\n')
+    other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ' | grep -v "$exclude_list" | tr '\n' ' ')
+    echo "Starting rest of containers: $other"
+    service_up "$other"
+  else
+    service_up "$containers"
+  fi
 else
   service_up "$containers"
 fi

@@ -23,7 +23,7 @@ useremail=$(git config --global user.email || echo 'noreply@yoda.org')
 touch .dockerignore
 mkdir -p $yoda_dir/{images,containers}
 cp $YODA_PATH/templates/env.sh $yoda_dir
-cp $YODA_PATH/templates/{Env,Build}file $yoda_dir
+cp $YODA_PATH/templates/{Env,Build,Start}file $yoda_dir
 sed "s/{{user}}/$username/g;s/{{email}}/$useremail/g;" $YODA_PATH/templates/Dockerfile > $yoda_dir/images/Dockerfile-base
 cp $YODA_PATH/templates/gitignore $yoda_dir/.gitignore
 cp $YODA_PATH/templates/dockerignore $yoda_dir/.dockerignore
