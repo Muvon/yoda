@@ -45,7 +45,6 @@ $YODA_CMD compose > $COMPOSE_FILE
 images=$(grep image: $COMPOSE_FILE | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
 
 containers=$(get_containers "$@")
-
 $YODA_CMD build ${build_args[*]} $images
 
 if [[ -z "$force" ]]; then
@@ -82,7 +81,13 @@ if [[ -z "$force" ]]; then
       if [[ -n "${wait_index[$service]}" ]]; then
         echo "Waiting for: ${service_containers[*]}"
         wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | tr -d ' ' | tr '\n' ' ')
-        docker wait $wait_containers
+        exit_code=$(docker wait $wait_containers)
+        if [[ $exit_code != 0 ]]; then
+          echo "Failed to wait containers: $wait_containers"
+          docker logs $wait_containers
+          echo "Start is aborted due to one of containers exited with exit code $exit_code != 0 while waiting"
+          exit 1
+        fi
       fi
       running_containers+=($service_containers)
     done
