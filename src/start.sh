@@ -41,11 +41,15 @@ service_up() {
 }
 
 $YODA_CMD compose > $COMPOSE_FILE
-# Get images we need to build
-images=$(grep image: $COMPOSE_FILE | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
-
 containers=$(get_containers "$@")
-$YODA_CMD build ${build_args[*]} $images
+
+# Build images on start only when no registry setted
+if [[ -z "$REGISTRY_URL" || -n "$rebuild" ]]; then
+  images=$(grep image: $COMPOSE_FILE | sed 's|image:\(.*\)|\1|' | tr -d ' ' | sort | uniq)
+  $YODA_CMD build ${build_args[*]} $images
+else # Pull images otherwise
+  docker-compose pull
+fi
 
 if [[ -z "$force" ]]; then
   running_containers=()
