@@ -96,7 +96,7 @@ if [[ -z "$force" ]]; then
   # Start rest of containers
   if [[ -n "${running_containers[*]}" ]]; then
     exclude_list=$(echo "${running_containers[*]}" | tr ' ' '\n')
-    other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ' | grep -v "$exclude_list" | tr '\n' ' ')
+    other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ' | grep -v "$exclude_list" | tr '\n' ' ')
     echo "Starting rest of containers: $other"
     service_up "$other"
   else
