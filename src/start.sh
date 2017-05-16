@@ -65,7 +65,7 @@ if [[ -z "$force" ]]; then
     for service in "${flow[@]}"; do
       count=$(get_count "$service" 0)
       service=$(get_service "$service")
-      service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2 | tr -d ' ')
+      service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ')
       if (( $count > 0 )); then
         printf -v join_string "%.0s- " $(seq 1 $count)
         echo "$service_containers" | paste -d ' ' $join_string | while read chunk; do
