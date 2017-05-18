@@ -54,7 +54,7 @@ fi
 if [[ -z "$force" ]]; then
   running_containers=()
   parse_yaml "$DOCKER_ROOT/Startfile" cfg
-  eval "flow=(\${cfg_${ENV}[flow]}) wait=(\${cfg_${ENV}[wait]}) stop=(\${cfg_${ENV}[stop]})"
+  eval "flow=(\${cfg_${ENV%%.*}[flow]}) wait=(\${cfg_${ENV%%.*}[wait]}) stop=(\${cfg_${ENV%%.*}[stop]})"
   array_flip wait_index "${wait[@]}"
 
   # Stopping services first before recreating
