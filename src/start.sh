@@ -2,7 +2,6 @@
 set -e
 # shellcheck source=../lib/container.sh
 source $YODA_PATH/lib/container.sh
-source $YODA_PATH/lib/yaml.sh
 source $YODA_PATH/lib/array.sh
 
 for p in "$@"; do
@@ -40,6 +39,10 @@ service_up() {
   docker-compose up ${compose_args[*]} -t $STOP_WAIT_TIMEOUT -d $1
 }
 
+get_config() {
+  grep -A 3 "^$ENV:$" docker/Startfile | grep "$1:" | head -n 1 | cut -d ':' -f 2
+}
+
 $YODA_CMD compose > $COMPOSE_FILE
 containers=$(get_containers "$@")
 
@@ -53,8 +56,9 @@ fi
 
 if [[ -z "$force" ]]; then
   running_containers=()
-  parse_yaml "$DOCKER_ROOT/Startfile" cfg
-  eval "flow=(\${cfg_${ENV%%.*}[flow]}) wait=(\${cfg_${ENV%%.*}[wait]}) stop=(\${cfg_${ENV%%.*}[stop]})"
+  flow=( $(get_config flow) )
+  wait=( $(get_config wait) )
+  stop=( $(get_config stop) )
   array_flip wait_index "${wait[@]}"
 
   # Stopping services first before recreating
