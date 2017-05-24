@@ -64,7 +64,11 @@ if [[ -z "$force" ]]; then
   # Stopping services first before recreating
   if [[ -n "${stop[*]}" ]]; then
     echo "Stopping: ${stop[*]}"
-    service_stop "${stop[*]}"
+    stop_containers=()
+    for service in "${stop[@]}"; do
+      stop_containers+=( $(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ') )
+    done
+    service_stop "${stop_containers[*]}"
   fi
 
   # Starting services using declared flow
@@ -88,7 +92,7 @@ if [[ -z "$force" ]]; then
       # We should wait for this container?
       if [[ -n "${wait_index[$service]}" ]]; then
         echo "Waiting for: ${service_containers[*]}"
-        wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | tr -d ' ' | tr '\n' ' ')
+        wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2-3 | tr -d ' ' | tr '\n' ' ')
         exit_code=$(docker wait $wait_containers)
         if [[ $exit_code != 0 ]]; then
           echo "Failed to wait containers: $wait_containers"
