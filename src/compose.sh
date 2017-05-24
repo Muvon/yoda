@@ -46,7 +46,7 @@ echo 'services:'
 # Remove .0 suffix if we have only one container of such type
 get_container_name() {
   container_name="$1.$2"
-  if [[ ${SCALE_MAP[$1]:-0} == 0 ]]; then
+  if [[ $CONTAINER_SCALE_INDEX == 0 && ${SCALE_MAP[$1]:-0} == 0 ]]; then
     container_name=$1
   fi
 

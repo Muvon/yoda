@@ -27,4 +27,9 @@ export COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml"
 
 # Wait # seconds before kill -9 stopping container
 export STOP_WAIT_TIMEOUT=${STOP_WAIT_TIMEOUT:-10}
+
+# If 1 names will be project.container.0 also when scale not set
+export CONTAINER_SCALE_INDEX=${CONTAINER_SCALE_INDEX:-1}
+
+# If you use this be sure to run yoda build --push by self before deploying
 export REGISTRY_URL=${REGISTRY_URL:-''}
