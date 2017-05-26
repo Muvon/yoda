@@ -92,7 +92,7 @@ if [[ -z "$force" ]]; then
       # We should wait for this container?
       if [[ -n "${wait_index[$service]}" ]]; then
         echo "Waiting for: ${service_containers[*]}"
-        wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2-3 | tr -d ' ' | tr '\n' ' ')
+        wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2-3 | tr -d ' ' | tr $'\n' ' ')
         exit_code=$(docker wait $wait_containers)
         if [[ $exit_code != 0 ]]; then
           echo "Failed to wait containers: $wait_containers"
@@ -107,8 +107,8 @@ if [[ -z "$force" ]]; then
 
   # Start rest of containers
   if [[ -n "${running_containers[*]}" ]]; then
-    exclude_list=$(echo "${running_containers[*]}" | tr ' ' '\n')
-    other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ' | grep -v "$exclude_list" | tr '\n' ' ')
+    exclude_list=$(echo "${running_containers[*]}" | tr ' ' $'\n')
+    other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ' | grep -v "$exclude_list" | tr $'\n' ' ')
     echo "Starting rest of containers: $other"
     service_up "$other"
   else

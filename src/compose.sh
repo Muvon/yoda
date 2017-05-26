@@ -54,7 +54,7 @@ get_container_name() {
 }
 
 adapt_link() {
-  link=$(echo "$1" | tr -d ' -\n')
+  link=$(echo "$1" | tr -d ' -' | tr -d $'\n')
   for n in $(seq 0 ${SCALE_MAP[$link]:-0}); do
     echo -n '  - '
     get_container_name "$link" "$n"
