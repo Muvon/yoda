@@ -43,6 +43,21 @@ get_config() {
   grep -A 3 "^$ENV:$" docker/Startfile | grep "$1:" | head -n 1 | cut -d ':' -f 2
 }
 
+validate_services() {
+  local section=$1
+  services=$(get_config "$section")
+  pool=( $(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | cut -d: -f2) )
+  for service in $services; do
+    if echo -n "${pool[*]}" | grep -Eo "\b$service\b" > /dev/null; then
+      continue
+    fi
+    >&2 echo "No service '$service' of section '$section' in pool of services: '${pool[*]}'. Check Startfile"
+    exit 1
+  done
+
+  echo -n "$services"
+}
+
 $YODA_CMD compose > $COMPOSE_FILE
 containers=$(get_containers "$@")
 
@@ -56,9 +71,9 @@ fi
 
 if [[ -z "$force" ]]; then
   running_containers=()
-  flow=( $(get_config flow) )
-  wait=( $(get_config wait) )
-  stop=( $(get_config stop) )
+  flow=( $(validate_services "flow") )
+  wait=( $(validate_services "wait") )
+  stop=( $(validate_services "stop") )
   array_flip wait_index "${wait[@]}"
 
   # Stopping services first before recreating
