@@ -213,7 +213,7 @@ Options are:
 | --rebuild | Rebuild all images also if they exist with that revision | omited |
 | --no-cache | Dont use Dockerfile cache on building images stage. It passes internally to build command | omited |
 | --recreate | Force recreate containers |
-| --force | Should start containers excluding Startenv file |
+| --force | Should start containers excluding Startfile flow description |
 
 You also can manager flow of start and restart of you containers using [Startfile](#path-startfile)  
 

@@ -54,7 +54,7 @@ Usage:
       --rebuild     Rebuild all images also if they exist with that revision. Default: not set.
       --no-cache    Dont use Dockerfile cache on building images stage. It passes internally to build command. Default: not set.
       --recreate    Force recreate containers. Default: not set.
-      --force       Should start containers excluding Startenv file. Default: not set.
+      --force       Should start containers excluding Startfile flow description. Default: not set.
 
   ${c_bold}$YODA_CMD stop [CONTAINER...]${c_normal}
     Stop all containers or only passed with arguments
