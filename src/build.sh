@@ -25,6 +25,10 @@ for p in "$@"; do
       rebuild=1
       shift
       ;;
+    --no-cache)
+      no_cache=1
+      shift
+      ;;
     --push)
       push=1
       shift
@@ -58,8 +62,12 @@ for line in "${lines[@]}"; do
   if [[ -z "$image_id" || -n "$rebuild" ]]; then
     name=${line%%:*}
     build_args=${line#*:}
+    extra_args=()
+    if [[ -n "$no_cache" ]]; then
+      extra_args+=('--no-cache')
+    fi
     echo 'building.'
-    docker build --network host $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
+    docker build --network host ${extra_args[*]} $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
   else
     echo 'built already.'
   fi

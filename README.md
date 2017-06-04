@@ -193,6 +193,7 @@ Options are:
 | Options | Description | Default |
 |---|---|:---:|
 | --rebuild | Force build also if image exists already | omited |
+| --no-cache | Dont use Dockerfile cache when building images. | omited |
 | --push | Should we push builded images to repository if we have REPOSITORY_URL defined in [env.sh](#path-envsh) file | omited |
 
 
@@ -210,6 +211,7 @@ Options are:
 | Options | Description | Default |
 |---|---|:---:|
 | --rebuild | Rebuild all images also if they exist with that revision | omited |
+| --no-cache | Dont use Dockerfile cache on building images stage. It passes internally to build command | omited |
 | --recreate | Force recreate containers |
 | --force | Should start containers excluding Startenv file |
 

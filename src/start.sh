@@ -10,6 +10,10 @@ for p in "$@"; do
       rebuild=1
       shift
       ;;
+    --no-cache)
+      no_cache=1
+      shift
+      ;;
     --recreate)
       recreate=1
       shift
@@ -24,6 +28,10 @@ done
 build_args=()
 if [[ -n "$rebuild" ]]; then
   build_args+=('--rebuild')
+fi
+
+if [[ -n "$no_cache" ]]; then
+  build_args+=('--no-cache')
 fi
 
 compose_args=('--no-build' '--remove-orphans')

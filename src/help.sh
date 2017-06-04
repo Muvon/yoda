@@ -41,6 +41,7 @@ Usage:
     Build images for current project
     Options are:
       --rebuild     Force build also if image exists already. Default: not set.
+      --no-cache    Dont use Dockerfile cache when building images. Default: not set.
       --push        Should we push builded images to repository if we have REPOSITORY_URL defined in env.sh file. Default: not set
 
   ${c_bold}$YODA_CMD compose [COMPOSE_SCRIPT]${c_normal}
@@ -51,6 +52,7 @@ Usage:
     Start all containers or only passed with arguments
     Options are:
       --rebuild     Rebuild all images also if they exist with that revision. Default: not set.
+      --no-cache    Dont use Dockerfile cache on building images stage. It passes internally to build command. Default: not set.
       --recreate    Force recreate containers. Default: not set.
       --force       Should start containers excluding Startenv file. Default: not set.
 
