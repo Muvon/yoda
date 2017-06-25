@@ -30,7 +30,7 @@ fi
 # Get last revision
 declare -A revisions
 for server in ${servers[*]}; do
-  revisions[$server]=$(ssh -AT $server "
+  revisions[$server]=$(ssh -o ControlPath=none -AT $server "
     if test -f .deploy/$COMPOSE_PROJECT_NAME.revision; then
       tail -n 2 .deploy/$COMPOSE_PROJECT_NAME.revision | head -n 1
     fi

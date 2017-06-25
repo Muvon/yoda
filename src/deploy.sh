@@ -76,7 +76,7 @@ deploy() {
     start_args+=('--force')
   fi
 
-  ssh -AT $host <<EOF
+  ssh -o ControlPath=none -AT $host <<EOF
     set -e
 
     if [[ ! -d ~/.yoda ]]; then
