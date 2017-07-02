@@ -13,7 +13,7 @@ Commands available:
   ${c_bold}compose${c_normal}   Display generated compose file for current environment
   ${c_bold}start${c_normal}     Start all services for current project
   ${c_bold}stop${c_normal}      Stop all services for current project
-  ${c_bold}logs${c_normal}      View output from containers
+  ${c_bold}log${c_normal}       View output from containers
   ${c_bold}deploy${c_normal}    Deploy project on one or all nodes
   ${c_bold}rollback${c_normal}  Rollback is another deploy but with previous revision that detected automatic
   ${c_bold}destroy${c_normal}   Remove all created services by start command and all local images with volumes
@@ -60,7 +60,7 @@ Usage:
   ${c_bold}$YODA_CMD stop [CONTAINER...]${c_normal}
     Stop all containers or only passed with arguments
 
-  ${c_bold}$YODA_CMD logs [options] [SERVICE...]${c_normal}
+  ${c_bold}$YODA_CMD log [options] [SERVICE...]${c_normal}
     View output from containers.
     Options are the same as for "docker-compose logs" command:
       --no-color          Produce monochrome output.
