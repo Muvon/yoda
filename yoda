@@ -163,6 +163,11 @@ case "$cmd" in
     bash "$YODA_PATH/src/status.sh"
     ;;
 
+  logs)
+    check_yodarc
+    bash "$YODA_PATH/src/logs.sh" "$@"
+    ;;
+
   deploy)
     check_yodarc
     if [[ -z "$GIT_URL" ]]; then
