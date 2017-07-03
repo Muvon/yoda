@@ -23,6 +23,7 @@ export ENV=${ENV:-dev}
 
 export COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"{{name}}"}
 export COMPOSE_HTTP_TIMEOUT=${COMPOSE_HTTP_TIMEOUT:-300}
+export MAIN_COMPOSE_FILE="$DOCKER_ROOT/docker-compose.yml"
 export COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml"
 
 # Wait # seconds before kill -9 stopping container

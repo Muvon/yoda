@@ -79,14 +79,23 @@ get_context() {
 for p in ${!SCALE_MAP[*]}; do
   for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
     container_name=$(get_container_name "$p" "$i")
+    env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
+    container_file="$DOCKER_ROOT/containers/$p/container.yml"
+
+    if [[ ! -f "$env_container_file" && $__second_run ]]; then
+      continue
+    fi
 
     echo "  $container_name:"
-    echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
-    echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
+    if [[ ! $__second_run ]]; then
+      echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
+      echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
+    fi
 
-    remove=0
-    env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
-    mapfile -t lines < "$DOCKER_ROOT/containers/$p/container.yml"
+    if [[ -f "$env_container_file" && $__second_run ]]; then
+      container_file="$env_container_file"
+    fi
+    mapfile -t lines < "$container_file"
     {
       for line in "${lines[@]}"; do
         context=$(get_context "$line")
@@ -106,43 +115,9 @@ for p in ${!SCALE_MAP[*]}; do
           fi
         fi
 
-        # Try to find keys should be replaced with env container file
-        if [[ -f "$env_container_file" ]]; then
-          if [[ "$line" =~ ^[a-z_]+: ]]; then
-            if grep "${line%%:*}:" "$env_container_file" >/dev/null; then
-              remove=1
-            else
-              remove=0
-              echo "$line"
-            fi
-          else
-            if [[ $remove == 0 ]]; then
-              echo "$line"
-            fi
-          fi
-        else
-          echo "$line"
-        fi
+        echo "$line"
       done
 
-      # Add env file data?
-      if [[ -f "$env_container_file" ]]; then
-        # Little shit with duplicated code
-        mapfile -t lines < "$env_container_file"
-        for line in "${lines[@]}"; do
-          context=$(get_context "$line")
-
-          # Convert links container name to fully qualified names
-          if [[ "$context" == "links" ]]; then
-            if [[ "$line" =~ ^\ *- ]]; then
-              adapt_link "$line"
-              continue
-            fi
-          fi
-
-          echo "$line"
-        done
-      fi
     } | sed "s/^/    /g" | compose_container $p $i
   done
 done
