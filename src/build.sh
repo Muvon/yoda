@@ -80,7 +80,7 @@ else
   lock
 
   for image_for_build in "$@"; do
-    if [[ $(builded $image_for_build) ]]; then
+    if [[ $(builded $image_for_build) || ! -f $DOCKER_ROOT/images/Dockerfile-$image_for_build ]]; then
       continue
     else
       newline=$'\n'
