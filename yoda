@@ -132,7 +132,7 @@ case "$cmd" in
     # Get containers to build
     containers=$(grep ^$ENV: $DOCKER_ROOT/Envfile | cut -d ':' -f2)
     COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/src/compose.sh" $containers > $MAIN_COMPOSE_FILE
-    __second_run=true COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/src/compose.sh" $containers > $COMPOSE_FILE
+    COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/src/compose.sh" --second-run $containers > $COMPOSE_FILE
     docker-compose -f $MAIN_COMPOSE_FILE -f $COMPOSE_FILE config
     ;;
 

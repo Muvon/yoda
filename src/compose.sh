@@ -10,6 +10,17 @@ compose_container() {
   echo
 }
 
+second_run=
+
+for p in "$@"; do
+  case $p in
+    --second-run)
+      second_run=true
+      shift
+      ;;
+  esac
+done
+
 # Parse map
 declare -A SCALE_MAP
 for p in "$@"; do
@@ -82,17 +93,17 @@ for p in ${!SCALE_MAP[*]}; do
     env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
     container_file="$DOCKER_ROOT/containers/$p/container.yml"
 
-    if [[ ! -f "$env_container_file" && $__second_run ]]; then
+    if [[ ! -f "$env_container_file" && $second_run ]]; then
       continue
     fi
 
     echo "  $container_name:"
-    if [[ ! $__second_run ]]; then
+    if [[ ! $second_run ]]; then
       echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
       echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
     fi
 
-    if [[ -f "$env_container_file" && $__second_run ]]; then
+    if [[ -f "$env_container_file" && $second_run ]]; then
       container_file="$env_container_file"
     fi
     mapfile -t lines < "$container_file"
