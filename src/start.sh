@@ -71,7 +71,7 @@ containers=$(get_containers "$@")
 
 # Build images on start only when no registry setted
 if [[ -z "$REGISTRY_URL" || -n "$rebuild" ]]; then
-  images=$(grep image: $COMPOSE_FILE | sed -E 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
+  images=$(grep image: $COMPOSE_FILE | sed -r 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
   $YODA_CMD build ${build_args[*]} $images
 else # Pull images otherwise
   docker-compose pull

@@ -19,7 +19,7 @@ git clone git@github.com:dmitrykuzmenkov/yoda.git
 cd yoda && make check && sudo make install
 ```
 
-Remember that you need bash version 4 or higher installed at least.
+Remember that you need bash version 4 or higher installed at least and GNU implementation of the sed.
 
 ## Knowledge requirements
 1. [Docker](https://docs.docker.com) and its main concept
