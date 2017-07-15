@@ -81,7 +81,7 @@ else
   lock
 
   for image_for_build in "$@"; do
-    if [[ $(builded $image_for_build) || ! -f $DOCKER_ROOT/images/Dockerfile-$image_for_build ]]; then
+    if $(builded $image_for_build) || [[ ! -f $DOCKER_ROOT/images/Dockerfile-$image_for_build ]] ; then
       continue
     else
       newline=$'\n'
@@ -91,7 +91,7 @@ else
         if [[ $line =~ ^FROM.* ]]; then
           dep_name=$(echo $line | grep -Eo 'FROM [^ ]+' | cut -d' ' -f2)
           if [[ "${image_names[$dep_name]}" == $dep_name ]]; then
-            if [[ ! $(builded $dep_name) ]]; then
+            if ! $(builded $dep_name) ; then
               args=('--force')
               if [[ -n "$rebuild" ]]; then
                 args+=('--rebuild')
