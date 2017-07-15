@@ -64,8 +64,9 @@ done
 
 builded() {
   if [[ $(eval cat $lock_file | grep "$@") ]]; then
-    echo true
+    return 0
   fi
+  return 1
 }
 
 if [[ ! -n "$@" ]]; then
