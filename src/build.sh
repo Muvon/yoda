@@ -63,7 +63,7 @@ for line in "${lines[@]}"; do
 done
 
 builded() {
-  if grep "^$@$" $lock_file $2>1 ; then
+  if grep "^$@$" $lock_file 2>&1 ; then
     return 0
   fi
   return 1
