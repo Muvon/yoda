@@ -46,19 +46,32 @@ fi
 declare -A image_names
 declare -A image_ids
 declare -A image_build_args
+declare -A image_build_context
 mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
   image=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   image_id=$(eval echo $image)
-  name=${line%%:*}
+
+  [[ $line =~ ^([^:]*):(.*)$ ]]
+  name=${BASH_REMATCH[1]}
+  build_args=${BASH_REMATCH[2]}
+
+  if [[ $build_args =~ ^(.*)context:(.*)$ ]]; then
+    build_args=$(eval echo "${BASH_REMATCH[1]}")
+    context="${BASH_REMATCH[2]}"
+  else
+    build_args=$(eval echo $build_args)
+    context="."
+  fi
+
   image_ids[$name]=$image_id
 
-  args=$(eval echo ${line#*:})
   extra_args=()
   if [[ -n "$no_cache" ]]; then
     extra_args+=('--no-cache')
   fi
-  image_build_args[$name]="${extra_args[*]} $(eval echo ${line#*:})"
+  image_build_args[$name]="${extra_args[*]} $build_args"
+  image_build_context[$name]="$context"
   image_names[$name]=$name
 done
 
@@ -121,7 +134,7 @@ else
       docker_image_id=$(docker images -q "${image_ids[$image_for_build]}")
       if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
         echo 'building.'
-        echo "$build_instructions" | docker build --network host ${image_build_args[$image_for_build]} -f - .
+        echo "$build_instructions" | docker build --network host ${image_build_args[$image_for_build]} -f - ${image_build_context[$image_for_build]}
       else
         echo 'built already.'
       fi
