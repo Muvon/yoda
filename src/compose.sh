@@ -65,7 +65,7 @@ get_container_name() {
 }
 
 adapt_link() {
-  link_with_alias=$(echo "$1" | sed -E 's/^[ -]+(.*)$/\1/' | tr -d $'\n')
+  link_with_alias=$(echo "$1" | sed -r 's/^[ -]+(.*)$/\1/' | tr -d $'\n')
   link=${link_with_alias%:*}
   alias=${link_with_alias#*:}
   for n in $(seq 0 ${SCALE_MAP[$link]:-0}); do

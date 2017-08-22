@@ -10,14 +10,7 @@ unlock() {
   test -f $lock_file && rm -f $_
 }
 
-if [[ -f $lock_file ]]; then
-  >&2 echo "Build is already in progress."
-  >&2 echo "If something went wrong you should just remove lock file: $lock_file"
-  exit 1
-fi
-
-trap unlock EXIT
-lock
+original_args=$@
 
 for p in "$@"; do
   case $p in
@@ -33,48 +26,114 @@ for p in "$@"; do
       push=1
       shift
       ;;
+    --force)
+      force=1
+      shift
+      ;;
   esac
 done
 
-# Get images we should build
-declare -A images
-for image in "$@"; do
-  images[$image]=1
-done
+if [[ -f $lock_file && ! $force ]]; then
+  >&2 echo "Build is already in progress."
+  >&2 echo "If something went wrong you should just remove lock file: $lock_file"
+  exit 1
+fi
 
 if [[ -n "$REGISTRY_URL" ]]; then
   echo "Using docker registry: $REGISTRY_URL"
 fi
 
+declare -A image_names
+declare -A image_ids
+declare -A image_build_args
 mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
-  build_image=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
-  image=$(eval echo $build_image)
-  echo -n "Image '$image' is "
-  build_id=${line%%:*}
-  # Skip images that we dont need to build
-  if [[ -n "${images[*]}" && -z "${images[$build_image]}" && -z "${images[$build_id]}" ]]; then
-    echo 'skipped.'
-    continue
-  fi
+  image=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  image_id=$(eval echo $image)
+  name=${line%%:*}
+  image_ids[$name]=$image_id
 
-  image_id=$(docker images -q $image)
-  if [[ -z "$image_id" || -n "$rebuild" ]]; then
-    name=${line%%:*}
-    build_args=${line#*:}
-    extra_args=()
-    if [[ -n "$no_cache" ]]; then
-      extra_args+=('--no-cache')
-    fi
-    echo 'building.'
-    docker build --network host ${extra_args[*]} $(eval echo $build_args) -f "$DOCKER_ROOT/images/Dockerfile-$name" .
-  else
-    echo 'built already.'
+  args=$(eval echo ${line#*:})
+  extra_args=()
+  if [[ -n "$no_cache" ]]; then
+    extra_args+=('--no-cache')
   fi
-
-  # If we had setup REPOSITORY_URL and should push
-  if [[ -n "$push" && -n "$REGISTRY_URL" ]]; then
-    docker tag "$image" "$REGISTRY_URL/$image"
-    docker push "$REGISTRY_URL/$image"
-  fi
+  image_build_args[$name]="${extra_args[*]} $(eval echo ${line#*:})"
+  image_names[$name]=$name
 done
+
+builded() {
+  if grep -lq "^$@$" $lock_file ; then
+    return 0
+  fi
+  return 1
+}
+
+if [[ ! -n "$@" ]]; then
+  for name in "${image_names[@]}"; do
+    original_args+=" $name"
+  done
+  $YODA_CMD build $original_args
+else
+  if [[ ! $force ]]; then
+    trap unlock EXIT
+  fi
+  lock
+
+  for image_for_build in "$@"; do
+    if $(builded $image_for_build) || [[ ! -f $DOCKER_ROOT/images/Dockerfile-$image_for_build ]] ; then
+      continue
+    else
+      newline=$'\n'
+      build_instructions=""
+      mapfile -t deps < $DOCKER_ROOT/images/Dockerfile-$image_for_build
+      for line in "${deps[@]}"; do
+        if [[ $line =~ ^FROM.* ]]; then
+          dep_name=$(echo $line | grep -Eo 'FROM [^ ]+' | cut -d' ' -f2)
+          if [[ "${image_names[$dep_name]}" == $dep_name ]]; then
+            if ! $(builded $dep_name) ; then
+              args=('--force')
+              if [[ -n "$rebuild" ]]; then
+                args+=('--rebuild')
+              fi
+              if [[ -n "$no_cache" ]]; then
+                args+=('--no-cache')
+              fi
+              if [[ -n "$push" ]]; then
+                args+='--push'
+              fi
+
+              $YODA_CMD build ${args[*]} $dep_name
+            fi
+
+            new_line=$(echo $line | sed -e "s@$dep_name@${image_ids[$dep_name]}@")
+            build_instructions+="$new_line${newline}"
+          else
+            build_instructions+="$line${newline}"
+          fi
+        else
+          build_instructions+="$line${newline}"
+        fi
+      done
+
+      echo -n "Image '${image_ids[$image_for_build]}' is "
+
+      docker_image_id=$(docker images -q "${image_ids[$image_for_build]}")
+      if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
+        echo 'building.'
+        echo "$build_instructions" | docker build --network host ${image_build_args[$image_for_build]} -f - .
+      else
+        echo 'built already.'
+      fi
+
+    fi
+
+    # If we had setup REPOSITORY_URL and should push
+    if [[ -n "$push" && -n "$REGISTRY_URL" ]]; then
+      docker tag "${image_ids[$image_for_build]}" "$REGISTRY_URL/${image_ids[$image_for_build]}"
+      docker push "$REGISTRY_URL/${image_ids[$image_for_build]}"
+    fi
+
+    echo $image_for_build >> $lock_file
+  done
+fi
