@@ -18,7 +18,7 @@ check:
 	which tput
 	test -n 'bash >= 4' -a -n "$(call IF_VER_GT, $(BASH_VERSION), 4)"
 	test -n 'Docker API version >= 1.26' -a -n "$(call IF_VER_GT, $(DOCKER_API_VERSION), 1.26)"
-	test -n 'docker-compose >= 1.12' -a -n "$(call IF_VER_GT, $(DOCKER_COMPOSE_VERSION), 1.12)"
+	test -n 'docker-compose >= 1.18' -a -n "$(call IF_VER_GT, $(DOCKER_COMPOSE_VERSION), 1.18)"
 	test -n 'git >= 1.9' -a -n "$(call IF_VER_GT, $(GIT_VERSION), 1.9)"
 
 install:
