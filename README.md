@@ -24,7 +24,7 @@ Remember that you need bash version 4 or higher installed at least and GNU imple
 ## Knowledge requirements
 1. [Docker](https://docs.docker.com) and its main concept
 2. [Image and container](https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/) understanding
-3. You know [Docker Compose](https://docs.docker.com/compose/overview/) and and [its file syntax](https://docs.docker.com/compose/compose-file/).
+3. You know [Docker Compose](https://docs.docker.com/compose/overview/) and [its file syntax](https://docs.docker.com/compose/compose-file/).
 
 ## Usage example
 OK. You have git repository with your project.  
@@ -78,7 +78,7 @@ When you do yoda init in your project it creates by default yoda folder. This fo
 ### Path: containers
 When you adding new container folder is created here with same name. For example if you add container with name **container**. Same folder will appear here.  
 This folder will contain some files.
- 
+
 | File | Description |
 |---|---|
 | container.yml | Its docker-compose section without section name that describes how to build container. This file used to generate whole docker-compose.yml file for starting services |
@@ -107,7 +107,7 @@ Each line contains image name and build args that will be passed in **docker bui
 
 ### Path: Envfile
 Its simple file YAML like with environment and server description:
-  
+
 ```yaml
 user@server: production
 production: container1 container2=2
