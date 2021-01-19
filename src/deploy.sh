@@ -93,7 +93,14 @@ deploy() {
     git checkout -f $git_branch && git reset --hard origin/$git_branch
     git pull --rebase origin $git_branch
     git clean -fdx
-    PATH=\$PATH:~/.yoda ENV=$env REVISION=$rev $custom_args yoda start ${start_args[*]}
+    if [[ -d ".gitsecret" ]]; then
+      if [[ -z "\$GIT_SECRET_PASSWORD" ]]; then
+        echo '.gitsecret folder found but no $GIT_SECRET_PASSWORD environment variable set'
+        exit 1
+      fi
+      git secret reveal -p "\$GIT_SECRET_PASSWORD"
+    fi
+    PATH=\$PATH:~/.yoda ENV=$env GIT_BRANCH=$git_branch REVISION=$rev $custom_args yoda start ${start_args[*]}
     {
       source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
       echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision
