@@ -1,4 +1,4 @@
-FROM alpine:3.5
-MAINTAINER {{user}} <{{email}}>
+FROM alpine:3.11
+LABEL maintainer="{{user}} <{{email}}"
 
 COPY . /src
