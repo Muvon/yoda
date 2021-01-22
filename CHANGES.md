@@ -1,5 +1,23 @@
 # Yoda change log
 
+## Version 1.2
+**New:**
+1. Add automatic support of git-secret on deployment
+2. Add startup server script for Centos 8 to setup ready to deploy node
+3. Add log command to follow output of containers
+4. Add --no-cache argument for build command
+
+**Changes**
+1. Upgrade min version of docker api to 1.41
+2. Upgrade min version of compose to 1.28
+3. Upgrade builded compose file version to 3.9
+4. Dont use shared ssh connection to prevent failure of deploys in some casess
+5. Add validatation of services in Startfile. It closes #46
+
+**Bugs**
+1. Dont run service up with empty rest of containers. It closes #47
+2. Fix various missprints in docs and logic
+
 ## Version: 1.1
 **New:**
 1. Add startup server script for Centos 7 to setup ready to deploy node
