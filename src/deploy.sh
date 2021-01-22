@@ -100,7 +100,7 @@ deploy() {
       fi
       git secret reveal -p "\$GIT_SECRET_PASSWORD"
     fi
-    PATH=\$PATH:~/.yoda ENV=$env GIT_BRANCH=$git_branch REVISION=$rev $custom_args yoda start ${start_args[*]}
+    PATH=\$PATH:~/.yoda ENV=$env REVISION=$rev $custom_args yoda start ${start_args[*]}
     {
       source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
       echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision
