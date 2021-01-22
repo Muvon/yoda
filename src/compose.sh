@@ -39,7 +39,7 @@ for line in "${lines[@]}"; do
 done
 
 echo "# Build args: $*"
-echo 'version: "2.1"'
+echo 'version: "3.9"'
 echo 'services:'
 
 # name, sequence
