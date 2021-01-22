@@ -6,6 +6,7 @@
 2. Add startup server script for Centos 8 to setup ready to deploy node
 3. Add log command to follow output of containers
 4. Add --no-cache argument for build command
+5. Add possibility to use custom context with Buildfile
 
 **Changes**
 1. Upgrade min version of docker api to 1.41
