@@ -32,6 +32,10 @@ mapfile -t lines < $DOCKER_ROOT/Buildfile
 for line in "${lines[@]}"; do
   k=$(echo $line | cut -d: -f1)
   v=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  # @TODO: this logic used twice: compose and build
+  [[ $k =~ ^([^\[]*)(\[(.*)\])?$ ]]
+  k=${BASH_REMATCH[1]}
+
   if [[ -n "$REGISTRY_URL" ]]; then
     v="$REGISTRY_URL/$v"
   fi
