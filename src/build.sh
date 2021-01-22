@@ -70,13 +70,13 @@ for line in "${lines[@]}"; do
 done
 
 builded() {
-  if grep -lq "^$@$" $lock_file ; then
+  if [[ $(cat "$lock_file") -eq "$*" ]] ; then
     return 0
   fi
   return 1
 }
 
-if [[ ! -n "$@" ]]; then
+if [[ -z "$*" ]]; then
   for name in "${image_names[@]}"; do
     original_args+=" $name"
   done
@@ -107,7 +107,7 @@ else
                 args+=('--no-cache')
               fi
               if [[ -n "$push" ]]; then
-                args+='--push'
+                args+=('--push')
               fi
 
               $YODA_CMD build ${args[*]} $dep_name
