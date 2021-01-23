@@ -1,5 +1,9 @@
 # Yoda change log
 
+## Version 1.3
+
+*Coming soon*
+
 ## Version 1.2
 **New:**
 1. Add automatic support of git-secret on deployment
