@@ -69,13 +69,6 @@ for line in "${lines[@]}"; do
   image_names[$name]=$name
 done
 
-builded() {
-  if [[ -n "$*" && $(cat "$lock_file") -eq "$*" ]] ; then
-    return 1
-  fi
-  return 0
-}
-
 if [[ -z "$*" ]]; then
   for name in "${image_names[@]}"; do
     original_args+=" $name"
@@ -88,51 +81,13 @@ else
   lock
 
   for image_for_build in "$@"; do
-    if $(builded $image_for_build) || [[ ! -f $DOCKER_ROOT/images/Dockerfile-$image_for_build ]] ; then
-      continue
+    echo -n "Image '${image_ids[$image_for_build]}' is "
+    docker_image_id=$(docker images -q "${image_ids[$image_for_build]}")
+    if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
+      echo 'building.'
+      docker build --network host "${image_build_args[$image_for_build]}" -f "$DOCKER_ROOT/images/Dockerfile-$image_for_build" "${image_build_context[$image_for_build]}"
     else
-      newline=$'\n'
-      build_instructions=""
-      mapfile -t deps < $DOCKER_ROOT/images/Dockerfile-$image_for_build
-      for line in "${deps[@]}"; do
-        if [[ $line =~ ^FROM.* ]]; then
-          dep_name=$(echo $line | grep -Eo 'FROM [^ ]+' | cut -d' ' -f2)
-          if [[ "${image_names[$dep_name]}" == $dep_name ]]; then
-            if ! $(builded $dep_name) ; then
-              args=('--force')
-              if [[ -n "$rebuild" ]]; then
-                args+=('--rebuild')
-              fi
-              if [[ -n "$no_cache" ]]; then
-                args+=('--no-cache')
-              fi
-              if [[ -n "$push" ]]; then
-                args+=('--push')
-              fi
-
-              $YODA_CMD build ${args[*]} $dep_name
-            fi
-
-            new_line=$(echo $line | sed -e "s@$dep_name@${image_ids[$dep_name]}@")
-            build_instructions+="$new_line${newline}"
-          else
-            build_instructions+="$line${newline}"
-          fi
-        else
-          build_instructions+="$line${newline}"
-        fi
-      done
-
-      echo -n "Image '${image_ids[$image_for_build]}' is "
-
-      docker_image_id=$(docker images -q "${image_ids[$image_for_build]}")
-      if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
-        echo 'building.'
-        echo "$build_instructions" | docker build --network host ${image_build_args[$image_for_build]} -f - ${image_build_context[$image_for_build]}
-      else
-        echo 'built already.'
-      fi
-
+      echo 'built already.'
     fi
 
     # If we had setup REPOSITORY_URL and should push
@@ -140,7 +95,5 @@ else
       docker tag "${image_ids[$image_for_build]}" "$REGISTRY_URL/${image_ids[$image_for_build]}"
       docker push "$REGISTRY_URL/${image_ids[$image_for_build]}"
     fi
-
-    echo -n $image_for_build >> $lock_file
   done
 fi
