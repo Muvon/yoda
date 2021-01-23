@@ -38,7 +38,9 @@ fi
 
 if [[ -n "$env" ]]; then
   echo "Environment: ${env%.*}"
-  echo "Namespace: ${env#*.}"
+  if [[ -n "${env#*.}" ]]; then
+    echo "Namespace: ${env#*.}"
+  fi
 fi
 
 if [[ -n "$rev" ]]; then
