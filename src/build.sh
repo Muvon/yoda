@@ -47,7 +47,7 @@ declare -A image_names
 declare -A image_ids
 declare -A image_build_args
 declare -A image_build_context
-mapfile -t lines < $DOCKER_ROOT/Buildfile
+mapfile -t lines < "$DOCKER_ROOT/Buildfile"
 for line in "${lines[@]}"; do
   image=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   image_id=$(eval echo $image)
@@ -70,10 +70,10 @@ for line in "${lines[@]}"; do
 done
 
 builded() {
-  if [[ $(cat "$lock_file") -eq "$*" ]] ; then
-    return 0
+  if [[ -n "$*" && $(cat "$lock_file") -eq "$*" ]] ; then
+    return 1
   fi
-  return 1
+  return 0
 }
 
 if [[ -z "$*" ]]; then
@@ -141,6 +141,6 @@ else
       docker push "$REGISTRY_URL/${image_ids[$image_for_build]}"
     fi
 
-    echo $image_for_build >> $lock_file
+    echo -n $image_for_build >> $lock_file
   done
 fi
