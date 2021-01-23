@@ -56,7 +56,8 @@ if [[ -n "$host" ]]; then
 fi
 
 if [[ -n "$env" ]]; then
-  echo "Environment: $env"
+  echo "Environment: ${env%.*}"
+  echo "Namespace: ${env#*.}"
 fi
 
 if [[ -n "$rev" ]]; then
