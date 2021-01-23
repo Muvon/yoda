@@ -59,8 +59,13 @@ for line in "${lines[@]}"; do
   image=$(echo "$line" | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   image_id=$(eval echo "$image")
 
+  name=${line%%:*}
+  [[ $name =~ ^([^\[]*)(\[(.*)\])?$ ]]
+  name=${BASH_REMATCH[1]}
+  context=${BASH_REMATCH[3]:-.}
+
   echo -n "Image '$image_id' is "
-  if [[ -n "${images[*]}" && -z "${images[$image]}" ]]; then
+  if [[ -n "${images[*]}" && -z "${images[$name]}" ]]; then
     echo 'skipped.'
     continue
   fi
@@ -68,11 +73,6 @@ for line in "${lines[@]}"; do
   docker_image_id=$(docker images -q "$image_id")
   if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
     echo 'building.'
-
-    name=${line%%:*}
-    [[ $name =~ ^([^\[]*)(\[(.*)\])?$ ]]
-    name=${BASH_REMATCH[1]}
-    context=${BASH_REMATCH[3]:-.}
 
     build_args=$(eval echo ${line#*:})
     extra_args=()
