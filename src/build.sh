@@ -60,7 +60,7 @@ for line in "${lines[@]}"; do
   image_id=$(eval echo "$image")
 
   echo -n "Image '$image_id' is "
-  if [[ -n "${images[*]}" && -z "${images[$image]}" && -z "${images[$image_id]}" ]]; then
+  if [[ -n "${images[*]}" && -z "${images[$image]}" ]]; then
     echo 'skipped.'
     continue
   fi
