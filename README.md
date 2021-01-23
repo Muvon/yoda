@@ -95,6 +95,8 @@ For example you can write here IMAGE_NAME to set image name with revision and ot
 
 If you need custom env.sh file for environment you can just create it with name as env.dev.sh that will extend default env.sh file with new variables defined there.
 
+Take a noticy that environment support namespaces for example production.server1 and production.server2. One server cannot hold 2 namespaces so to use custom env.sh in this case just use env.production.sh without namespace of each server.
+
 ### Path: Buildfile
 Its simple file that have following structure:
 
@@ -113,9 +115,21 @@ user@server: production
 production: container1 container2=2
 dev: container1
 ```
-
 Example file above declare server **user@server** that will be deployed as **production**. And production will contain one container1 and two container2 instances.  
 ANd in dev environment only one container with name container1 will be started.
+
+Or in case of multiservers we use like this
+
+```yaml
+user@server1: production.ns1
+user@server2: production.ns2
+production.ns1: container1 container2=2
+production.ns2: container3 container4
+dev: container1
+```
+
+In that case almost the same. Dot (.) allows us to separate namespaces and customize which services we use for one server and which for another. In that case we still have **production** environment. All that goes after dot (.) is about namespace of environment.
+
 
 ## Path: Startfile
 This file allow you to manage flow of start your complex service.  
@@ -125,15 +139,24 @@ dev:
   flow: deploy container2 container1=2
   stop: container2
   wait: deploy
+production.ns1:
+  flow: deploy container2 container1=2
+  stop: container2
+  wait: deploy
+production.ns2:
+  flow: deploy container2 container1=2
+  stop: container2
+  wait: deploy
 ```
 - **flow** - It declares flow of starting services. It contains container or container=chunk where is chunk - number that devide starting by chunks
 - **stop** - each service repsented here will be stopped before start
 - **wait** - After run up command with container sometimes you need to wait for exit code of it. This section declares which containers we should wait for
 
-
 In this example you [yoda start](#yoda-start-options-container) command first will stop container2 if its running.  
 After that it will start deploy, then container2 and then container1 services will be started as chunks by 2.  
 Also we wait for exit code for deploy container.
+
+Take a notice in case if you use multiserver and namespaces in environment you have to describe each environment with namespace sepately because all of them independed in flow.
 
 ## Path: docker/.yodarc
 This is locked environment file for yoda inited in current project with yoda version and other useful common files. Plese dont edit this file because it rewrites on yoda upgrade.  

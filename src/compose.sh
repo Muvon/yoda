@@ -89,7 +89,7 @@ for p in ${!SCALE_MAP[*]}; do
     echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
 
     remove=0
-    env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
+    env_container_file="$DOCKER_ROOT/containers/$p/container.${ENV%.*}.yml"
     mapfile -t lines < "$DOCKER_ROOT/containers/$p/container.yml"
     {
       for line in "${lines[@]}"; do
