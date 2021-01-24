@@ -27,7 +27,7 @@ dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages
 dnf install -y docker-ce-20.10.2-3.el8
 
 # Preparing docker to start
-sed -i 's|ExecStart=/usr/bin/dockerd|ExecStart=/usr/bin/dockerd --storage-driver=overlay2 --iptables=false --live-restore|' /usr/lib/systemd/system/docker.service
+cp daemon.json /etc/docker/
 systemctl daemon-reload
 systemctl enable docker
 

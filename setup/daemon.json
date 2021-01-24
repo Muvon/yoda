@@ -1,0 +1,11 @@
+{
+  "debug": false,
+  "iptables": false,
+  "ip6tables": false,
+  "live-restore": true,
+  "storage-driver": "overlay2",
+  "tls": false,
+  "features": {
+    "buildkit": true
+  }
+}
