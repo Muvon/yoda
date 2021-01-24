@@ -183,6 +183,7 @@ Commands available:
 | [start](#yoda-start-options-container) |  Start all services for current project |
 | [stop](#yoda-stop-container) | Stop all services for current project |
 | [status](#yoda-status) | Display current status of services |
+| [setup](#yoda-setup) | Setup server to be read for use with yoda deployment system |
 | [deploy](#yoda-deploy-options) | Deploy project on one or all nodes |
 | [rollback](#yoda-rollback-options) | Rollback project on one or all nodes to previos revision |
 | [destroy](#yoda-destroy) | Remove all created services by start command and all local images with volumes |
@@ -246,8 +247,16 @@ Stop all containers or only passed with arguments
 ### yoda status
 Display current status of services
 
+### yoda setup [options]
+Setup server before it can be used for environment. You can use only Centos 8 distribution. Otherwise you have to setup it in manual mode. Before deploy put your authorized_keys to server folder.
+
+| Options | Description | Default |
+|---|---|:---:|
+| --env | Setup single host or use host regexp pattern (Envfile will be used) | - |
+| --host | Setup all servers in environment (Envfile will be used) | - |
+
 ### yoda deploy [options]
-Deploy single-node or whole cluster  
+Deploy single-node or whole cluster
 It exit with code 0 for success and 1 for failure (if something went wrong also on one node of all).
 Options are:
 

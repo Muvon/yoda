@@ -172,6 +172,11 @@ case "$cmd" in
     $YODA_CMD log "$@"
     ;;
 
+  setup)
+    check_yodarc
+    bash "$YODA_PATH/src/setup.sh" "$@"
+    ;;
+
   deploy)
     check_yodarc
     if [[ -z "$GIT_URL" ]]; then

@@ -72,6 +72,12 @@ Usage:
   ${c_bold}$YODA_CMD status${c_normal}
     Display current status of services
 
+  ${c_bold}$YODA_CMD setup [options]${c_normal}
+    Setup server before it can be used for environment. You can use only Centos 8 distribution. Otherwise you have to setup it in manual mode. Before deploy put your authorized_keys to server folder.
+    Optitons are:
+      --host=host         Setup single host or use host regexp pattern (Envfile will be used)
+      --env=environment   Setup all servers in environment (Envfile will be used)
+
   ${c_bold}$YODA_CMD deploy [options]${c_normal}
     Deploy single-node or whole cluster
     Options are:

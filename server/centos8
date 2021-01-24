@@ -40,7 +40,6 @@ dnf install -y bash-completion
 curl -L https://raw.githubusercontent.com/docker/machine/v0.16.0/contrib/completion/bash/docker-machine.bash -o /etc/bash_completion.d/docker-machine
 curl -L https://raw.githubusercontent.com/docker/compose/1.27.4/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
 
-
 # Install firewalld
 dnf install -y firewalld
 
@@ -54,5 +53,6 @@ systemctl start chronyd
 # Generate locale
 # localedef -i en_US -f utf8 en_US.utf8
 
-# Reboot now
+bash ./setup
+
 shutdown -r now

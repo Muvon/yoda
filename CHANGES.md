@@ -2,9 +2,15 @@
 
 ## Version 1.3
 
-*Coming soon*
-**Changes**
+**New**
+1. Add *daemon.json* and change the way we use for setup server with docker
+2. Add possibility to setup new server with **yoda** before use it for deploy by running:
 
+    ```bash
+    yoda setup --env=production
+    ```
+
+**Changes**
 1. Various code refactoring and optimizations
 2. Change logic how we handle **--env** in **deploy**/**rollback** commands and introduce **--stack**. ENV contains only environment now. You have to change
 
@@ -18,7 +24,7 @@
       yoda deploy --env=production --stack=stack
     ```
 
-3. Something else
+3. Centos 7 setup script is deprecated and removed
 
 ## Version 1.2
 **New:**
