@@ -4,10 +4,10 @@ useradd box
 usermod -aG docker box
 mkdir /home/box/.ssh && chown box:box "$_" && chmod 700 "$_"
 mkdir /home/admin/.ssh && chown admin:admin "$_" && chmod 700 "$_"
-cp ./authorized_keys /home/box/.ssh/
-cp ./authorized_keys /home/admin/.ssh/
+cp "$SERVER_ROOT/authorized_keys" /home/box/.ssh/
+cp "$SERVER_ROOT/authorized_keys" /home/admin/.ssh/
 chown box:box /home/box/.ssh/authorized_keys && chmod 600 "$_"
 chown admin:admin /home/admin/.ssh/authorized_keys && chmod 600 "$_"
 echo '%admin  ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
-cp -f ./sshd_config /etc/ssh/sshd_config
+cp -f "$SERVER_ROOT/sshd_config" /etc/ssh/sshd_config
 systemctl reload sshd

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -e
+SERVER_ROOT=$(cd "${BASH_SOURCE%/*}" && pwd)
+export SERVER_ROOT
 
 # Update common system
 dnf install -y epel-release
@@ -12,7 +14,7 @@ dnf install -y chrony nano dstat htop curl libzip git git-secret
 
 # Upgrade kernel to support overlayfs2
 rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
-rpm -Uvh http://www.elrepo.org/elrepo-release-8.0-2.el8.elrepo.noarch.rpm
+rpm -Uvh http://www.elrepo.org/elrepo-release-8.2-1.el8.elrepo.noarch.rpm
 dnf --enablerepo=elrepo-kernel install -y kernel-ml
 grub2-set-default 0
 
@@ -27,7 +29,7 @@ dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages
 dnf install -y docker-ce-20.10.2-3.el8
 
 # Preparing docker to start
-cp daemon.json /etc/docker/
+cp "$SERVER_ROOT/daemon.json" /etc/docker/
 systemctl daemon-reload
 systemctl enable docker
 
@@ -53,6 +55,6 @@ systemctl start chronyd
 # Generate locale
 # localedef -i en_US -f utf8 en_US.utf8
 
-bash ./setup
+bash "$SERVER_ROOT/setup"
 
 shutdown -r now
