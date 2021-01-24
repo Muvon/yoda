@@ -3,6 +3,8 @@
 ## Version 1.3
 
 *Coming soon*
+**Changes**
+1. Various code refactoring and optimizations
 
 ## Version 1.2
 **New:**
