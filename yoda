@@ -86,8 +86,8 @@ custom_run() {
 }
 
 allow_dev_only() {
-  if [[ "$ENV_NAME" != 'dev' ]]; then
-    >&2 echo "Your environment: $ENV_NAME. This command is allowed only in 'dev' environment."
+  if [[ "$ENV" != 'dev' ]]; then
+    >&2 echo "Your environment: $ENV. This command is allowed only in 'dev' environment."
     return 1
   fi
 }
