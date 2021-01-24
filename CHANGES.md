@@ -4,7 +4,21 @@
 
 *Coming soon*
 **Changes**
+
 1. Various code refactoring and optimizations
+2. Change logic how we handle **--env** in **deploy**/**rollback** commands and introduce **--stack**. ENV contains only environment now. You have to change
+
+    ```bash
+      yoda deploy --env=production.stack
+    ```
+
+    to
+
+    ```bash
+      yoda deploy --env=production --stack=stack
+    ```
+
+3. Something else
 
 ## Version 1.2
 **New:**

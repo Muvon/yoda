@@ -8,6 +8,9 @@ for p in "$@"; do
     --env=*)
       env=${p#*=}
       ;;
+    --stack=*)
+      stack=${p#*=}
+      ;;
     --rev=*)
       rev=${p#*=}
       ;;
@@ -32,15 +35,11 @@ fi
 git_branch=${branch:-"master"}
 echo "GIT branch: $git_branch"
 
-if [[ -n "$host" ]]; then
-  echo "Host: $host"
-fi
+echo "Host: $host"
+echo "Environment: $env"
 
-if [[ -n "$env" ]]; then
-  echo "Environment: ${env%.*}"
-  if [[ -n "${env#*.}" ]]; then
-    echo "Namespace: ${env#*.}"
-  fi
+if [[ -n "$stack" ]]; then
+  echo "Stack: $stack"
 fi
 
 if [[ -n "$rev" ]]; then
@@ -103,7 +102,7 @@ deploy() {
       fi
       git secret reveal -p "\$GIT_SECRET_PASSWORD"
     fi
-    PATH=\$PATH:~/.yoda ENV=$env REVISION=$rev $custom_args yoda start ${start_args[*]}
+    PATH=\$PATH:~/.yoda ENV=$env STACK=$stack REVISION=$rev $custom_args yoda start ${start_args[*]}
     {
       source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
       echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision

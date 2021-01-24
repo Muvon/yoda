@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
+get_stack() {
+  env_stack="$ENV"
+  if [[ -n "$STACK" ]]; then
+    env_stack="$env_stack.$STACK"
+  fi
+  return $(cat $DOCKER_ROOT/Envfile | grep ^$env_stack: | cut -d: -f2)
+}
+
 get_containers() {
-  containers=()
+  local containers=()
   for service in "$@"; do
     service=$(echo $service | sed "s|^$COMPOSE_PROJECT_NAME\.||")
 
@@ -12,7 +20,7 @@ get_containers() {
       container=${service%.*}
       containers+=($service)
     else
-      service=$(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | sed "s|^$ENV||" | grep -oE "\b$service(=[0-9]+)?\b")
+      service=$(get_stack | grep -oE "\b$service(=[0-9]+)?\b")
       count=$(get_count "$service" 1)
       service=$(get_service "$service")
 

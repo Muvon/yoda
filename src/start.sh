@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -e
-# shellcheck source=../lib/container.sh
-source $YODA_PATH/lib/container.sh
-source $YODA_PATH/lib/array.sh
+# shellcheck disable=SC1091 source=../lib/container.sh
+source "$YODA_PATH/lib/container.sh"
+# shellcheck disable=SC1091 source=../lib/array.sh
+source "$YODA_PATH/lib/array.sh"
 
 for p in "$@"; do
   case $p in
@@ -54,7 +55,7 @@ get_config() {
 validate_services() {
   local section=$1
   services=$(get_config "$section")
-  pool=( $(cat $DOCKER_ROOT/Envfile | grep ^$ENV: | cut -d: -f2) )
+  pool=( $(get_stack) )
   for service in $services; do
     if echo -n "${pool[*]}" | grep -Eo "\b$service\b" > /dev/null; then
       continue
@@ -66,12 +67,12 @@ validate_services() {
   echo -n "$services"
 }
 
-$YODA_CMD compose > $COMPOSE_FILE
+$YODA_CMD compose > "$COMPOSE_FILE"
 containers=$(get_containers "$@")
 
 # Build images on start only when no registry setted
 if [[ -z "$REGISTRY_URL" || -n "$rebuild" ]]; then
-  images=$(grep image: $COMPOSE_FILE | sed -r 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
+  images=$(grep image: "$COMPOSE_FILE" | sed -r 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
   $YODA_CMD build ${build_args[*]} $images
 else # Pull images otherwise
   docker-compose pull

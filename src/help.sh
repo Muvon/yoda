@@ -77,6 +77,7 @@ Usage:
     Options are:
       --host=host         Deploy on single host or using host regexp pattern (Envfile will be used)
       --env=environment   Deploy on all nodes with that environment (Envfile will be used)
+      --stack=stack       Deploy only this stack in current environment
       --rev=revision      Set custom revision to be deployed or rollback to
       --branch=gitbranch  What branch will be deployed. Default is master
       --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.

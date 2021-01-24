@@ -8,6 +8,9 @@ for p in "$@"; do
     --env=*)
       env=${p#*=}
       ;;
+    --stack=*)
+      stack=${p#*=}
+      ;;
     --rev=*)
       shift
       ;;
@@ -51,15 +54,10 @@ if [[ $(echo "$rev" | wc -l | tr -d ' ') -gt 1 ]]; then
   exit 1
 fi
 
-if [[ -n "$host" ]]; then
-  echo "Host: $host"
-fi
-
-if [[ -n "$env" ]]; then
-  echo "Environment: ${env%.*}"
-  if [[ -n "${env#*.}" ]]; then
-    echo "Namespace: ${env#*.}"
-  fi
+echo "Host: $host"
+echo "Environment: $env"
+if [[ -n "$stack" ]]; then
+  echo "Stack: $stack"
 fi
 
 if [[ -n "$rev" ]]; then

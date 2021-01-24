@@ -121,10 +121,10 @@ ANd in dev environment only one container with name container1 will be started.
 Or in case of multiservers we use like this
 
 ```yaml
-user@server1: production.ns1
-user@server2: production.ns2
-production.ns1: container1 container2=2
-production.ns2: container3 container4
+user@server1: production.stack1
+user@server2: production.stack2
+production.stack1: container1 container2=2
+production.stack2: container3 container4
 dev: container1
 ```
 
@@ -255,6 +255,7 @@ Options are:
 |---|---|:---:|
 | --host | Deploy on single host or using host regexp pattern (Envfile will be used) | - |
 | --env | Deploy on all nodes with that environment (Envfile will be used) | - |
+| --stack | Deploy only this stack in current environment | - |
 | --rev | Set custom revision to be deployed or rollback to | - |
 | --branch | What branch will be deployed. | master |
 | --args | Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed | - |

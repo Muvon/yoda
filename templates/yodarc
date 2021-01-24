@@ -5,6 +5,7 @@ GIT_URL=$(git config --get remote.origin.url 2> /dev/null || true)
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo 'master')
 SOURCE_PATH=$(pwd)
 DOCKER_ROOT=$(cd "${BASH_SOURCE%/*}" && pwd)
+ENV=${ENV:-dev}
 
 export \
   YODA_VERSION="{{yoda_version}}" \
@@ -15,10 +16,10 @@ export \
   SOURCE_PATH \
   DOCKER_ROOT \
   HOSTNAME=${HOSTNAME:-$(hostname)} \
-  ENV=${ENV:-dev} \
+  ENV STACK \
   COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"{{name}}"} \
   COMPOSE_HTTP_TIMEOUT=${COMPOSE_HTTP_TIMEOUT:-300} \
-  COMPOSE_FILE="$DOCKER_ROOT/docker-compose.${ENV%.*}.yml" \
+  COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml" \
   \ # Wait # seconds before kill -9 stopping container
   STOP_WAIT_TIMEOUT=${STOP_WAIT_TIMEOUT:-10} \
   \ # If 1 names will be project.container.0 also when scale not set
