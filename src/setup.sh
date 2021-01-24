@@ -16,12 +16,12 @@ if [[ -z "$host" && -z "$env" ]]; then
   exit 1
 fi
 
-if [[ ! -f "$DOCKER_ROOT/server/authorized_keys" ]]; then
-  >&2 echo "Cannot find authorized_keys file. Please add it to server folder before  setup."
+if [[ ! -f "$DOCKER_ROOT/.ssh/authorized_keys" ]]; then
+  >&2 echo "Cannot find authorized_keys file. Please add it to '$DOCKER_ROOT/.ssh/authorized_keys'."
   exit 1
 fi
 
-control_path=$DOCKER_ROOT/.ssh/%r@%h-%p
+control_path=$DOCKER_ROOT/.ssh/connections/%r@%h-%p
 setup() {
   local host=$1
   if [[ -z "$host" ]]; then
@@ -36,24 +36,9 @@ setup() {
     exit 1
   fi
 
-  # First check known hosts
-  grep "${host##*@}" ~/.ssh/known_hosts || ssh-keyscan "${host##*@}" >> "$_"
-  yoda_git_url=$(cd ${BASH_SOURCE%/*} && git remote get-url origin || true)
-  yoda_git_host=$(echo $yoda_git_url | cut -d'@' -f2 | cut -d':' -f1)
-
-  ssh -o ControlPath=$control_path -o PasswordAuthentication=no -AT "root@$host" <<EOF
-    set -e
-
-    # already deployed?
-    which docker || exit 0
-
-    if [[ ! -d ~/.yoda ]]; then
-      grep $yoda_git_host ~/.ssh/known_hosts || ssh-keyscan $yoda_git_host >> \$_
-      git clone -q $yoda_git_url ~/.yoda
-    fi
-
-    bash ~/.yoda/server/centos8
-EOF
+  scp -o ControlPath="$control_path" -o PasswordAuthentication=no -r "$YODA_PATH/server" "root@$host:~/"
+  scp -o ControlPath="$control_path" -o PasswordAuthentication=no "$DOCKER_ROOT/.ssh/authorized_keys" "root@$host:~/server/"
+  ssh -o ControlPath="$control_path" -o PasswordAuthentication=no -T "root@$host" "bash ~/server/centos8"
   echo "Setup of the $host with environment $env has been finished."
 }
 
@@ -70,13 +55,14 @@ fi
 # First do checkups that all servers have authorization by keys
 echo "Check root authorization on all servers using SSH keys"
 for server in ${servers[*]}; do
-  echo -n '  '
-  ssh -o ControlPath=$control_path -o ControlPersist=1800 -o ConnectTimeout=5 -AT "root@$host" "echo root@$host...ok"
+  echo -n "  root@${server#*@}"
+  grep "${server#*@}" ~/.ssh/known_hosts > /dev/null 2>&1 || ssh-keyscan "${server#*@}" >> "$_"
+  ssh -o ControlPath="$control_path" -o ControlPersist=1800 -o ConnectTimeout=5 -AT "root@${server#*@}" "echo '...ok'"
 done
 
-echo "Setup has been started"
+echo "Setup has been started"s
 for server in ${servers[*]}; do
-  ( setup "$server" >> "$DOCKER_ROOT/log/setup/${server//@/_}.log" 2>&1 ) &
+  ( setup "${server#*@}" >> "$DOCKER_ROOT/log/setup/${server#*@}.log" 2>&1 ) &
   pids+=($!)
 done
 
@@ -126,7 +112,8 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
       status="${c_yellow}${c_bold}processing${c_normal}"
     fi
     tput el
-    echo "${servers[$idx]} – $status"
+    server="${servers[$idx]}"
+    echo "root@${server#*@} – $status"
     clear=1
   done
 done
