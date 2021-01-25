@@ -150,7 +150,7 @@ is_succeed() {
 clear=
 elapsed=0
 exit_code=0
-
+failed=()
 while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   if [[ -n "$clear" ]]; then
     sleep 1
@@ -173,6 +173,7 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
       else
         exit_code=1
         status="${c_red}${c_bold}failed${c_normal}"
+        failed+=("${servers[$idx]}")
         finished[$pid]=$exit_code
       fi
     else
@@ -184,4 +185,8 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   done
 done
 echo "Finished: $(date -u)"
+for server in ${failed[*]}; do
+  echo "${c_red}${c_bold}$server${c_normal} log:"
+  tail -n 5 "$DOCKER_ROOT/log/${server//@/_}.log" | sed 's/^/  /'
+done
 exit $exit_code
