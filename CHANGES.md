@@ -27,6 +27,9 @@
 3. Centos 7 setup script is deprecated and removed
 4. Continuosly check yoda path and fetch/pull in case we have empty tag. Useful for using latest dev version of yod on servers
 
+**Bugs**
+1. If before you had to make env.production.stack.sh file now you need to make env.production.sh. It was missbehavior
+
 ## Version 1.2
 **New:**
 1. Add automatic support of git-secret on deployment

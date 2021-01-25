@@ -43,13 +43,13 @@ if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
     set +e
     echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
     echo "Switching to project Yoda version: '$YODA_VERSION'."
-    cd $YODA_PATH
+    cd "$YODA_PATH"
     git fetch
     git pull --rebase origin master
-    git checkout $YODA_VERSION
-    switched_version=$(grep "YODA_VERSION=$YODA_VERSION" $YODA_BIN)
+    git checkout $YODA_VERSION || git checkout master
+    switched_version=$(grep "YODA_VERSION=$YODA_VERSION" "$YODA_BIN")
     if [[ "$switched_version" == "$YODA_VERSION" ]]; then
-      exec $YODA_BIN $cmd "$@"
+      exec "$YODA_BIN" "$cmd" "$@"
     else
       >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
     fi
