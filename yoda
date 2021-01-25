@@ -104,9 +104,9 @@ check_yodarc() {
     return 1
   fi
 
-  test -e "$DOCKER_ROOT/env.sh" && source "$_"
-  test -e "$DOCKER_ROOT/env.$ENV.sh" && source "$_"
-  test -e "$DOCKER_ROOT/env.$ENV.$STACK.sh" && source "$_"
+  test -e "$DOCKER_ROOT/env.sh" && source "$_" || true
+  test -e "$DOCKER_ROOT/env.$ENV.sh" && source "$_" || true
+  test -e "$DOCKER_ROOT/env.$ENV.$STACK.sh" && source "$_" || true
 }
 
 case "$cmd" in
