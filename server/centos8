@@ -10,7 +10,7 @@ dnf update -y
 # Install usable cli tools
 # libzip is for docker-compose
 dnf group install -y "Development Tools"
-dnf install -y chrony nano dstat htop curl libzip git git-secret
+dnf install -y chrony nano dstat htop curl libzip git git-secret screen
 
 # Upgrade kernel to support overlayfs2
 rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
@@ -29,9 +29,10 @@ dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages
 dnf install -y docker-ce-20.10.2-3.el8
 
 # Preparing docker to start
-cp "$SERVER_ROOT/daemon.json" /etc/docker/
 systemctl daemon-reload
 systemctl enable docker
+systemctl start docker
+mkdir -p /etc/docker && cp "$SERVER_ROOT/daemon.json" "$_"
 
 # Install docker-compose
 curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
@@ -57,4 +58,4 @@ systemctl start chronyd
 
 bash "$SERVER_ROOT/setup"
 
-shutdown -r now
+screen -d -m "shutdown -r 5"
