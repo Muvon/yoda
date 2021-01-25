@@ -34,7 +34,7 @@ if [[ "$ENV" != "dev" && -z "$yoda_tag" && "$YODA_SOURCE_VERSION" == "$YODA_VERS
   (
     cd "$YODA_PATH"
     git fetch
-    if [[ $(git status) =~ 'branch is up to date' ]]; then
+    if [[ ! $(git status) =~ 'branch is up to date' ]]; then
       yoda_git_branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo 'master')
       echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
       echo "Pulling changes from $yoda_git_branch."
