@@ -62,11 +62,6 @@ if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
   ) 2> /dev/null
 fi
 
-
-test -e "$DOCKER_ROOT/env.sh" && source "$_"
-test -e "$DOCKER_ROOT/env.$ENV.sh" && source "$_"
-test -e "$DOCKER_ROOT/env.$ENV.$STACK.sh" && source "$_"
-
 for p in "$@"; do
   case $p in
     *)
@@ -108,6 +103,10 @@ check_yodarc() {
     >&2 echo "Yoda is not inited. Run '$YODA_CMD init' first. More info: '$YODA_CMD help'."
     return 1
   fi
+
+  test -e "$DOCKER_ROOT/env.sh" && source "$_"
+  test -e "$DOCKER_ROOT/env.$ENV.sh" && source "$_"
+  test -e "$DOCKER_ROOT/env.$ENV.$STACK.sh" && source "$_"
 }
 
 case "$cmd" in
