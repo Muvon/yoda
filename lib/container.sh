@@ -6,7 +6,7 @@ get_stack() {
   if [[ -n "$STACK" ]]; then
     env_stack="$env_stack.$STACK"
   fi
-  return $(cat $DOCKER_ROOT/Envfile | grep ^$env_stack: | cut -d: -f2)
+  grep "^$env_stack:" "$DOCKER_ROOT/Envfile" | cut -d: -f2
 }
 
 get_containers() {
