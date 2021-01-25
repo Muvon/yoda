@@ -32,10 +32,16 @@ commit=$(git rev-parse HEAD 2>/dev/null || echo 'latest')
 yoda_tag=$(git describe --exact-match "$commit" 2>/dev/null || true)
 if [[ "$ENV" != "dev" && -z "$yoda_tag" && "$YODA_SOURCE_VERSION" == "$YODA_VERSION" ]]; then
   (
+    cd "$YODA_PATH"
     yoda_git_branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo 'master')
     fetch=$(git fetch)
-    test -n "$fetch" && git pull --rebase origin "$yoda_git_branch"
-  ) > /dev/null 2>&1
+    if [[ -n "$fetch" ]]; then
+      echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
+      echo "Pulling changes from $yoda_git_branch."
+      git pull --rebase origin "$yoda_git_branch"
+      exec "$YODA_BIN" "$cmd" "$@"
+    fi
+  ) 2> /dev/null
 fi
 
 if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
@@ -53,7 +59,7 @@ if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
     else
       >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
     fi
-  ) > /dev/null 2>&1
+  ) 2> /dev/null
 fi
 
 # shellcheck source=docker/env.sh
