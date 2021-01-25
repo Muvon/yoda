@@ -80,10 +80,17 @@ deploy() {
 
   ssh -o ControlPath=none -AT $host <<EOF
     set -e
-
     if [[ ! -d ~/.yoda ]]; then
       grep $yoda_git_host ~/.ssh/known_hosts || ssh-keyscan $yoda_git_host >> \$_
       git clone -q $yoda_git_url ~/.yoda
+    else
+      echo 'Changing remote origin url of yoda git repository'
+      cd ~/.yoda
+      remote_url=\$(git remote get-url origin)
+      if [[ "\$remote_url" =~ 'dmitrykuzmenkov' ]]; then
+        git remote set-url origin "\${remote_url//dmitrykuzmenkov/muvon}"
+      fi
+      cd ~/
     fi
 
     mkdir -p ~/.deploy && cd \$_
