@@ -33,8 +33,8 @@ yoda_tag=$(git describe --exact-match "$commit" 2>/dev/null || true)
 if [[ "$ENV" != "dev" && -z "$yoda_tag" && "$YODA_SOURCE_VERSION" == "$YODA_VERSION" ]]; then
   (
     yoda_git_branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo 'master')
-    git fetch
-    git pull --rebase origin "$yoda_git_branch"
+    fetch=$(git fetch)
+    test -n "$fetch" && git pull --rebase origin "$yoda_git_branch"
   ) 1> /dev/null 2> /dev/null
 fi
 
