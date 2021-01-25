@@ -26,9 +26,10 @@
 
 3. Centos 7 setup script is deprecated and removed
 4. Continuosly check yoda path and fetch/pull in case we have empty tag. Useful for using latest dev version of yod on servers
+5. If you have server with production.stack now Yoda reads 2 files: common production config *env.production.sh* & stack config in production *env.production.stack.sh*
 
 **Bugs**
-1. If before you had to make env.production.stack.sh file now you need to make env.production.sh. It was missbehavior
+1. If before you had to make env.production.stack.sh file now you need to make env.production.sh. It was missbehavior.
 
 ## Version 1.2
 **New:**
