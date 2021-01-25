@@ -25,6 +25,7 @@
     ```
 
 3. Centos 7 setup script is deprecated and removed
+4. Continuosly check yoda path and fetch/pull in case we have empty tag. Useful for using latest dev version of yod on servers
 
 ## Version 1.2
 **New:**
