@@ -53,7 +53,7 @@ if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
     else
       >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
     fi
-  )2> /dev/null
+  ) > /dev/null 2>&1
 fi
 
 # shellcheck source=docker/env.sh
