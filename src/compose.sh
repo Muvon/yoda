@@ -86,7 +86,7 @@ for p in ${!SCALE_MAP[*]}; do
     container_path=${p//./\/}
     echo "  $container_name:"
     echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
-    echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
+    echo "    hostname: $container_name | cut -c63"
 
     # Try to find container file
     container_file="$DOCKER_ROOT/containers/$container_path/container.yml"
