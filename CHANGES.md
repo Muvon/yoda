@@ -10,6 +10,8 @@
     yoda setup --env=production
     ```
 
+3. Add possibility of nested containers with dot (.) as delimeter of paths. Useful to use for daemons.
+
 **Changes**
 1. Various code refactoring and optimizations
 2. Change logic how we handle **--env** in **deploy**/**rollback** commands and introduce **--stack**. ENV contains only environment now. You have to change
@@ -27,7 +29,7 @@
 3. Centos 7 setup script is deprecated and removed
 4. Continuosly check yoda path and fetch/pull in case we have empty tag. Useful for using latest dev version of yod on servers
 5. If you have server with production.stack now Yoda reads 2 files: common production config *env.production.sh* & stack config in production *env.production.stack.sh*
-6. **yoda deploy** command shows 5 lines of failed servers after in console output now.
+6. **yoda deploy/rollback** command shows 5 lines of failed servers after in console output now.
 
 **Bugs**
 1. If before you had to make env.production.stack.sh file now you need to make env.production.sh. It was missbehavior.

@@ -83,14 +83,23 @@ get_context() {
 for p in ${!SCALE_MAP[*]}; do
   for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
     container_name=$(get_container_name "$p" "$i")
-
+    container_path=${p//./\/}
     echo "  $container_name:"
     echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
     echo "    hostname: ${HOSTNAME}.${COMPOSE_PROJECT_NAME}.$container_name"
 
+    # Try to find container file
+    container_file="$DOCKER_ROOT/containers/$container_path/container.yml"
+    test ! -f "$container_file" && container_file=${container_file%/*}.yml
+    env_container_file=${container_file%.*}.$ENV.yml
+
+    if [[ ! -f "$container_file" ]]; then
+      >&2 echo "Cannot find configuration file for container: $p"
+      exit 1
+    fi
+
     remove=0
-    env_container_file="$DOCKER_ROOT/containers/$p/container.$ENV.yml"
-    mapfile -t lines < "$DOCKER_ROOT/containers/$p/container.yml"
+    mapfile -t lines < "$container_file"
     {
       for line in "${lines[@]}"; do
         context=$(get_context "$line")
