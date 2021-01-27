@@ -47,7 +47,7 @@ echo 'version: "3.9"'
 
 # Common services and possibility to use Yaml merge anchors
 # Stick to env operated file only
-test -f "$DOCKER_ROOT/containers/$ENV.yml" && cat "$_" || true
+test -f "$DOCKER_ROOT/containers/compose.yml" && cat "$_" || true
 echo
 
 echo 'services:'
@@ -103,7 +103,7 @@ for p in ${!SCALE_MAP[*]}; do
           echo "image: ${IMAGE_MAP[$image]:-$image}"
           continue
         fi
-        if [[ "$line" =~ ^network_mode: ]]; then
+        if [[ "$line" =~ ^(network_mode|networks): ]]; then
           has_network=1
         fi
 
@@ -127,7 +127,7 @@ for p in ${!SCALE_MAP[*]}; do
       done
 
       if [[ -f "$env_container_file" ]]; then
-        if [[ $has_network == 0 && -n $(grep -q network_mode "$env_container_file") ]]; then
+        if [[ $has_network == 0 && -n $(grep -q \(network_mode\|networks\) "$env_container_file") ]]; then
           has_network=1
         fi
         cat "$_"
@@ -135,7 +135,7 @@ for p in ${!SCALE_MAP[*]}; do
 
       # Set default network mode if we not redefine it
       if [[ $has_network == 0 ]]; then
-        echo "network_mode: *network_mode"
+        echo "<<: *default_${ENV}_networks"
       fi
     } | sed "s/^/    /g" | compose_container $p $i
   done

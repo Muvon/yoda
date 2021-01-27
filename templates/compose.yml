@@ -1,4 +1,12 @@
-x-network_mode: &network_mode {{network_mode}}
+x-dev-networks:
+  &default_dev_networks
+  networks:
+    - default
+
+x-production-networks:
+  &default_production_networks
+  network_mode: host
+
 networks:
   default:
-    driver: {{network_mode}}
+    driver: bridge
