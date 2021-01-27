@@ -13,6 +13,7 @@
 3. Add possibility of nested containers with dot (.) as delimeter of paths. Useful to use for daemons.
 4. Links are deprecated. Use networks instead for each environment and assign it in compose.yml file
 5. Introduce usage of YAML merge anchors. Set default anchor network_mode globally to use in auto append to all containers that do not have network_mode setuped
+6. Add support of templates vars in container yml files. You can use %{ENV} and %{STACK} for dropin replacements depends on current env
 
 **Changes**
 1. Various code refactoring and optimizations
