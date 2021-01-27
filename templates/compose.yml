@@ -1,3 +1,5 @@
+# This is common file for all environments
+# You can use compose.yml in each container for variables extensions
 x-dev-networks:
   &default_dev_networks
   networks:

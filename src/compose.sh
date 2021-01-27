@@ -90,6 +90,9 @@ for p in ${!SCALE_MAP[*]}; do
       exit 1
     fi
 
+    # Check if we have common var file named compose.yml for extension from
+    [[ -f "$DOCKER_ROOT/containers/$container_path/compose.yml" ]] && cat "$_" || true
+
     remove=0
     has_network=0
     mapfile -t lines < "$container_file"
@@ -137,6 +140,6 @@ for p in ${!SCALE_MAP[*]}; do
       if [[ $has_network == 0 ]]; then
         echo "<<: *default_${ENV}_networks"
       fi
-    } | sed "s/^/    /g" | compose_container $p $i
+    } | sed "s/^/    /g;s/%{ENV}/$ENV/g;s/%{STACK}/$STACK/g" | compose_container $p $i
   done
 done
