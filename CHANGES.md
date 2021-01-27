@@ -11,6 +11,7 @@
     ```
 
 3. Add possibility of nested containers with dot (.) as delimeter of paths. Useful to use for daemons.
+4. Links are deprecated. Use networks instead for each environment and assign it in container.yml file
 
 **Changes**
 1. Various code refactoring and optimizations

@@ -44,8 +44,18 @@ done
 
 echo "# Build args: $*"
 echo 'version: "3.9"'
-echo 'services:'
 
+echo 'networks:'
+networks_file="$DOCKER_ROOT/containers/networks.yml"
+test -f "${networks_file%.*}.$ENV.yml" && networks_file="$_" || true
+mapfile -t lines < "$networks_file"
+{
+  for line in "${lines[@]}"; do
+    echo "  $line";
+  done
+}
+
+echo 'services:'
 # name, sequence
 # Remove .0 suffix if we have only one container of such type
 get_container_name() {
@@ -55,20 +65,6 @@ get_container_name() {
   fi
 
   echo -n "$container_name"
-}
-
-adapt_link() {
-  link_with_alias=$(echo "$1" | sed -r 's/^[ -]+(.*)$/\1/' | tr -d $'\n')
-  link=${link_with_alias%:*}
-  alias=${link_with_alias#*:}
-  for n in $(seq 0 ${SCALE_MAP[$link]:-0}); do
-    echo -n '  - '
-    get_container_name "$link" "$n"
-    if [[ $alias != $link_with_alias ]]; then
-      echo -n ":$alias"
-    fi
-    echo
-  done
 }
 
 context=
@@ -84,9 +80,10 @@ for p in ${!SCALE_MAP[*]}; do
   for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
     container_name=$(get_container_name "$p" "$i")
     container_path=${p//./\/}
+    container_hostname=$(echo "$container_name" | cut -c -63)
     echo "  $container_name:"
     echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
-    echo "    hostname: $(echo "$container_name" | cut -c63)"
+    echo "    hostname: $container_hostname"
 
     # Try to find container file
     container_file="$DOCKER_ROOT/containers/$container_path/container.yml"
@@ -111,14 +108,6 @@ for p in ${!SCALE_MAP[*]}; do
           continue
         fi
 
-        # Convert links container name to fully qualified names
-        if [[ "$context" == "links" ]]; then
-          if [[ "$line" =~ ^\ *- ]]; then
-            adapt_link "$line"
-            continue
-          fi
-        fi
-
         # Try to find keys should be replaced with env container file
         if [[ -f "$env_container_file" ]]; then
           if [[ "$line" =~ ^[a-z_]+: ]]; then
@@ -138,24 +127,7 @@ for p in ${!SCALE_MAP[*]}; do
         fi
       done
 
-      # Add env file data?
-      if [[ -f "$env_container_file" ]]; then
-        # Little shit with duplicated code
-        mapfile -t lines < "$env_container_file"
-        for line in "${lines[@]}"; do
-          context=$(get_context "$line")
-
-          # Convert links container name to fully qualified names
-          if [[ "$context" == "links" ]]; then
-            if [[ "$line" =~ ^\ *- ]]; then
-              adapt_link "$line"
-              continue
-            fi
-          fi
-
-          echo "$line"
-        done
-      fi
+      test -f "$env_container_file" && cat "$_" || true
     } | sed "s/^/    /g" | compose_container $p $i
   done
 done

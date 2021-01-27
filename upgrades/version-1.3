@@ -6,3 +6,5 @@ update_yodarc
 mkdir -p "$DOCKER_ROOT/.ssh/connections"
 grep '^.ssh$' "$DOCKER_ROOT/.gitignore" || echo '.ssh' >> "$_"
 grep '^.ssh$' "$DOCKER_ROOT/.dockerignore" || echo '.ssh' >> "$_"
+sed 's/{{driver}}/host/g' "$YODA_PATH/templates/networks.yml" > "$DOCKER_ROOT/containers/networks.yml"
+sed 's/{{driver}}/bridge/g' "$YODA_PATH/templates/networks.yml" > "$DOCKER_ROOT/containers/networks.dev.yml"
