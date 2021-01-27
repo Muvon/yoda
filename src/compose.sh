@@ -45,15 +45,10 @@ done
 echo "# Build args: $*"
 echo 'version: "3.9"'
 
-echo 'networks:'
-networks_file="$DOCKER_ROOT/containers/networks.yml"
-test -f "${networks_file%.*}.$ENV.yml" && networks_file="$_" || true
-mapfile -t lines < "$networks_file"
-{
-  for line in "${lines[@]}"; do
-    echo "  $line";
-  done
-}
+# Common services and possibility to use Yaml merge anchors
+# Stick to env operated file only
+test -f "$DOCKER_ROOT/containers/$ENV.yml" && cat "$_" || true
+echo
 
 echo 'services:'
 # name, sequence
@@ -96,6 +91,7 @@ for p in ${!SCALE_MAP[*]}; do
     fi
 
     remove=0
+    has_network=0
     mapfile -t lines < "$container_file"
     {
       for line in "${lines[@]}"; do
@@ -106,6 +102,9 @@ for p in ${!SCALE_MAP[*]}; do
           image=$(echo "$line" | cut -d' ' -f2)
           echo "image: ${IMAGE_MAP[$image]:-$image}"
           continue
+        fi
+        if [[ "$line" =~ ^network_mode: ]]; then
+          has_network=1
         fi
 
         # Try to find keys should be replaced with env container file
@@ -127,7 +126,17 @@ for p in ${!SCALE_MAP[*]}; do
         fi
       done
 
-      test -f "$env_container_file" && cat "$_" || true
+      if [[ -f "$env_container_file" ]]; then
+        if [[ $has_network == 0 && -n $(grep -q network_mode "$env_container_file") ]]; then
+          has_network=1
+        fi
+        cat "$_"
+      fi
+
+      # Set default network mode if we not redefine it
+      if [[ $has_network == 0 ]]; then
+        echo "network_mode: *network_mode"
+      fi
     } | sed "s/^/    /g" | compose_container $p $i
   done
 done

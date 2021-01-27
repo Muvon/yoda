@@ -1,0 +1,4 @@
+x-network_mode: &network_mode {{network_mode}}
+networks:
+  default:
+    driver: {{network_mode}}
