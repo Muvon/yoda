@@ -10,6 +10,50 @@ compose_container() {
   echo
 }
 
+compile_config() {
+  local lines=()
+  local remove=0
+  local container_file=$1
+  local env_container_file=${container_file%.*}.$ENV.yml
+  local ident=$(printf "%${2:-4}s")
+  local compiled=()
+  mapfile -t lines < "$container_file"
+  {
+    for line in "${lines[@]}"; do
+      # Check if we using shortcut for image declaration
+      if [[ "$line" =~ ^image: ]]; then
+        image=$(echo "$line" | cut -d' ' -f2)
+        compiled+=( "image: ${IMAGE_MAP[$image]:-$image}" )
+        continue
+      fi
+
+      # Try to find keys should be replaced with env container file
+      if [[ -f "$env_container_file" ]]; then
+        if [[ "$line" =~ ^[a-z_]+: ]]; then
+          if grep "${line%%:*}:" "$env_container_file" >/dev/null; then
+            remove=1
+          else
+            remove=0
+            compiled+=("$line")
+          fi
+        else
+          if [[ $remove == 0 ]]; then
+            compiled+=("$line")
+          fi
+        fi
+      else
+        compiled+=("$line")
+      fi
+    done
+
+    if [[ -f "$env_container_file" ]]; then
+      compiled+=( "$( cat "$env_container_file" )" )
+    fi
+
+    printf "%s\n" "${compiled[@]}"
+  } | sed "s/^/$ident/g;s/%{ENV}/$ENV/g;s/%{STACK}/$STACK/g" | compose_container $p $i
+}
+
 # Parse map
 declare -A SCALE_MAP
 for p in "$@"; do
@@ -62,84 +106,49 @@ get_container_name() {
   echo -n "$container_name"
 }
 
-context=
-get_context() {
-  if [[ "$line" =~ ^[a-z_]+: ]]; then
-    echo -n "$line" | cut -d ':' -f1 | tr -d ' '
-  else
-    echo -n "$context"
-  fi
-}
-
 for p in ${!SCALE_MAP[*]}; do
   for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
+    output=()
     container_name=$(get_container_name "$p" "$i")
     container_path=${p//./\/}
     container_hostname=$(echo "$container_name" | cut -c -63)
-    echo "  $container_name:"
-    echo "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
-    echo "    hostname: $container_hostname"
+    output+=(
+      "  $container_name:"
+      "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
+      "    hostname: $container_hostname"
+    )
 
     # Try to find container file
     container_file="$DOCKER_ROOT/containers/$container_path/container.yml"
     test ! -f "$container_file" && container_file=${container_file%/*}.yml
-    env_container_file=${container_file%.*}.$ENV.yml
 
     if [[ ! -f "$container_file" ]]; then
       >&2 echo "Cannot find configuration file for container: $p"
       exit 1
     fi
 
-    # Check if we have common var file named compose.yml for extension from
-    [[ -f "$DOCKER_ROOT/containers/$container_path/compose.yml" ]] && cat "$_" || true
+    # If we have nested container we check syntax that this file used only for YAML anchors
+    root_container_file="$DOCKER_ROOT/containers/${container_path%%/*}/container.yml"
+    yaml_anchor=
+    if [[ -f "$root_container_file" && "$root_container_file" != "$container_file" ]]; then
+      yaml_anchor="${container_path//\//_}"
+      output+=( "    x-$yaml_anchor: &$yaml_anchor" )
+      output+=( "$( compile_config "$root_container_file" 6 )" )
+    fi
 
-    remove=0
-    has_network=0
-    mapfile -t lines < "$container_file"
-    {
-      for line in "${lines[@]}"; do
-        context=$(get_context "$line")
+    output+=( "$( compile_config "$container_file" 4 )" )
 
-        # Check if we using shortcut for image declaration
-        if [[ "$line" =~ ^image: ]]; then
-          image=$(echo "$line" | cut -d' ' -f2)
-          echo "image: ${IMAGE_MAP[$image]:-$image}"
-          continue
-        fi
-        if [[ "$line" =~ ^(network_mode|networks): ]]; then
-          has_network=1
-        fi
+    # Extend root container if we have namespaces
+    if [[ -n "$yaml_anchor" ]]; then
+      output+=( "    <<: *${yaml_anchor}" )
+    fi
 
-        # Try to find keys should be replaced with env container file
-        if [[ -f "$env_container_file" ]]; then
-          if [[ "$line" =~ ^[a-z_]+: ]]; then
-            if grep "${line%%:*}:" "$env_container_file" >/dev/null; then
-              remove=1
-            else
-              remove=0
-              echo "$line"
-            fi
-          else
-            if [[ $remove == 0 ]]; then
-              echo "$line"
-            fi
-          fi
-        else
-          echo "$line"
-        fi
-      done
+    # Set default network mode if we not redefine it
+    if ! echo "${output[*]}" | grep -q \(network_mode\|networks\); then
+      output+=( "    <<: *default_${ENV}_networks" )
+    fi
 
-      if [[ -f "$env_container_file" ]]; then
-        if [[ $has_network == 0 && -n $(grep -q \(network_mode\|networks\) "$env_container_file") ]]; then
-          has_network=1
-        fi
-        cat "$_"
-      fi
-
-      # Set default network mode if we not redefine it
-      if [[ $has_network == 0 ]]; then
-        echo "<<: *default_${ENV}_networks"
-      fi
-    } | sed "s/^/    /g;s/%{ENV}/$ENV/g;s/%{STACK}/$STACK/g" | compose_container $p $i
+    echo
+    printf "%s\n" "${output[@]}"
   done
 done
