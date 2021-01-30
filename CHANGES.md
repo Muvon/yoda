@@ -48,7 +48,7 @@
 **Changes**
 1. Upgrade min version of docker api to 1.41
 2. Upgrade min version of compose to 1.28
-3. Upgrade builded compose file version to 3.9
+3. Upgrade built compose file version to 3.9
 4. Dont use shared ssh connection to prevent failure of deploys in some casess
 5. Add validatation of services in Startfile. It closes #46
 

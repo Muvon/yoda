@@ -22,8 +22,7 @@ compile_config() {
   # Prepare replacements
   local replaces=(
     "^/$(printf "%${2:-4}s")"
-    "%{ENV}/$ENV"
-    "%{STACK}/$STACK"
+    "$YODA_VAR_REGEX"
   )
 
   local compiled=()

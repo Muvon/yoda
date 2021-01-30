@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# shellcheck disable=SC1091 source=../lib/array.sh
+source "$YODA_PATH/lib/string.sh"
+
 lock_file="$DOCKER_ROOT/.build.lock"
 lock() {
   touch $lock_file
@@ -80,7 +83,7 @@ for line in "${lines[@]}"; do
       extra_args+=('--no-cache')
     fi
 
-    docker build --network host ${extra_args[*]} $(eval echo "$build_args") -f "$DOCKER_ROOT/images/Dockerfile-$name" "$context"
+    cat "$DOCKER_ROOT/images/Dockerfile-$name" | string_replace "$YODA_VAR_REGEX" | docker build --network host ${extra_args[*]} $(eval echo "$build_args") -f - "$context"
   else
     echo 'built already.'
   fi
