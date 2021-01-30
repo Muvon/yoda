@@ -144,7 +144,7 @@ for p in ${!SCALE_MAP[*]}; do
     fi
 
     # Set default network mode if we not redefine it
-    if ! echo "${output[*]}" | grep -q \(network_mode\|networks\); then
+    if [[ ${output[*]} != *network_mode:* && ${output[*]} != *networks:* ]]; then
       output+=( "    <<: *default_${ENV}_networks" )
     fi
 
