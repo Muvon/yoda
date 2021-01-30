@@ -19,5 +19,5 @@ string_replace() {
   fi
 
   local replaces=("$@")
-  echo "$str" | sed "s/$(array_join "/g;s/" "${replaces[@]}")/g"
+  echo "$str" | sed -E "s/$(array_join "/g;s/" "${replaces[@]}")/g"
 }
