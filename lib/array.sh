@@ -16,3 +16,16 @@ array_flip() {
     eval "${index_name}['${value_array[$i]}']=$i"
   done
 }
+
+# Usage: array_join [separator] [array]
+# Example:
+#  array=( a b c )
+#  array_join "," "${array[@]}"
+array_join() {
+  local sep=$1
+  shift
+  local arr=("$@")
+  local result
+  result=$(printf "$sep%s" "${arr[@]}")
+  echo "${result:${#sep}}"
+}
