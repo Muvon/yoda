@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# shellcheck disable=SC1091 source=../lib/array.sh
+source "$YODA_PATH/lib/string.sh"
+
 compose_container() {
   if [[ -x "$COMPOSE_SCRIPT" ]]; then
     cat - | $COMPOSE_SCRIPT --name=$1 --sequence=$2
@@ -15,7 +18,14 @@ compile_config() {
   local remove=0
   local container_file=$1
   local env_container_file=${container_file%.*}.$ENV.yml
-  local ident=$(printf "%${2:-4}s")
+
+  # Prepare replacements
+  local replaces=(
+    "^/$(printf "%${2:-4}s")"
+    "%{ENV}/$ENV"
+    "%{STACK}/$STACK"
+  )
+
   local compiled=()
   mapfile -t lines < "$container_file"
   {
@@ -51,7 +61,7 @@ compile_config() {
     fi
 
     printf "%s\n" "${compiled[@]}"
-  } | sed "s/^/$ident/g;s/%{ENV}/$ENV/g;s/%{STACK}/$STACK/g" | compose_container $p $i
+  } | string_replace "${replaces[@]}" | compose_container $p $i
 }
 
 # Parse map
