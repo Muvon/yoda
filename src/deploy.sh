@@ -81,6 +81,9 @@ deploy() {
   ssh -o ControlPath=none -AT $host <<EOF
     set -e
     if [[ ! -d ~/.yoda ]]; then
+      if [[ ! -f ~/.ssh/known_hosts ]]; then
+        touch ~/.ssh/known_hosts
+      fi
       grep $yoda_git_host ~/.ssh/known_hosts || ssh-keyscan $yoda_git_host >> \$_
       git clone -q $yoda_git_url ~/.yoda
     else
