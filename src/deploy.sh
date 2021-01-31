@@ -78,6 +78,7 @@ deploy() {
     start_args+=('--force')
   fi
 
+  yoda_remote_path='PATH=$HOME/.yoda:$PATH'
   ssh -o ControlPath=none -AT $host <<EOF
     set -e
     if [[ ! -d ~/.yoda ]]; then
@@ -86,6 +87,10 @@ deploy() {
       fi
       grep $yoda_git_host ~/.ssh/known_hosts || ssh-keyscan $yoda_git_host >> \$_
       git clone -q $yoda_git_url ~/.yoda
+
+      if grep -qV $yoda_remote_path ~/.bashrc; then
+        echo yoda_remote_path >> ~/.bashrc
+      fi
     else
       echo 'Changing remote origin url of yoda git repository'
       cd ~/.yoda
