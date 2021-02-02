@@ -1,6 +1,6 @@
 # Yoda change log
 
-## Version 1.3
+## Version 2.0
 
 **New**
 1. Add *daemon.json* and change the way we use for setup server with docker
