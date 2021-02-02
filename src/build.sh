@@ -84,10 +84,9 @@ for line in "${lines[@]}"; do
     fi
 
     content="$(cat "$DOCKER_ROOT/images/Dockerfile-$name")"
-    matches=( "$(echo "$content" | grep -Eo "$YODA_VAR_REGEX")" )
+    matches=( "$(echo "$content" | grep -Eo "$YODA_VAR_REGEX" | cat)" )
 
     for match in "${matches[@]}"; do
-    echo "$match"
       var=$(eval echo "\$${match:2:-1}")
       content="${content//"$match"/"$var"}"
     done
