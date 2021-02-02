@@ -9,7 +9,7 @@ ENV=${ENV:-dev}
 
 export \
   YODA_VERSION="{{yoda_version}}" \
-  YODA_VAR_REGEX='%(\{[A-Z\_]+\})/$\1' \
+  YODA_VAR_REGEX='%(\{[A-Z_]+\})' \
   REVISION=${REVISION:-$commit} \
   REVISION_TAG \
   GIT_URL \

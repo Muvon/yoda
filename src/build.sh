@@ -83,7 +83,16 @@ for line in "${lines[@]}"; do
       extra_args+=('--no-cache')
     fi
 
-    cat "$DOCKER_ROOT/images/Dockerfile-$name" | string_replace "$YODA_VAR_REGEX" | docker build --network host ${extra_args[*]} $(eval echo "$build_args") -f - "$context"
+    content="$(cat "$DOCKER_ROOT/images/Dockerfile-$name")"
+    matches=( "$(echo "$content" | grep -Eo "$YODA_VAR_REGEX")" )
+
+    for match in "${matches[@]}"; do
+    echo "$match"
+      var=$(eval echo "\$${match:2:-1}")
+      content="${content//"$match"/"$var"}"
+    done
+    echo "$content" | \
+      docker build --network host ${extra_args[*]} $(eval echo "$build_args") -f - "$context"
   else
     echo 'built already.'
   fi
