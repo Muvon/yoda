@@ -64,6 +64,10 @@ deploy() {
     exit 1
   fi
 
+  # Redeclare env and stack cuz we get it from config
+  env=${env%%.*}
+  stack=${env##*.}
+
   # First check known hosts
   grep ${host##*@} ~/.ssh/known_hosts || ssh-keyscan ${host##*@} >> $_
 
