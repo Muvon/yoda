@@ -7,3 +7,13 @@ mkdir -p "$DOCKER_ROOT/.ssh/connections"
 grep '^.ssh$' "$DOCKER_ROOT/.gitignore" || echo '.ssh' >> "$_"
 grep '^.ssh$' "$DOCKER_ROOT/.dockerignore" || echo '.ssh' >> "$_"
 cp "$YODA_PATH/templates/compose.yml" "$DOCKER_ROOT/containers/compose.yml"
+echo '(!!!) Breaking changes:'
+echo '  - Change deploy/rollback way:'
+edho '    yoda deploy --env=production --stack=stack'
+echo '  - CONTAINER_SCALE_INDEX env is deprecated now'
+echo '    and not used anymore'
+echo '  - Yoda includes 3 env file as follows:'
+echo '    env.sh env.[env].sh env.[env].[stack].sh'
+echo '  - Yaml for container can use stored arguments now.'
+echo '    Common compose file in docker/containers/compose.yml.'
+echo '    Move all common logic such to there.'
