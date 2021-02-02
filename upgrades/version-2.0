@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck source=../lib/migration.sh
-source "$YODA_PATH/lib/migration.sh"
-
-update_yodarc
 mkdir -p "$DOCKER_ROOT/.ssh/connections"
 grep '^.ssh$' "$DOCKER_ROOT/.gitignore" || echo '.ssh' >> "$_"
 grep '^.ssh$' "$DOCKER_ROOT/.dockerignore" || echo '.ssh' >> "$_"
