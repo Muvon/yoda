@@ -34,9 +34,6 @@
 5. If you have server with production.stack now Yoda reads 2 files: common production config *env.production.sh* & stack config in production *env.production.stack.sh*
 6. **yoda deploy/rollback** command shows 5 lines of failed servers after in console output now.
 
-**Bugs**
-1. If before you had to make env.production.stack.sh file now you need to make env.production.sh. It was missbehavior.
-
 ## Version 1.2
 **New:**
 1. Add automatic support of git-secret on deployment

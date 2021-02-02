@@ -129,11 +129,17 @@ EOF
 pids=()
 servers=()
 mkdir -p $DOCKER_ROOT/log
+# This is dirty hack same in container.yml
+# @TODO: fix it
+env_stack="$env"
+if [[ -n "$stack" ]]; then
+  env_stack="$env_stack.$stack"
+fi
 
 if [[ -n "$host" ]]; then
   servers=(`grep -E "^(\w+@)?$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 else
-  servers=(`grep -E ":\s*$env\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  servers=(`grep -E ":\s*$env_stack\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 fi
 
 for server in ${servers[*]}; do
