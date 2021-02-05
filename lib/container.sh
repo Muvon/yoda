@@ -10,6 +10,7 @@ get_stack() {
 }
 
 get_containers() {
+      echo 1
   local containers=()
   for service in "$@"; do
     service=$(echo $service | sed "s|^$COMPOSE_PROJECT_NAME\.||")
@@ -20,7 +21,12 @@ get_containers() {
       container=${service%.*}
       containers+=($service)
     else
-      service=$(get_stack | grep -oE "\b$service(=[0-9]+)?\b")
+
+      service=$(get_stack | grep -oE "\b$service(=[0-9]+)?\b" | cat)
+      if [[ -z "$service" ]]; then
+        >&2 echo "There is no $container in $ENV $STACK"
+        exit 1
+      fi
       count=$(get_count "$service" 1)
       service=$(get_service "$service")
       if (( count > 1 )); then
@@ -41,7 +47,7 @@ get_containers() {
     images+=($image)
   done
 
-  echo ${containers[*]}
+  echo "${containers[@]}"
 }
 
 get_count() {
