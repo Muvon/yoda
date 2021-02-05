@@ -23,10 +23,13 @@ get_containers() {
       service=$(get_stack | grep -oE "\b$service(=[0-9]+)?\b")
       count=$(get_count "$service" 1)
       service=$(get_service "$service")
-
-      for n in $(seq 0 $((count - 1))); do
-        containers+=($service.$n)
-      done
+      if (( count > 1 )); then
+        for n in $(seq 0 $((count - 1))); do
+          containers+=($service.$n)
+        done
+      else
+        containers+=($service)
+      fi
     fi
 
     container_file="$DOCKER_ROOT/containers/${container//./\/}/container.yml";
