@@ -29,7 +29,12 @@ get_containers() {
       done
     fi
 
-    image=$(grep image: $DOCKER_ROOT/containers/$container/container.yml | cut -d':' -f2 | tr -d ' ')
+    container_file="$DOCKER_ROOT/containers/${container//./\/}/container.yml";
+    if [[ ! -f "$container_file" ]]; then
+      container_file="$DOCKER_ROOT/containers/${container//./\/}.yml";
+    fi
+
+    image=$(grep image: $container_file | cut -d':' -f2 | tr -d ' ')
     images+=($image)
   done
 
