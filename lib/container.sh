@@ -10,7 +10,6 @@ get_stack() {
 }
 
 get_containers() {
-      echo 1
   local containers=()
   for service in "$@"; do
     service=$(echo $service | sed "s|^$COMPOSE_PROJECT_NAME\.||")
