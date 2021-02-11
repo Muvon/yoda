@@ -21,3 +21,16 @@ string_replace() {
   local replaces=("$@")
   echo "$str" | sed -E "s/$(array_join "/g;s/" "${replaces[@]}")/g"
 }
+
+
+string_trim() {
+  local str
+  str=$1
+
+  str=${str##( )}
+  str=${str%%( )}
+  str=${str//$'\n'/}
+  str=${str//$'\r'/}
+
+  echo -n "$str"
+}
