@@ -1,12 +1,39 @@
 #!/usr/bin/env bash
 set -e
 
+# shellcheck disable=SC1091 source=../lib/string.sh
+source "$YODA_PATH/lib/string.sh"
+
 get_stack() {
   env_stack="$ENV"
   if [[ -n "$STACK" ]]; then
     env_stack="$env_stack.$STACK"
   fi
-  grep "^$env_stack:" "$DOCKER_ROOT/Envfile" | cut -d: -f2
+
+  mapfile -t lines < "$DOCKER_ROOT/Envfile"
+  local parse=0
+  local stack=()
+  for line in "${lines[@]}"; do
+    if (( parse == 1 )); then
+      if [[ $line == *:* ]]; then
+        break
+      fi
+      container=$(string_trim "${line//-/}")
+      stack+=( "$container" )
+    fi
+
+    # Find first line
+    if [[ $line =~ ^$env_stack: ]]; then
+
+      line=$(string_trim "${line##*\:}")
+      if [[ -n "$line" ]]; then
+        stack=( $line )
+        break
+      fi
+      parse=1
+    fi
+  done
+  echo -n "${stack[@]}"
 }
 
 get_containers() {
