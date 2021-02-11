@@ -27,10 +27,5 @@ string_trim() {
   local str
   str=$1
 
-  str=${str##( )}
-  str=${str%%( )}
-  str=${str//$'\n'/}
-  str=${str//$'\r'/}
-
-  echo -n "$str"
+  echo -n "$str" | xargs
 }
