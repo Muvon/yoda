@@ -96,7 +96,7 @@ for line in "${lines[@]}"; do
 done
 
 echo "# Build args: $*"
-echo 'version: "3.9"'
+echo 'version: "2.4"'
 
 # Common services and possibility to use Yaml merge anchors
 # Stick to env operated file only

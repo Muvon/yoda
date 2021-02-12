@@ -34,6 +34,7 @@
 4. Continuosly check yoda path and fetch/pull in case we have empty tag. Useful for using latest dev version of yod on servers
 5. If you have server with production.stack now Yoda reads 2 files: common production config *env.production.sh* & stack config in production *env.production.stack.sh*
 6. **yoda deploy/rollback** command shows 5 lines of failed servers after in console output now.
+7. Back to compose file version 2.4 instead of 3.x cuz 3.x is made for swarm mode that we do not use
 
 ## Version 1.2
 **New:**
