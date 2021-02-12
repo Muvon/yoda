@@ -118,11 +118,16 @@ deploy() {
     git pull --rebase origin $git_branch
     git clean -fdx
     if [[ -d ".gitsecret" ]]; then
-      if [[ -z "\$GIT_SECRET_PASSWORD" ]]; then
-        echo '.gitsecret folder found but no $GIT_SECRET_PASSWORD environment variable set'
-        exit 1
+      if [[ -n "\$GIT_SECRET_PASSWORD" ]]; then
+        echo 'Using git secret to reveal configs'
+        git secret reveal -p "\$GIT_SECRET_PASSWORD"
+      else
+        echo 'Seems like the project contains .gitsecret but \$GIT_SECRET_PASSWORD is not set'
+        if [[ $env == "production" ]]; then
+          echo 'Remove .gitsecret or set \$GIT_SECRET_PASSWORD on the server for production use'
+          exit 1
+        fi
       fi
-      git secret reveal -p "\$GIT_SECRET_PASSWORD"
     fi
     PATH=\$PATH:~/.yoda ENV=$env STACK=$stack REVISION=$rev $custom_args yoda start ${start_args[*]}
     {
