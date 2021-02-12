@@ -1,13 +1,17 @@
 # This is common file for all environments
 # You can use compose.yml in each container for variables extensions
-x-dev-networks:
-  &default_dev_networks
+x-dev-networks: &default_dev_networks
   networks:
     - default
 
-x-production-networks:
-  &default_production_networks
+x-production-networks: &default_production_networks
   network_mode: host
+
+x-dev-restart: &default_dev_restart
+  restart: 'no'
+
+x-production-restart: &default_production_restart
+  restart: on-failure
 
 networks:
   default:

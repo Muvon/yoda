@@ -157,6 +157,12 @@ for p in ${!SCALE_MAP[*]}; do
       output+=( "    <<: *default_${ENV}_networks" )
     fi
 
+    # Set default restart mode if we not redefine it
+    if [[ ${output[*]} != *restart:* ]]; then
+      output+=( "    <<: *default_${ENV}_restart" )
+    fi
+
+
     echo
     printf "%s\n" "${output[@]}"
   done

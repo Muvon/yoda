@@ -3,6 +3,5 @@ labels:
   - role={{name}}
 working_dir: /src
 entrypoint: /src/docker/containers/{{name}}/entrypoint
-restart: unless-stopped
 cap_drop:
   - ALL
