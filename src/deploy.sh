@@ -96,7 +96,7 @@ deploy() {
       git clone -q $yoda_git_url ~/.yoda
 
       if grep -qV $yoda_remote_path ~/.bashrc; then
-        echo yoda_remote_path >> ~/.bashrc
+        echo $yoda_remote_path >> ~/.bashrc
       fi
     else
       echo 'Changing remote origin url of yoda git repository'
