@@ -140,7 +140,7 @@ for p in ${!SCALE_MAP[*]}; do
     root_container_file="$DOCKER_ROOT/containers/${container_path%%/*}/container.yml"
     yaml_anchor=
     if [[ -f "$root_container_file" && "$root_container_file" != "$container_file" ]]; then
-      yaml_anchor="${container_path//\//_}"
+      yaml_anchor="${container_name//./_}"
       output+=( "    x-$yaml_anchor: &$yaml_anchor" )
       output+=( "$( compile_config "$root_container_file" 6 )" )
     fi
