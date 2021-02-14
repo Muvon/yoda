@@ -51,7 +51,6 @@ StrictModes yes
 MaxAuthTries 3
 MaxSessions 5
 
-RSAAuthentication yes
 PubkeyAuthentication yes
 
 # The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
@@ -119,11 +118,10 @@ X11Forwarding yes
 #PrintLastLog yes
 #TCPKeepAlive yes
 #UseLogin no
-UsePrivilegeSeparation sandbox		# Default for new installations.
 #PermitUserEnvironment no
 #Compression delayed
-#ClientAliveInterval 0
-#ClientAliveCountMax 3
+ClientAliveInterval 15
+ClientAliveCountMax 4
 #ShowPatchLevel no
 #UseDNS yes
 #PidFile /var/run/sshd.pid
