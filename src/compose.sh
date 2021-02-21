@@ -120,11 +120,9 @@ for p in ${!SCALE_MAP[*]}; do
     output=()
     container_name=$(get_container_name "$p" "$i")
     container_path=${p//./\/}
-    container_hostname=$(echo "$container_name" | cut -c -63)
     output+=(
       "  $container_name:"
       "    container_name: ${COMPOSE_PROJECT_NAME}.$container_name"
-      "    hostname: $container_hostname"
     )
 
     # Try to find container file
@@ -162,6 +160,11 @@ for p in ${!SCALE_MAP[*]}; do
       output+=( "    <<: *default_${ENV}_restart" )
     fi
 
+    # Set default hostname if not set
+    if [[ ${output[*]} != *hostname:* ]]; then
+        container_hostname=$(echo "$container_name" | cut -c -63)
+        output+=( "    hostname: $container_hostname" )
+    fi
 
     echo
     printf "%s\n" "${output[@]}"
