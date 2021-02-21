@@ -46,10 +46,17 @@ pids=()
 servers=()
 mkdir -p "$DOCKER_ROOT/log/setup"
 
+# This is dirty hack same in container.yml
+# @TODO: fix it
+env_stack="$env"
+if [[ -n "$stack" ]]; then
+  env_stack="$env_stack.$stack"
+fi
+
 if [[ -n "$host" ]]; then
-  servers=( $(grep -E "^(\w+@)?$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1 | cut -d'@' -f2) )
+  servers=(`grep -E "^(\w+@)?$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 else
-  servers=( $(grep -E ":\s*$env\b" $DOCKER_ROOT/Envfile | cut -d':' -f1) )
+  servers=(`grep -E ":\s*$env_stack\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
 fi
 
 # First do checkups that all servers have authorization by keys
