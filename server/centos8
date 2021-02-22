@@ -58,5 +58,5 @@ systemctl start chronyd
 
 bash "$SERVER_ROOT/setup"
 
-echo 'Reboot the system in 5 seconds'
+echo 'Reboot the system in 1 minute'
 screen -d -m bash -c "shutdown -r +1"
