@@ -18,7 +18,7 @@ get_stack() {
       if [[ $line == *:* ]]; then
         break
       fi
-      container=$(string_trim "${line//-/}")
+      container=$(string_trim "${line/-/}")
       stack+=( "$container" )
     fi
 
