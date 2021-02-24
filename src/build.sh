@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-# shellcheck disable=SC1091 source=../lib/array.sh
+# shellcheck disable=SC1091 source=../lib/string.sh
 source "$YODA_PATH/lib/string.sh"
+
+# shellcheck disable=SC1091 source=../lib/template.sh
+source "$YODA_PATH/lib/template.sh"
 
 lock_file="$DOCKER_ROOT/.build.lock"
 lock() {
@@ -73,6 +76,10 @@ for line in "${lines[@]}"; do
     continue
   fi
 
+  # Find and compile all .yoda files
+  template_compile_dir "$DOCKER_ROOT"
+
+  # Finally build image
   docker_image_id=$(docker images -q "$image_id")
   if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
     echo 'building.'
@@ -83,14 +90,7 @@ for line in "${lines[@]}"; do
       extra_args+=('--no-cache')
     fi
 
-    content="$(cat "$DOCKER_ROOT/images/Dockerfile-$name")"
-    matches=( "$(echo "$content" | grep -Eo "$YODA_VAR_REGEX" | cat)" )
-
-    for match in "${matches[@]}"; do
-      var=$(eval echo "\$${match:2:-1}")
-      content="${content//"$match"/"$var"}"
-    done
-    echo "$content" | \
+    template_build "$DOCKER_ROOT/images/Dockerfile-$name" | \
       docker build --network host ${extra_args[*]} $(eval echo "$build_args") -f - "$context"
   else
     echo 'built already.'

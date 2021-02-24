@@ -15,6 +15,7 @@
 5. Introduce usage of YAML merge anchors. Set default anchor network_mode globally to use in auto append to all containers that do not have network_mode setuped
 6. Add support of templates vars in container yml files. You can use %{ENV} and %{STACK} for dropin replacements depends on current env
 7. Add support or array syntax of env stack definition in Envfile
+8. Templated configs possible with extension of .yoda on docker folder. In that case .yoda will be removed and env vars replaced to final file before its built.
 
 **Changes**
 1. Various code refactoring and optimizations
