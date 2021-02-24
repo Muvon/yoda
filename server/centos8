@@ -4,7 +4,8 @@ SERVER_ROOT=$(cd "${BASH_SOURCE%/*}" && pwd)
 export SERVER_ROOT
 
 # Update common system
-dnf install -y epel-release
+dnf install -y epel-release dnf-plugins-core
+dnf config-manager --set-enabled powertools
 dnf update -y
 
 # Install usable cli tools
