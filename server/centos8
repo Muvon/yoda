@@ -27,7 +27,7 @@ dnf config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
 dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.4.3-3.1.el7.x86_64.rpm
-dnf install -y docker-ce-20.10.2-3.el8
+dnf install -y docker-ce-20.10.3-3.el8
 
 # Preparing docker to start
 systemctl daemon-reload
@@ -55,7 +55,8 @@ systemctl enable chronyd
 systemctl start chronyd
 
 # Generate locale
-# localedef -i en_US -f utf8 en_US.utf8
+dnf install -y glibc-locale-source
+localedef --no-archive -i en_US -f UTF-8 en_US.UTF-8
 
 bash "$SERVER_ROOT/setup"
 
