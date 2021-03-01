@@ -11,7 +11,7 @@ x-dev-restart: &default_dev_restart
   restart: 'no'
 
 x-production-restart: &default_production_restart
-  restart: on-failure
+  restart: always
 
 networks:
   default:
