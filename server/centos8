@@ -5,7 +5,7 @@ export SERVER_ROOT
 
 # Update common system
 dnf install -y epel-release dnf-plugins-core
-dnf config-manager --set-enabled powertools
+dnf config-manager --set-enabled PowerTools
 dnf update -y
 
 # Install usable cli tools
