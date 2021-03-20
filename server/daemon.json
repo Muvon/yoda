@@ -9,5 +9,10 @@
   "experimental" : true,
   "features": {
     "buildkit": true
+  },
+  "log-driver": "local",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "10"
   }
 }
