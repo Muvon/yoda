@@ -19,7 +19,7 @@ check:
 	test -n 'bash >= 4' -a -n "$(call IF_VER_GT, $(BASH_VERSION), 4)"
 	test -n 'Docker API version >= 1.41' -a -n "$(call IF_VER_GT, $(DOCKER_API_VERSION), 1.41)"
 	test -n 'docker-compose >= 1.28' -a -n "$(call IF_VER_GT, $(DOCKER_COMPOSE_VERSION), 1.18)"
-	test -n 'git >= 1.9' -a -n "$(call IF_VER_GT, $(GIT_VERSION), 1.9)"
+	test -n 'git >= 2.22' -a -n "$(call IF_VER_GT, $(GIT_VERSION), 2.22)"
 
 install:
 	@echo "Installing Yoda to "$(INSTALL_TO)

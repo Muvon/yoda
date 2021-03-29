@@ -32,7 +32,8 @@ if [[ -z "$host" && -z "$env" ]]; then
 fi
 
 # Get needed branch
-git_branch=${branch:-"master"}
+cur_branch=$(git branch --show-current)
+git_branch=${branch:-"$cur_branch"}
 echo "GIT branch: $git_branch"
 
 echo "Host: $host"
