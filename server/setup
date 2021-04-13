@@ -11,3 +11,5 @@ chown admin:admin /home/admin/.ssh/authorized_keys && chmod 600 "$_"
 echo '%admin  ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 cp -f "$SERVER_ROOT/sshd_config" /etc/ssh/sshd_config
 systemctl reload sshd
+cp -f "$SERVER_ROOT/sysctl.conf" /etc/sysctl.conf
+sysctl -p
