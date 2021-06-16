@@ -5,7 +5,12 @@ export SERVER_ROOT
 
 # Update common system
 dnf install -y epel-release dnf-plugins-core
-dnf config-manager --set-enabled PowerTools
+if grep '\[powertools\]' /etc/yum.repos.d/CentOS-Linux-PowerTools.repo; then
+  repo=powertools
+else
+  repo=PowerTools
+fi
+dnf config-manager --set-enabled "$repo"
 dnf update -y
 
 # Install usable cli tools
