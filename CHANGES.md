@@ -1,5 +1,14 @@
 # Yoda change log
 
+## Version 2.1
+
+**New**
+1. Install tuned
+2. Add sysctl.conf file for tuning setup
+
+**Bugs:**
+1. Fix issue with PowerTools repo in some Centos installations (due to case sensitive filename)
+
 ## Version 2.0
 
 **New**
