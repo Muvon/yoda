@@ -1,5 +1,9 @@
 # Yoda change log
 
+## Version 2.2
+
+Coming soon :)
+
 ## Version 2.1
 
 **New**
