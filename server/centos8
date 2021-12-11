@@ -67,7 +67,8 @@ dnf install -y glibc-locale-source
 localedef --no-archive -i en_US -f UTF-8 en_US.UTF-8
 
 # Set timezone to UTc
-timedatectl set-timezone UTC
+ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+# timedatectl set-timezone UTC
 
 bash "$SERVER_ROOT/setup"
 
