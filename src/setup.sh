@@ -36,13 +36,13 @@ setup() {
     exit 1
   fi
 
-  install_script=
-  if hostnamectl | grep 'CentOS Stream 9'; then
-    install_script=centos-stream9
-  elif hostnamectl | grep 'CentOS 8'; then
-    install_script=centos8
-  fi
-
+  # Check that we support version
+  centos_version=$(ssh -o ControlPath="$control_path" -o PasswordAuthentication=no -T "root@$host" "hostnamectl | grep 'Operating System' | cut -d: -f2" | xargs)
+  declare -A version_map=(
+    ["CentOS 8"]=centos8
+    ["CentOS Stream 9"]=centos-stream9
+  )
+  install_script="${version_map[$centos_version]}"
   if [[ -z "$install_script" ]]; then
     >&2 echo "Cant find right script to run for your OS version"
     exit 1
