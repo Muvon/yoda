@@ -36,9 +36,21 @@ setup() {
     exit 1
   fi
 
+  install_script=
+  if hostnamectl | grep 'CentOS Stream 9'; then
+    install_script=centos-stream9
+  elif hostnamectl | grep 'CentOS 8'; then
+    install_script=centos8
+  fi
+
+  if [[ -z "$install_script" ]]; then
+    >&2 echo "Cant find right script to run for your OS version"
+    exit 1
+  fi
+
   scp -o ControlPath="$control_path" -o PasswordAuthentication=no -r "$YODA_PATH/server" "root@$host:~/"
   scp -o ControlPath="$control_path" -o PasswordAuthentication=no "$DOCKER_ROOT/.ssh/authorized_keys" "root@$host:~/server/"
-  ssh -o ControlPath="$control_path" -o PasswordAuthentication=no -T "root@$host" "bash ~/server/centos8"
+  ssh -o ControlPath="$control_path" -o PasswordAuthentication=no -T "root@$host" "bash ~/server/$install_script"
   echo "Setup of the $host with environment $env has been finished."
 }
 
