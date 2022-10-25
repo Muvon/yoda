@@ -6,7 +6,7 @@ export SERVER_ROOT
 # Update common system
 dnf install -y epel-release dnf-plugins-core
 dnf config-manager --set-enabled "crb"
-dnf install dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm
+dnf install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-9.rpm
 dnf update -y
 
 # Install usable cli tools
