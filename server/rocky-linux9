@@ -12,7 +12,7 @@ dnf update -y
 # Install usable cli tools
 # libzip is for docker-compose
 dnf group install -y "Development Tools"
-dnf install -y chrony nano dstat htop curl libzip git screen pwgen
+dnf install -y chrony nano dstat htop curl libzip git screen pwgen wget
 
 wget https://raw.githubusercontent.com/sobolevn/git-secret/master/utils/rpm/git-secret.repo -O git-secret-rpm.repo
 # Inspect what's inside! You can also enable `gpg` check on repo level.
