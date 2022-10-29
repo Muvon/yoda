@@ -20,14 +20,15 @@ mv git-secret-rpm.repo /etc/yum.repos.d/
 dnf install -y git-secret
 
 # Install docker
-dnf install -y dnf-utils \
-  device-mapper-persistent-data \
-  lvm2
+dnf install -y dnf-utils lvm2
 dnf config-manager \
     --add-repo \
     https://download.docker.com/linux/centos/docker-ce.repo
-dnf install -y https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.4.3-3.1.el7.x86_64.rpm
 dnf install -y docker-ce-3:20.10.17-3.el9
+dnf install -y containerd.io-1.6.9-3.1.el9 \
+  docker-ce-20.10.21-3.el9 \
+  docker-ce-cli-20.10.21-3.el9 \
+  docker-compose-plugin-2.12.2-3.el9
 
 # Preparing docker to start
 systemctl daemon-reload
@@ -35,14 +36,9 @@ systemctl enable docker
 systemctl start docker
 mkdir -p /etc/docker && cp "$SERVER_ROOT/daemon.json" "$_"
 
-# Install docker-compose
-curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
-chmod +x /usr/bin/docker-compose
-
 # Bash completion for docker
 dnf install -y bash-completion
-curl -L https://raw.githubusercontent.com/docker/machine/v0.16.0/contrib/completion/bash/docker-machine.bash -o /etc/bash_completion.d/docker-machine
-curl -L https://raw.githubusercontent.com/docker/compose/1.27.4/contrib/completion/bash/docker-compose -o /etc/bash_completion.d/docker-compose
+curl https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker -o /etc/bash_completion.d/docker.sh
 
 # Install firewalld
 dnf install -y firewalld tuned
