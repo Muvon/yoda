@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Update common system
+yum install -y epel-release
+yum update -y
+
+# Install usable cli tools
+yum group install -y "Development Tools"
+yum install -y chrony nano dstat htop curl libzip git screen pwgen
+
+# Upgrade kernel to support overlayfs2
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+yum --enablerepo=elrepo-kernel install -y kernel-ml
+grub2-set-default 0
+
+# Install git
+git_version=2.38.1
+yum install -y curl-devel expat-devel gettext-devel openssl-devel zlib-devel gcc perl-ExtUtils-MakeMaker
+curl -sSL https://github.com/git/git/archive/v${git_version}.tar.gz | tar xzf -
+cd "git-${git_version}" || exit 1
+make prefix=/usr all
+make prefix=/usr install
+cd .. && rm -fr git-${git_version}
+
+# Install docker
+yum install -y yum-utils
+yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+yum install -y containerd.io-1.6.9-3.1.el7 \
+  docker-ce-20.10.21-3.el7 \
+  docker-ce-cli-20.10.21-3.el7 \
+  docker-compose-plugin-2.12.2-3.el7
+
+# Preparing docker to start
+systemctl daemon-reload
+systemctl enable docker
+systemctl start docker
+mkdir -p /etc/docker && cp "$SERVER_ROOT/daemon.json" "$_"
+
+# Bash completion for docker
+yum install -y bash-completion
+curl https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker -o /etc/bash_completion.d/docker.sh
+
+# Install firewalld
+yum install -y firewalld tuned
+
+# Open port
+systemctl start firewalld
+systemctl enable firewalld
+
+systemctl start tuned
+systemctl enable tuned
+
+systemctl enable chronyd
+systemctl start chronyd
+
+# Generate locale
+localedef --no-archive -i en_US -f UTF-8 en_US.UTF-8
+
+bash "$SERVER_ROOT/setup"
+
+echo 'Reboot the system in 1 minute'
+screen -d -m bash -c "shutdown -r +1"
