@@ -41,11 +41,11 @@ if [[ -n "$recreate" ]]; then
 fi
 
 service_stop() {
-  docker-compose stop -t $STOP_WAIT_TIMEOUT $1 || true
+  docker compose stop -t $STOP_WAIT_TIMEOUT $1 || true
 }
 
 service_up() {
-  docker-compose up ${compose_args[*]} -d $1
+  docker compose up ${compose_args[*]} -d $1
 }
 
 get_config() {
@@ -75,7 +75,7 @@ if [[ -z "$REGISTRY_URL" || -n "$rebuild" ]]; then
   images=$(grep image: "$COMPOSE_FILE" | sed -r 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
   $YODA_CMD build ${build_args[*]} $images
 else # Pull images otherwise
-  docker-compose pull
+  docker compose pull
 fi
 
 if [[ -z "$force" ]]; then

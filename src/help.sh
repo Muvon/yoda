@@ -46,7 +46,7 @@ Usage:
       --push        Should we push builded images to repository if we have REPOSITORY_URL defined in env.sh file. Default: not set
 
   ${c_bold}$YODA_CMD compose [COMPOSE_SCRIPT]${c_normal}
-    Display generated docker-compose file in stdout.
+    Display generated docker compose file in stdout.
     COMPOSE_SCRIPT    executable script who will process each container template, replace something and return as plain text. Container templates goes to stdin and 2 addition arguments are passed: --name and --sequence so name of container and number in scale map
 
   ${c_bold}$YODA_CMD start [options] [CONTAINER...]${c_normal}
@@ -62,7 +62,7 @@ Usage:
 
   ${c_bold}$YODA_CMD log [options] [SERVICE...]${c_normal}
     View output from containers.
-    Options are the same as for "docker-compose logs" command:
+    Options are the same as for "docker compose logs" command:
       --no-color          Produce monochrome output.
       -f, --follow        Follow log output.
       -t, --timestamps    Show timestamps.

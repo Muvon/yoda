@@ -2,4 +2,4 @@
 set -e
 
 $YODA_CMD compose > $COMPOSE_FILE
-docker-compose -f $COMPOSE_FILE logs "$@"
+docker compose -f $COMPOSE_FILE logs "$@"

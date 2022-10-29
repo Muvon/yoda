@@ -5,4 +5,4 @@ source "$YODA_PATH/lib/container.sh"
 containers=$(get_containers "$@")
 
 $YODA_CMD compose > "$COMPOSE_FILE"
-docker-compose stop -t "$STOP_WAIT_TIMEOUT" $containers
+docker compose stop -t "$STOP_WAIT_TIMEOUT" $containers

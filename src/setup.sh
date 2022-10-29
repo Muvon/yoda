@@ -37,11 +37,11 @@ setup() {
   fi
 
   # Check that we support version
-  centos_version=$(ssh -o ControlPath="$control_path" -o PasswordAuthentication=no -T "root@$host" "hostnamectl | grep 'Operating System' | cut -d: -f2" | xargs)
+  centos_version=$(ssh -o ControlPath="$control_path" -o PasswordAuthentication=no -T "root@$host" "hostnamectl | grep 'Operating System' | cut -d: -f2 | xargs | cut -d. -f1")
   declare -A version_map=(
-    ["CentOS 8"]=centos8
+    ["CentOS Linux 8"]=centos8
     ["CentOS Stream 9"]=centos-stream9
-    ["Rocky Linux 9.0 (Blue Onyx)"]=rocky-linux9
+    ["Rocky Linux 9"]=rocky-linux9
   )
   install_script="${version_map[$centos_version]}"
   if [[ -z "$install_script" ]]; then
