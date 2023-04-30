@@ -1,5 +1,9 @@
 # Yoda change log
 
+## Version 2.3
+
+Fix critical issue with yaml anchoring due to some updates in Docker
+
 ## Version 2.2
 
 Coming soon :)

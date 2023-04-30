@@ -146,18 +146,31 @@ for p in ${!SCALE_MAP[*]}; do
     output+=( "$( compile_config "$container_file" 4 )" )
 
     # Extend root container if we have namespaces
+    anchors=()
     if [[ -n "$yaml_anchor" ]]; then
-      output+=( "    <<: *${yaml_anchor}" )
+      anchors+=("*${yaml_anchor}")
     fi
 
     # Set default network mode if we not redefine it
     if [[ ${output[*]} != *network_mode:* && ${output[*]} != *networks:* ]]; then
-      output+=( "    <<: *default_${ENV}_networks" )
+      anchors+=("*default_${ENV}_networks")
     fi
 
     # Set default restart mode if we not redefine it
     if [[ ${output[*]} != *restart:* ]]; then
-      output+=( "    <<: *default_${ENV}_restart" )
+      anchors+=("*default_${ENV}_restart")
+    fi
+
+    if [[ ${#anchors[@]} -gt 0 ]]; then
+      merged_anchors='['
+      for anchor in "${anchors[@]}"; do
+        if [[ $merged_anchors != '[' ]]; then
+          merged_anchors+=','
+        fi
+        merged_anchors+="$anchor"
+      done
+      merged_anchors+=']'
+      output+=( "    <<: $merged_anchors" )
     fi
 
     # Set default hostname if not set
