@@ -1,12 +1,20 @@
 # Yoda change log
 
+## Version 2.4
+
+Coming soon :)
+
 ## Version 2.3
 
-Fix critical issue with yaml anchoring due to some updates in Docker
+1. Fix issue with merged anchors due to docker yaml parser update
+2. Add stale config
 
 ## Version 2.2
 
-Coming soon :)
+1. Correct diverse problems related to the server setup scripts.
+2. Transition to using the Docker Compose plugin rather than the Docker-Compose script.
+3. Implement support for the Rocky Linux 9 server setup.
+4. Configure server setup scripts to utilize the UTC timezone.
 
 ## Version 2.1
 
