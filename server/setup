@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
-useradd admin
-useradd box
+# Setup users first
+for user in admin box; do
+  useradd $user
+  mkdir /home/$user/.ssh && chown $user:$user "$_" && chmod 700 "$_"
+  cp "$SERVER_ROOT/authorized_keys" /home/$user/.ssh/
+  echo 'HISTTIMEFORMAT="%Y-%m-%d %T "' >> $user/.bashrc
+  chown $user:$user /home/$user/{.ssh/authorized_keys,.bashrc} && chmod 600 "$_"
+done
+
+# Save time for history for root also
+echo 'HISTTIMEFORMAT="%Y-%m-%d %T "' >> /root/.bashrc
+
+# Add docker group to box user
 usermod -aG docker box
-mkdir /home/box/.ssh && chown box:box "$_" && chmod 700 "$_"
-mkdir /home/admin/.ssh && chown admin:admin "$_" && chmod 700 "$_"
-cp "$SERVER_ROOT/authorized_keys" /home/box/.ssh/
-cp "$SERVER_ROOT/authorized_keys" /home/admin/.ssh/
-chown box:box /home/box/.ssh/authorized_keys && chmod 600 "$_"
-chown admin:admin /home/admin/.ssh/authorized_keys && chmod 600 "$_"
+
+# Setup sudo for admin
 echo '%admin  ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+# Apply server wide configurations
 cp -f "$SERVER_ROOT/sshd_config" /etc/ssh/sshd_config
 systemctl reload sshd
 cp -f "$SERVER_ROOT/sysctl.conf" /etc/sysctl.conf
