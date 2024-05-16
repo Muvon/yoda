@@ -169,6 +169,16 @@ case "$cmd" in
     $YODA_CMD log "$@"
     ;;
 
+  exec)
+    check_yodarc
+    bash "$YODA_PATH/src/exec.sh" "$@"
+    ;;
+
+  enter)
+    check_yodarc
+    bash "$YODA_PATH/src/enter.sh" "$@"
+    ;;
+
   setup)
     check_yodarc
     bash "$YODA_PATH/src/setup.sh" "$@"

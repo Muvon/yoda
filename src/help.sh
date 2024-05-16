@@ -68,6 +68,11 @@ Usage:
       -t, --timestamps    Show timestamps.
       --tail="all"        Number of lines to show from the end of the logs
                           for each container.
+  ${c_bold}$YODA_CMD exec [options] [SERVICE...]${c_normal}
+    Execute command in container.
+
+  ${c_bold}$YODA_CMD enter [options] [SERVICE...]${c_normal}
+    Enter into container with one of autodetected shell: zsh, bash or sh.
 
   ${c_bold}$YODA_CMD status${c_normal}
     Display current status of services

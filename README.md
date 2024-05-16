@@ -247,6 +247,18 @@ Stop all containers or only passed with arguments
 ### yoda status
 Display current status of services
 
+### yoda log CONTAINER...
+Show log for a given container
+
+### yoda logs
+Show log for all containers
+
+### yoda exec CONTAINER... command
+Execute a given command in a container
+
+### yoda enter CONTAINER...
+Enter into a container with one of autodetected shell: zsh, bash or sh
+
 ### yoda setup [options]
 Setup server before it can be used for environment. You can use only Centos 8 distribution. Otherwise you have to setup it in manual mode. Before deploy put your authorized_keys to server folder.
 
