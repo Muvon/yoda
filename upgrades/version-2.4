@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+sed "2 c\commit=$(git rev-parse --verify HEAD 2>/dev/null || echo 'latest')" "$DOCKER_ROOT/.yodarc"
+sed "/^ENV=/a\commit=\${commit:0:7}" "$DOCKER_ROOT/.yodarc"
+
+echo '(!!!) Breaking changes:'
+echo '  - Default REVISION has been shortened:'
+echo '    instead of full hash commit image revision is shortened to 7 chars'
