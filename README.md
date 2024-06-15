@@ -56,7 +56,7 @@ Done!
 
 ## Philosophy
 1. You can have several images for single project.
-2. Each image you use must have Dockerfile located in docker/images folder and named by convetion: Dockerfile-{name}.
+2. Each image you use must have Dockerfile located in docker/images folder and named by convention: Dockerfile-{name}.
 3. You can have several containers depends on one image.
 4. Each container has own folder in docker/containers with structure followed by convention in this README.
 5. You can setup and use any BASH variables in file docker/env.sh. Its pregenerated for you.
@@ -67,7 +67,7 @@ Done!
 ##  Init folder structure
 When you do yoda init in your project it creates by default yoda folder. This folder has following structure
 
-| Path | Descrition |
+| Path | Description |
 |---|---|
 | containers | This folder contains all containers with templates in your project |
 | images | It contains Dockerfiles for you images. Common naming is: Dockerfile-name. Where is name is just name of image you build with that dockerfile |
@@ -86,7 +86,7 @@ This folder will contain some files.
 | entrypoint | Its entrypoint for you container. Its optional but good practise to use this file as executable for your container starting point |
 
 #### What is container.yml
-This file contains valid docker compose section for current service. container_name is immutable and declared by Yoda internaly. You can specify image key here with shortcut to image from Buildfile. For example if your Buildfile describe image with key "base" you can put here just **image: base** and Yoda automatic will replace base to image from build params specified in Buildfile.
+This file contains valid docker compose section for current service. container_name is immutable and declared by Yoda internally. You can specify image key here with shortcut to image from Buildfile. For example if your Buildfile describe image with key "base" you can put here just **image: base** and Yoda automatic will replace base to image from build params specified in Buildfile.
 
 ### Path: env.sh
 Here you can declare BASH environment variables and use it everywhere.  
@@ -116,7 +116,7 @@ production: container1 container2=2
 dev: container1
 ```
 Example file above declare server **user@server** that will be deployed as **production**. And production will contain one container1 and two container2 instances.  
-ANd in dev environment only one container with name container1 will be started.
+And in dev environment only one container with name container1 will be started.
 
 Or in case of multiservers we use like this
 
@@ -148,18 +148,18 @@ production.ns2:
   stop: container2
   wait: deploy
 ```
-- **flow** - It declares flow of starting services. It contains container or container=chunk where is chunk - number that devide starting by chunks
-- **stop** - each service repsented here will be stopped before start
+- **flow** - It declares flow of starting services. It contains container or container=chunk where is chunk - number that divide starting by chunks
+- **stop** - each service represented here will be stopped before start
 - **wait** - After run up command with container sometimes you need to wait for exit code of it. This section declares which containers we should wait for
 
 In this example you [yoda start](#yoda-start-options-container) command first will stop container2 if its running.  
 After that it will start deploy, then container2 and then container1 services will be started as chunks by 2.  
 Also we wait for exit code for deploy container.
 
-Take a notice in case if you use multiserver and namespaces in environment you have to describe each environment with namespace sepately because all of them independed in flow.
+Take a notice in case if you use multiserver and namespaces in environment you have to describe each environment with namespace sepately because all of them independent in flow.
 
 ## Path: docker/.yodarc
-This is locked environment file for yoda inited in current project with yoda version and other useful common files. Plese dont edit this file because it rewrites on yoda upgrade.  
+This is locked environment file for yoda inited in current project with yoda version and other useful common files. Please dont edit this file because it rewrites on yoda upgrade.  
 
 If you want you can redefine all variables in [env.sh](#path-envsh) file.  
 
@@ -183,9 +183,13 @@ Commands available:
 | [start](#yoda-start-options-container) |  Start all services for current project |
 | [stop](#yoda-stop-container) | Stop all services for current project |
 | [status](#yoda-status) | Display current status of services |
-| [setup](#yoda-setup) | Setup server to be read for use with yoda deployment system |
+| [log](#yoda-log-container) | Show log for a given container |
+| [logs](#yoda-logs) | Show log for all containers |
+| [exec](#yoda-exec-container) | Execute a given command in a container |
+| [enter](#yoda-enter-container) | Enter into a container with one of autodetected shell: zsh, bash or sh |
+| [setup](#yoda-setup-options) | Setup server to be read for use with yoda deployment system |
 | [deploy](#yoda-deploy-options) | Deploy project on one or all nodes |
-| [rollback](#yoda-rollback-options) | Rollback project on one or all nodes to previos revision |
+| [rollback](#yoda-rollback-options) | Rollback project on one or all nodes to previous revision |
 | [destroy](#yoda-destroy) | Remove all created services by start command and all local images with volumes |
 
 ### yoda version
@@ -216,9 +220,9 @@ Options are:
 
 | Options | Description | Default |
 |---|---|:---:|
-| --rebuild | Force build also if image exists already | omited |
-| --no-cache | Dont use Dockerfile cache when building images. | omited |
-| --push | Should we push builded images to repository if we have REPOSITORY_URL defined in [env.sh](#path-envsh) file | omited |
+| --rebuild | Force build also if image exists already | omitted |
+| --no-cache | Dont use Dockerfile cache when building images. | omitted |
+| --push | Should we push built images to repository if we have REPOSITORY_URL defined in [env.sh](#path-envsh) file | omitted |
 
 
 ### yoda compose [COMPOSE_SCRIPT]
@@ -234,8 +238,8 @@ Options are:
 
 | Options | Description | Default |
 |---|---|:---:|
-| --rebuild | Rebuild all images also if they exist with that revision | omited |
-| --no-cache | Dont use Dockerfile cache on building images stage. It passes internally to build command | omited |
+| --rebuild | Rebuild all images also if they exist with that revision | omitted |
+| --no-cache | Dont use Dockerfile cache on building images stage. It passes internally to build command | omitted |
 | --recreate | Force recreate containers |
 | --force | Should start containers excluding Startfile flow description |
 
