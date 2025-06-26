@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -e
+SERVER_ROOT=$(cd "${BASH_SOURCE%/*}" && pwd)
+export SERVER_ROOT
+
+# Update common system
+dnf install -y epel-release dnf-plugins-core
+dnf config-manager --set-enabled "crb"
+dnf install -y dnf-utils http://rpms.remirepo.net/enterprise/remi-release-10.rpm
+dnf update -y
+
+# Install usable cli tools
+# libzip is for docker-compose
+dnf group install -y "Development Tools"
+dnf install -y chrony nano dstat htop curl libzip git screen pwgen wget
+
+wget https://raw.githubusercontent.com/sobolevn/git-secret/master/utils/rpm/git-secret.repo -O git-secret-rpm.repo
+# Inspect what's inside! You can also enable `gpg` check on repo level.
+mv git-secret-rpm.repo /etc/yum.repos.d/
+dnf install -y git-secret
+
+# Install docker
+dnf install -y dnf-utils lvm2
+dnf config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+dnf install -y containerd.io-1.7.27-3.1.el10 \
+  docker-ce-28.3.0-1.el10 \
+  docker-ce-cli-28.3.0-1.el10 \
+  docker-compose-plugin-2.37.3-1.el10
+
+# Preparing docker to start
+systemctl daemon-reload
+systemctl enable docker
+systemctl start docker
+mkdir -p /etc/docker && cp "$SERVER_ROOT/daemon.json" "$_"
+
+# Bash completion for docker
+dnf install -y bash-completion
+curl https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker -o /etc/bash_completion.d/docker.sh
+
+# Install firewalld
+dnf install -y firewalld tuned
+
+# Open port
+systemctl start firewalld
+systemctl enable firewalld
+
+systemctl start tuned
+systemctl enable tuned
+
+systemctl enable chronyd
+systemctl start chronyd
+
+# Generate locale
+dnf install -y glibc-locale-source
+localedef --no-archive -i en_US -f UTF-8 en_US.UTF-8
+
+bash "$SERVER_ROOT/setup"
+
+echo 'Reboot the system in 1 minute'
+screen -d -m bash -c "shutdown -r +1"

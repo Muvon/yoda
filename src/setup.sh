@@ -43,6 +43,7 @@ setup() {
     ["CentOS Linux 8"]=centos8
     ["CentOS Stream 9"]=centos-stream9
     ["Rocky Linux 9"]=rocky-linux9
+    ["Rocky Linux 10"]=rocky-linux10
   )
   install_script="${version_map[$centos_version]}"
   if [[ -z "$install_script" ]]; then
