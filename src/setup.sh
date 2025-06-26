@@ -21,7 +21,7 @@ if [[ ! -f "$DOCKER_ROOT/.ssh/authorized_keys" ]]; then
   exit 1
 fi
 
-control_path=$DOCKER_ROOT/.ssh/connections/%r@%h-%p
+control_path=$DOCKER_ROOT/.ssh/connections/%C
 setup() {
   local host=$1
   if [[ -z "$host" ]]; then
