@@ -74,7 +74,7 @@ for p in "$@"; do
   SCALE_MAP["$service"]=$(( ${count:-1} - 1 )) # Start index using 0
 done
 
-if [[ -z "${SCALE_MAP[@]}" ]]; then
+if [[ ${#SCALE_MAP[@]} -eq 0 ]]; then
   >&2 echo "No services to build. First you should add container."
   exit 1
 fi

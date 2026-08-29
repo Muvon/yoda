@@ -1,4 +1,4 @@
-.PHONY: check
+.PHONY: check lint test
 BASH_EXISTS := $(shell which bash)
 SHELL := $(shell which bash)
 YODA_DIR := $(shell pwd)
@@ -23,3 +23,12 @@ check:
 install:
 	@echo "Installing Yoda to "$(INSTALL_TO)
 	ln -fs $(YODA_DIR)/yoda $(INSTALL_TO)/yoda
+
+SCRIPTS = yoda $(wildcard src/*.sh) $(wildcard lib/*.sh) server/postinstall.sh server/setup
+
+lint:
+	shellcheck -S error $(SCRIPTS)
+	for f in $(SCRIPTS); do bash -n $$f; done
+
+test:
+	bats -r tests/

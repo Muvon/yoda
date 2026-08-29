@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shellcheck (error level)
+        run: shellcheck -S error yoda src/*.sh lib/*.sh server/postinstall.sh server/setup
+
+      - name: Bash syntax check
+        run: |
+          for f in yoda src/*.sh lib/*.sh server/postinstall.sh server/setup; do
+            bash -n "$f"
+          done
+
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install bats
+        run: npm install -g bats
+
+      - name: Install bash 4+ (macOS)
+        if: runner.os == 'macOS'
+        run: brew install bash
+
+      - name: Run tests
+        run: bats -r tests/ --report-formatter junit --output .
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.os }}
+          path: report.xml
+
+      - name: Verify environment requirements
+        if: runner.os == 'Linux'
+        run: make check
