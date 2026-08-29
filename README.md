@@ -1,124 +1,153 @@
 # Yoda
-Simple tool to dockerize and manage deployment of your project  
 
-![Alt text](/img/yoda.jpg?raw=true "Help you deploy I will")  
+[![CI](https://github.com/Muvon/yoda/actions/workflows/ci.yml/badge.svg)](https://github.com/Muvon/yoda/actions/workflows/ci.yml)
 
-## What is it?
-Yoda helps you to dockerize existing application and automate deployment process.
+> Dockerize any project and deploy it to your servers — with pure Bash.
 
-1. Only BASH. No dependency shit!
-2. Requirements: git, docker with compose plugin
-3. Its simple like simplicity itself
-4. Runs on MACOS and Linux systems
+![Yoda — help you deploy I will](/img/yoda.jpg?raw=true)
 
-## Installation
-First you need to install Yoda on your laptop. Its supereasy:
+## Why Yoda?
+
+You have an app and a server. Yoda closes the gap: it scaffolds a Docker setup inside your project, builds images, generates a docker-compose file per environment, and deploys to one or many servers over SSH — with one-command rollback when things go sideways.
+
+- **Zero dependencies** — 100% Bash. You only need `git` and Docker with the Compose plugin
+- **Environment-aware** — dev/staging/production with per-env compose templates and env files
+- **Multi-server** — deploy a whole cluster in parallel, with namespaces per host
+- **Rollback built-in** — `yoda rollback` returns every node to the previous revision
+- **Fully hackable** — override build, compose, start, or deploy with your own executable script
+
+Runs on macOS and Linux. Current version: **2.4** — see [CHANGES.md](CHANGES.md) for the full history.
+
+## Quick Start
 
 ```bash
-git clone git@github.com:muvon/yoda.git
+git clone https://github.com/Muvon/yoda.git
 cd yoda && make check && sudo make install
 ```
 
-Remember that you need bash version 4 or higher installed at least and GNU implementation of the sed.
+`make check` verifies all prerequisites; `make install` symlinks `yoda` into `/usr/local/bin` (so `git pull` in the clone keeps it up to date).
 
-## Knowledge requirements
-1. [Docker](https://docs.docker.com) and its main concept
-2. [Image and container](https://docs.docker.com/engine/userguide/storagedriver/imagesandcontainers/) understanding
-3. You know [Docker Compose](https://docs.docker.com/compose/overview/) and [its file syntax](https://docs.docker.com/compose/compose-file/).
+Then, inside your project:
+
+```bash
+yoda init              # creates the docker/ folder in your project
+yoda add app           # adds a container skeleton
+# edit docker/images/Dockerfile-base and docker/containers/app/container.yml
+yoda start             # builds images and starts everything
+```
+
+Done. Full walkthrough below.
+
+### Prerequisites
+
+Verified automatically by `make check`:
+
+| Requirement | Minimum |
+|---|---|
+| Bash | 4.0 |
+| GNU sed | — (macOS: `brew install gnu-sed`) |
+| Docker API | 1.41 |
+| Docker Compose plugin | 1.28 |
+| Git | 2.22 |
+
+Familiarity with [Docker](https://docs.docker.com) and [Compose file syntax](https://docs.docker.com/compose/compose-file/) helps, but Yoda hides most of the plumbing.
 
 ## Usage example
-OK. You have git repository with your project.  
-Go into this folder and run this command to initialize environment.
+
+You have a git repository with your project. Go into it and initialize the environment:
 
 ```bash
 yoda init
 ```
 
-Now you will get **docker** folder created in your project.  
-Next step is prepare Dockerfile that located in docker/images folder.  
-You can setup docker build options in file docker/Buildfile.
+This creates a **docker/** folder in your project. Next, prepare the Dockerfile located in `docker/images/` and set build options in `docker/Buildfile`.
 
-Now you can add container to your project.
+Now add a container:
 
 ```bash
 yoda add container-name
 ```
 
-Change template for docker-compose.yml file in docker/containers/container-name/container.yml.
+Edit the compose template in `docker/containers/container-name/container.yml`.
 
-We are done. Build it and start with just one command now:
+That's it — build and start with one command:
 
 ```bash
 yoda start
 ```
 
-Done!
+## Deploy to your servers
 
-## Philosophy
-1. You can have several images for single project.
-2. Each image you use must have Dockerfile located in docker/images folder and named by convention: Dockerfile-{name}.
-3. You can have several containers depends on one image.
-4. Each container has own folder in docker/containers with structure followed by convention in this README.
-5. You can setup and use any BASH variables in file docker/env.sh. Its pregenerated for you.
-6. Envfile is main file that has all info about what should be built and in which environment, also what server runs which environment for deploy.
-7. Each container can be scaled N times and started using single template but different names.
-8. You can fully customize deploy, build, compose stages just wrapping in your own script using any language.
+Describe your servers in `docker/Envfile`, provision them once, then deploy:
 
-##  Init folder structure
-When you do yoda init in your project it creates by default yoda folder. This folder has following structure
+```bash
+yoda setup --env=production      # one-time server provisioning
+yoda deploy --env=production     # deploy the whole cluster in parallel
+yoda rollback --env=production   # revert every node to the previous revision
+```
+
+Setup scripts ship for **Rocky Linux 9/10, CentOS Stream 9 and CentOS 8** (see [`server/`](server/)); other distributions need manual setup. Before `yoda setup`, put your `authorized_keys` file into `docker/.ssh/`.
+
+## Project structure
+
+`yoda init` creates a `docker/` folder by default (pass a name to use another: `yoda init myfolder`):
 
 | Path | Description |
 |---|---|
-| containers | This folder contains all containers with templates in your project |
-| images | It contains Dockerfiles for you images. Common naming is: Dockerfile-name. Where is name is just name of image you build with that dockerfile |
-| env.sh | Its environment for your building context. You can define custom variables and use it everywhere in builds and other scripts. Its common for every environments you have. Optionally you can create special file for current environment. For example env.dev.sh. And this file will be read right after common file env.sh was read. |
-| Buildfile | It is declarative file that describes how to build each image you have. It has simple structure **name: arguments for docker build command** where is name is your image in images folder with same name. You can uses custom context also just in the format **name[context]: arguments for docker build command**. By default we use current dir as context for building  |
-| Envfile | It describes all environments and link servers for deploy with its environments you have. No limitation. You can create own environments and describe what containers must be built there |
+| `containers/` | One folder per container, each with its compose template |
+| `images/` | Dockerfiles for your images. Naming convention: `Dockerfile-{name}` |
+| `env.sh` | BASH variables for your build context, shared by all environments. Optionally extended per environment, e.g. `env.dev.sh` |
+| `Buildfile` | Declarative file describing how to build each image |
+| `Envfile` | Maps servers to environments and environments to containers |
+| `Startfile` | Optional start flow: ordering, chunked scaling, stop-before-start |
+| `.yodarc` | Locked config with Yoda version and common variables. Don't edit — it's rewritten on `yoda upgrade` |
 
-### Path: containers
-When you adding new container folder is created here with same name. For example if you add container with name **container**. Same folder will appear here.  
-This folder will contain some files.
+### containers/
+
+When you run `yoda add container`, a folder with the same name appears here. It contains:
 
 | File | Description |
 |---|---|
-| container.yml | Its docker compose section without section name that describes how to build container. This file used to generate whole docker-compose.yml file for starting services |
-| container.[env].yml | Optional you can create file with template that will be used when docker-compose.yml is generated for this environment. For example if you have container.dev.yml and starting services in dev environment will use all keys from this file replacing common container.yml keys|
-| entrypoint | Its entrypoint for you container. Its optional but good practise to use this file as executable for your container starting point |
+| `container.yml` | A docker-compose service section (without the service name) used to generate the final `docker-compose.yml` |
+| `container.[env].yml` | Optional per-environment override; e.g. `container.dev.yml` keys replace `container.yml` keys when running in `dev` |
+| `entrypoint` | Optional executable entrypoint for the container — good practice to use it |
 
-#### What is container.yml
-This file contains valid docker compose section for current service. container_name is immutable and declared by Yoda internally. You can specify image key here with shortcut to image from Buildfile. For example if your Buildfile describe image with key "base" you can put here just **image: base** and Yoda automatic will replace base to image from build params specified in Buildfile.
+`container.yml` is a valid compose service section. `container_name` is immutable and managed by Yoda. You can reference images from `Buildfile` by key: if Buildfile defines image `base`, write `image: base` and Yoda replaces it with the built image name.
 
-### Path: env.sh
-Here you can declare BASH environment variables and use it everywhere.  
+### env.sh
 
-For example you can write here IMAGE_NAME to set image name with revision and other staff and use it in Buildfile and container.yml.  
+Declare BASH variables and use them everywhere — builds, compose templates, scripts:
 
-If you need custom env.sh file for environment you can just create it with name as env.dev.sh that will extend default env.sh file with new variables defined there.
+```bash
+IMAGE_BASE=myapp:$REVISION
+```
 
-Take a noticy that environment support namespaces for example production.server1 and production.server2. One server cannot hold 2 namespaces so to use custom env.sh in this case just use env.production.sh without namespace of each server.
+Create `env.dev.sh` to extend `env.sh` for a specific environment. Environments support namespaces (`production.server1`, `production.server2`); since one server can't hold two namespaces, use `env.production.sh` (without the namespace part) for the shared config.
 
-### Path: Buildfile
-Its simple file that have following structure:
+### Buildfile
+
+One line per image — name plus arguments passed to `docker build`:
 
 ```yaml
 base: -t $IMAGE_BASE --compress
 db: -t postgres:9.5
 ```
 
-Each line contains image name and build args that will be passed in **docker build** command. See more info in **docker build --help**.
+Use `name[context]:` syntax for a custom build context. By default the current directory is the context. See `docker build --help` for available arguments.
 
-### Path: Envfile
-Its simple file YAML like with environment and server description:
+### Envfile
+
+Maps servers to environments and environments to containers:
 
 ```yaml
 user@server: production
 production: container1 container2=2
 dev: container1
 ```
-Example file above declare server **user@server** that will be deployed as **production**. And production will contain one container1 and two container2 instances.  
-And in dev environment only one container with name container1 will be started.
 
-Or in case of multiservers we use like this
+The example above deploys `user@server` as `production` with one `container1` and two `container2` instances; the `dev` environment runs only `container1`.
+
+Multi-server with namespaces:
 
 ```yaml
 user@server1: production.stack1
@@ -128,168 +157,189 @@ production.stack2: container3 container4
 dev: container1
 ```
 
-In that case almost the same. Dot (.) allows us to separate namespaces and customize which services we use for one server and which for another. In that case we still have **production** environment. All that goes after dot (.) is about namespace of environment.
+The dot (`.`) separates environment from namespace, letting you customize which services run on which server while keeping a single `production` environment.
 
+### Startfile
 
-## Path: Startfile
-This file allow you to manage flow of start your complex service.  
+Controls the start flow for complex services:
 
 ```yaml
 dev:
   flow: deploy container2 container1=2
   stop: container2
   wait: deploy
-production.ns1:
-  flow: deploy container2 container1=2
-  stop: container2
-  wait: deploy
-production.ns2:
-  flow: deploy container2 container1=2
-  stop: container2
-  wait: deploy
 ```
-- **flow** - It declares flow of starting services. It contains container or container=chunk where is chunk - number that divide starting by chunks
-- **stop** - each service represented here will be stopped before start
-- **wait** - After run up command with container sometimes you need to wait for exit code of it. This section declares which containers we should wait for
 
-In this example you [yoda start](#yoda-start-options-container) command first will stop container2 if its running.  
-After that it will start deploy, then container2 and then container1 services will be started as chunks by 2.  
-Also we wait for exit code for deploy container.
+- **flow** — start order; `container=chunk` starts containers in chunks of that size
+- **stop** — services stopped before starting
+- **wait** — services whose exit code Yoda waits for before continuing
 
-Take a notice in case if you use multiserver and namespaces in environment you have to describe each environment with namespace sepately because all of them independent in flow.
+In the example, [yoda start](#yoda-start-options-container) first stops `container2` if running, then starts `deploy`, waits for it to exit, starts `container2`, and finally starts `container1` in chunks of 2.
 
-## Path: docker/.yodarc
-This is locked environment file for yoda inited in current project with yoda version and other useful common files. Please dont edit this file because it rewrites on yoda upgrade.  
+With multi-server namespaces, describe each namespaced environment separately — their flows are independent.
 
-If you want you can redefine all variables in [env.sh](#path-envsh) file.  
+## CLI reference
 
-## Yoda command line tool usage
 ```bash
 yoda command arguments
 ```
 
-Commands available:  
-
 | Command | Description |
 |---|---|
 | [version](#yoda-version) | Display version of Yoda |
-| [help](#yoda-help) | Display this information |
+| [help](#yoda-help) | Display help information |
 | [init](#yoda-init-folder) | Prepare deployment folder in project |
-| [upgrade](#yoda-upgrade) | Upgrade to new version of initialized Yoda in project |
-| [add](#yoda-add-container) |  Add new container skeleton structure to project |
+| [upgrade](#yoda-upgrade) | Upgrade initialized Yoda in project to a new version |
+| [add](#yoda-add-container) | Add new container skeleton to project |
 | [delete](#yoda-delete-container) | Delete existing container from project |
-| [build](#yoda-build-options-images) |  Build images for current project |
-| [compose](#yoda-compose-compose_script) |  Display generated compose file for current environment |
-| [start](#yoda-start-options-container) |  Start all services for current project |
+| [build](#yoda-build-options-images) | Build images for current project |
+| [compose](#yoda-compose-compose_script) | Display generated compose file for current environment |
+| [start](#yoda-start-options-container) | Start all services for current project |
 | [stop](#yoda-stop-container) | Stop all services for current project |
 | [status](#yoda-status) | Display current status of services |
 | [log](#yoda-log-container) | Show log for a given container |
 | [logs](#yoda-logs) | Show log for all containers |
-| [exec](#yoda-exec-container) | Execute a given command in a container |
-| [enter](#yoda-enter-container) | Enter into a container with one of autodetected shell: zsh, bash or sh |
-| [setup](#yoda-setup-options) | Setup server to be read for use with yoda deployment system |
+| [exec](#yoda-exec-container-command) | Execute a command in a container |
+| [enter](#yoda-enter-container) | Enter a container with autodetected shell: zsh, bash or sh |
+| [setup](#yoda-setup-options) | Prepare a server for use with Yoda deployment |
 | [deploy](#yoda-deploy-options) | Deploy project on one or all nodes |
 | [rollback](#yoda-rollback-options) | Rollback project on one or all nodes to previous revision |
-| [destroy](#yoda-destroy) | Remove all created services by start command and all local images with volumes |
+| [destroy](#yoda-destroy) | Remove all services, local images and volumes created by start |
+
+> **Note:** `upgrade`, `add` and `delete` are allowed only in the `dev` environment.
 
 ### yoda version
-Display current Yoda version
+
+Display current Yoda version.
 
 ### yoda help
-Display help information
+
+Display help information.
 
 ### yoda init [folder]
-Prepare dockerized skeleton in project directory
 
-| Command | Description | Default |
+Prepare the dockerized skeleton in your project directory.
+
+| Argument | Description | Default |
 |---|---|---|
-| folder | Initialize all structure in folder with that name | yoda |
+| folder | Create the structure in a folder with this name | docker |
 
 ### yoda upgrade
-Upgrade to new version of initialized Yoda in project.
+
+Upgrade the initialized Yoda in your project to the new version.
 
 ### yoda add [CONTAINER...]
-Add container or bunch of containers skeleton to project
+
+Add one or more container skeletons to the project.
 
 ### yoda delete [CONTAINER...]
-Delete container or bunch of existing containers from project
+
+Delete one or more existing containers from the project.
 
 ### yoda build [options] [IMAGES...]
-Build images for current project. You can pass optional images you want to build. Default is every image from Buildfile.
-Options are:
 
-| Options | Description | Default |
+Build images for the current project. Optionally pass image names to build; defaults to every image in Buildfile.
+
+| Option | Description | Default |
 |---|---|:---:|
-| --rebuild | Force build also if image exists already | omitted |
-| --no-cache | Dont use Dockerfile cache when building images. | omitted |
-| --push | Should we push built images to repository if we have REPOSITORY_URL defined in [env.sh](#path-envsh) file | omitted |
-
+| --rebuild | Force build even if the image already exists | omitted |
+| --no-cache | Don't use Dockerfile cache when building | omitted |
+| --push | Push built images to the registry if `REGISTRY_URL` is defined in [env.sh](#envsh) | omitted |
 
 ### yoda compose [COMPOSE_SCRIPT]
-Display generated docker compose file in stdout.
 
-| Command | Description | Default |
+Display the generated docker-compose file in stdout.
+
+| Argument | Description | Default |
 |---|---|:---:|
-| COMPOSE_SCRIPT | Executable script who will process each container template, replace something and return as plain text. Container templates goes to stdin and 2 addition arguments are passed: --name and --sequence so name of container and number in scale map | - |
+| COMPOSE_SCRIPT | Executable script that processes each container template and returns plain text. The template comes via stdin with two extra arguments: `--name` (container name) and `--sequence` (number in the scale map) | - |
 
 ### yoda start [options] [CONTAINER...]
-Start all containers or only passed with arguments
-Options are:
 
-| Options | Description | Default |
+Start all containers, or only the ones passed as arguments.
+
+| Option | Description | Default |
 |---|---|:---:|
-| --rebuild | Rebuild all images also if they exist with that revision | omitted |
-| --no-cache | Dont use Dockerfile cache on building images stage. It passes internally to build command | omitted |
-| --recreate | Force recreate containers |
-| --force | Should start containers excluding Startfile flow description |
+| --rebuild | Rebuild images even if they exist with this revision | omitted |
+| --no-cache | Don't use Dockerfile cache when building (passed to build internally) | omitted |
+| --recreate | Force recreate containers | omitted |
+| --force | Start containers ignoring the Startfile flow | omitted |
 
-You also can manager flow of start and restart of you containers using [Startfile](#path-startfile)  
+You can manage the start/restart flow with the [Startfile](#startfile).
 
 ### yoda stop [CONTAINER...]
-Stop all containers or only passed with arguments
+
+Stop all containers, or only the ones passed as arguments.
 
 ### yoda status
-Display current status of services
+
+Display current status of services.
 
 ### yoda log CONTAINER...
-Show log for a given container
+
+Show log for a given container. Accepts the same options as `docker compose logs` (`-f`, `--tail`, `--timestamps`, `--no-color`).
 
 ### yoda logs
-Show log for all containers
+
+Show logs for all containers.
 
 ### yoda exec CONTAINER... command
-Execute a given command in a container
+
+Execute a command in a container.
 
 ### yoda enter CONTAINER...
-Enter into a container with one of autodetected shell: zsh, bash or sh
+
+Enter a container with one of the autodetected shells: zsh, bash or sh.
 
 ### yoda setup [options]
-Setup server before it can be used for environment. You can use only Centos 8 distribution. Otherwise you have to setup it in manual mode. Before deploy put your authorized_keys to server folder.
 
-| Options | Description | Default |
+Prepare a server before it can be used for deployment. Setup scripts are available for Rocky Linux 9/10, CentOS Stream 9 and CentOS 8; other distributions require manual setup. Before running setup, put your `authorized_keys` into the `docker/.ssh/` folder.
+
+| Option | Description | Default |
 |---|---|:---:|
-| --env | Setup single host or use host regexp pattern (Envfile will be used) | - |
-| --host | Setup all servers in environment (Envfile will be used) | - |
+| --host | Setup a single host or hosts matching a regexp pattern (Envfile is used) | - |
+| --env | Setup all servers in an environment (Envfile is used) | - |
 
 ### yoda deploy [options]
-Deploy single-node or whole cluster
-It exit with code 0 for success and 1 for failure (if something went wrong also on one node of all).
-Options are:
 
-| Options | Description | Default |
+Deploy a single node or the whole cluster in parallel. Exits with code 0 on success and 1 on failure (including failures on any single node).
+
+| Option | Description | Default |
 |---|---|:---:|
-| --host | Deploy on single host or using host regexp pattern (Envfile will be used) | - |
-| --env | Deploy on all nodes with that environment (Envfile will be used) | - |
-| --stack | Deploy only this stack in current environment | - |
-| --rev | Set custom revision to be deployed or rollback to | - |
-| --branch | What branch will be deployed. | master |
-| --args | Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed | - |
-| --force | Pass this flag to [yoda start](#yoda-start-options-container) command
+| --host | Deploy on a single host or hosts matching a regexp pattern (Envfile is used) | - |
+| --env | Deploy on all nodes with this environment (Envfile is used) | - |
+| --stack | Deploy only this stack in the current environment | - |
+| --rev | Set a custom revision to deploy or rollback to | - |
+| --branch | Branch to deploy | current branch |
+| --args | Custom environment arguments passed to `yoda start` on each remote server | - |
+| --force | Pass this flag to [yoda start](#yoda-start-options-container) | omitted |
 
 ### yoda rollback [options]
-Rollback to previous revision
-It exit with code 0 for success and 1 for failure (if something went wrong also on one node of all).
-Options are the same as for deploy command.
+
+Rollback to the previous revision. Exits with code 0 on success and 1 on failure (including failures on any single node). Options are the same as for the deploy command.
 
 ### yoda destroy
-Remove all created services by start command and all local images with volumes
+
+Remove all services created by the start command, plus all local images and volumes.
+
+## Philosophy
+
+1. A project can have several images.
+2. Each image has a Dockerfile in `docker/images/` named by convention: `Dockerfile-{name}`.
+3. Several containers can share one image.
+4. Each container has its own folder in `docker/containers/` following the structure described above.
+5. Use any BASH variables in `docker/env.sh` — it's pregenerated for you.
+6. Envfile is the source of truth: what gets built, in which environment, and which server runs which environment.
+7. Each container can be scaled N times from a single template with different names.
+8. Customize deploy, build, compose and start stages fully — just drop your own executable script (any language) into the docker folder.
+
+## Internals
+
+Curious how build, compose, start and deploy flow through their stages? See [FLOW.md](FLOW.md).
+
+## Contributing
+
+```bash
+make lint    # shellcheck + bash -n on all scripts
+make test    # bats test suite
+```

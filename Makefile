@@ -27,7 +27,7 @@ install:
 SCRIPTS = yoda $(wildcard src/*.sh) $(wildcard lib/*.sh) server/postinstall.sh server/setup
 
 lint:
-	shellcheck -S error $(SCRIPTS)
+	shellcheck -S style $(SCRIPTS)
 	for f in $(SCRIPTS); do bash -n $$f; done
 
 test:

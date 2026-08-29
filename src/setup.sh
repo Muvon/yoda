@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # env vars and c_* colors are exported by the parent yoda process
 set -e
 for p in "$@"; do
   case $p in
@@ -36,7 +37,7 @@ setup() {
     exit 1
   fi
 
-  env=$(grep $host: $DOCKER_ROOT/Envfile | cut -d':' -f2 | tr -d ' ')
+  env=$(grep "$host:" "$DOCKER_ROOT/Envfile" | cut -d':' -f2 | tr -d ' ')
 
   if [[ -z "$env" ]]; then
     >&2 echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
@@ -76,23 +77,23 @@ if [[ -n "$stack" ]]; then
 fi
 
 if [[ -n "$host" ]]; then
-  servers=(`grep -E "^(\w+@)?$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  mapfile -t servers < <(grep -E "^(\w+@)?$host:" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 else
-  servers=(`grep -E ":\s*$env_stack\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  mapfile -t servers < <(grep -E ":\s*$env_stack\b" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 fi
 
 # First do checkups that all servers have authorization by keys
 echo "Check root authorization on all servers using SSH keys"
-for server in ${servers[*]}; do
+for server in "${servers[@]}"; do
   echo -n "  root@${server#*@}"
   grep "${server#*@}" ~/.ssh/known_hosts > /dev/null 2>&1 || ssh-keyscan "${server#*@}" >> "$_"
   ssh -o ControlPath="$control_path" -o ControlPersist=1800 -o ConnectTimeout=5 -AT "root@${server#*@}" "echo '...ok'"
 done
 
 echo "Setup has been started"
-for server in ${servers[*]}; do
+for server in "${servers[@]}"; do
   ( setup "${server#*@}" >> "$DOCKER_ROOT/log/setup/${server#*@}.log" 2>&1 ) &
-  pids+=($!)
+  pids+=("$!")
 done
 
 echo "Nodes: ${#servers[*]}"
@@ -118,7 +119,7 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     sleep 1
     elapsed=$(( $(date +%s) - start_ts))
     tput cuu1
-    seq ${#pids[@]} | xargs -I0 tput cuu1
+    seq "${#pids[@]}" | xargs -I0 tput cuu1
   fi
 
   tput el

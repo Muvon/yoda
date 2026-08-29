@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # SERVER_ROOT is set by the invoking install script
 # Setup users first
 for user in admin box; do
-  useradd $user
-  mkdir /home/$user/.ssh && chown $user:$user "$_" && chmod 700 "$_"
-  cp "$SERVER_ROOT/authorized_keys" /home/$user/.ssh/
-  echo 'HISTTIMEFORMAT="%Y-%m-%d %T "' >> $user/.bashrc
-  chown $user:$user /home/$user/{.ssh/authorized_keys,.bashrc} && chmod 600 "$_"
+  useradd "$user"
+  mkdir "/home/$user/.ssh" && chown "$user:$user" "$_" && chmod 700 "$_"
+  cp "$SERVER_ROOT/authorized_keys" "/home/$user/.ssh/"
+  echo 'HISTTIMEFORMAT="%Y-%m-%d %T "' >> "$user/.bashrc"
+  chown "$user:$user" "/home/$user"/{.ssh/authorized_keys,.bashrc} && chmod 600 "$_"
 done
 
 # Save time for history for root also

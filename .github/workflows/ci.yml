@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Shellcheck (error level)
-        run: shellcheck -S error yoda src/*.sh lib/*.sh server/postinstall.sh server/setup
+      - name: Shellcheck (style level)
+        run: shellcheck -S style yoda src/*.sh lib/*.sh server/postinstall.sh server/setup
 
       - name: Bash syntax check
         run: |

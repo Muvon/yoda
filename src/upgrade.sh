@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # YODA_VERSION is exported by the parent yoda process
 set -e
 upgrade_path=$1
 if [[ -z "$upgrade_path" || ! -d "$upgrade_path" ]]; then
@@ -6,7 +7,7 @@ if [[ -z "$upgrade_path" || ! -d "$upgrade_path" ]]; then
   exit 1
 fi
 
-# shellcheck source=../lib/migration.sh
+# shellcheck disable=SC1091 source=../lib/migration.sh
 source "$YODA_PATH/lib/migration.sh"
 
 declare -A upgrades

@@ -4,17 +4,17 @@ YODA_CMD='yoda'
 YODA_SOURCE_VERSION='2.4'
 # YODA_VERSION redefined when you are in project dir
 YODA_VERSION=$YODA_SOURCE_VERSION
-YODA_BIN=$(test -h $0 && readlink $0 || echo $0)
+YODA_BIN=$(test -h "$0" && readlink "$0" || echo "$0")
 YODA_PATH=${YODA_BIN%/*}
 
 export YODA_CMD YODA_SOURCE_VERSION YODA_VERSION YODA_BIN YODA_PATH
 
 # Colored output support
 # shellcheck source=lib/color.sh
-source $YODA_PATH/lib/color.sh
+source "$YODA_PATH/lib/color.sh"
 
 # shellcheck source=lib/container.sh
-source $YODA_PATH/lib/container.sh
+source "$YODA_PATH/lib/container.sh"
 
 # Forbid to run as root
 if [[ "$(id -u)" -eq 0 ]]; then
@@ -29,9 +29,10 @@ cmd=$1
 shift
 
 # Auto version switch and update
-yodarc_file=$(ls */.yodarc 2>/dev/null || true)
+yodarc_file=$(ls ./*/.yodarc 2>/dev/null || true)
+# shellcheck source=/dev/null
 test -f "$yodarc_file" && source "$_"
-if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
+if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && "$cmd" != upgrade ]]; then
   (
     set +e
     echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
@@ -39,7 +40,7 @@ if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && $cmd != upgrade ]]; then
     cd "$YODA_PATH"
     git fetch
     git pull --rebase origin master
-    git checkout $YODA_VERSION || git checkout master
+    git checkout "$YODA_VERSION" || git checkout master
     switched_version=$(grep "YODA_VERSION=$YODA_VERSION" "$YODA_BIN")
     if [[ "$switched_version" == "$YODA_VERSION" ]]; then
       exec "$YODA_BIN" "$cmd" "$@"
@@ -62,19 +63,19 @@ custom_run() {
   shift
 
   # Stop recursion here get parent caller
-  called_by=$(ps -o command -p $PPID | tail -n 1 | cut -d' ' -f2)
+  called_by=$(ps -o command -p "$PPID" | tail -n 1 | cut -d' ' -f2)
   if [[ "$called_by" == "$DOCKER_ROOT/$script" ]]; then
     return 0
   fi
 
-  if [[ -e $DOCKER_ROOT/$script && ! -x $DOCKER_ROOT/$script ]]; then
+  if [[ -e "$DOCKER_ROOT/$script" && ! -x "$DOCKER_ROOT/$script" ]]; then
     >&2 echo "$DOCKER_ROOT/$script is found but its not executable. Run 'chmod +x $DOCKER_ROOT/$script' to make it work."
     return 1
   fi
 
-  if [[ -x $DOCKER_ROOT/$script ]]; then
-    exec $DOCKER_ROOT/$script "$@"
-    exit 0
+  if [[ -x "$DOCKER_ROOT/$script" ]]; then
+    # shellcheck disable=SC2093  # intentional: replace the yoda process with the project script
+    exec "$DOCKER_ROOT/$script" "$@"
   fi
 }
 
@@ -86,14 +87,18 @@ allow_dev_only() {
 }
 
 check_yodarc() {
-  if [[ ! -f $DOCKER_ROOT/.yodarc ]]; then
+  if [[ ! -f "$DOCKER_ROOT/.yodarc" ]]; then
     >&2 echo "Yoda is not inited. Run '$YODA_CMD init' first. More info: '$YODA_CMD help'."
     return 1
   fi
 
-  test -e "$DOCKER_ROOT/env.sh" && source "$_" || true
-  test -e "$DOCKER_ROOT/env.$ENV.sh" && source "$_" || true
-  test -e "$DOCKER_ROOT/env.$ENV.$STACK.sh" && source "$_" || true
+  local env_file
+  for env_file in "env.sh" "env.$ENV.sh" "env.$ENV.$STACK.sh"; do
+    if [[ -e "$DOCKER_ROOT/$env_file" ]]; then
+      # shellcheck source=/dev/null
+      source "$DOCKER_ROOT/$env_file"
+    fi
+  done
 }
 
 case "$cmd" in
@@ -111,13 +116,12 @@ case "$cmd" in
     check_yodarc
     allow_dev_only
 
-    arg_name="$*"
-    if [[ -z "$arg_name" ]]; then
+    if [[ $# -eq 0 ]]; then
       >&2 echo "Did you mean '$YODA_CMD $cmd container'? '$YODA_CMD help' for more info."
       exit 1
     fi
 
-    for name in $arg_name; do
+    for name in "$@"; do
       bash "$YODA_PATH/src/$cmd.sh" "$name"
     done
     ;;
@@ -127,8 +131,8 @@ case "$cmd" in
     arg_composer="$*"
     custom_run compose
     # Get containers to build
-    containers=$(get_stack)
-    COMPOSE_SCRIPT=$arg_composer bash "$YODA_PATH/src/compose.sh" $containers
+    read -ra containers <<< "$(get_stack)"
+    COMPOSE_SCRIPT="$arg_composer" bash "$YODA_PATH/src/compose.sh" "${containers[@]}"
     ;;
 
   build)

@@ -3,9 +3,9 @@ set -e
 
 arg_dir="$*"
 
-if [[ -f $DOCKER_ROOT/.yodarc ]]; then
-  # shellcheck source=yoda/.yodarc
-  source $DOCKER_ROOT/.yodarc
+if [[ -f "$DOCKER_ROOT/.yodarc" ]]; then
+  # shellcheck source=/dev/null
+  source "$DOCKER_ROOT/.yodarc"
   >&2 echo "Yoda was initialized already. Yoda version: '$YODA_VERSION'. Yoda home path: '$DOCKER_ROOT'."
   exit 1
 fi
@@ -21,11 +21,11 @@ username=$(git config --global user.name || echo 'Unknown maintainer')
 useremail=$(git config --global user.email || echo 'noreply@yoda.org')
 
 touch .dockerignore
-mkdir -p $yoda_dir/{images,containers,.ssh}
+mkdir -p "$yoda_dir"/{images,containers,.ssh}
 cp "$YODA_PATH/templates/compose.yml" "$yoda_dir/containers/compose.yml"
-cp $YODA_PATH/templates/env.sh $yoda_dir
-cp $YODA_PATH/templates/{Env,Build,Start}file $yoda_dir
-sed "s/{{user}}/$username/g;s/{{email}}/$useremail/g;" $YODA_PATH/templates/Dockerfile > $yoda_dir/images/Dockerfile-base
-cp $YODA_PATH/templates/gitignore $yoda_dir/.gitignore
-cp $YODA_PATH/templates/dockerignore $yoda_dir/.dockerignore
-sed "s/{{name}}/$project_name/g;s/{{yoda_version}}/$YODA_VERSION/g" $YODA_PATH/templates/yodarc > $yoda_dir/.yodarc
+cp "$YODA_PATH/templates/env.sh" "$yoda_dir"
+cp "$YODA_PATH/templates/"{Env,Build,Start}file "$yoda_dir"
+sed "s/{{user}}/$username/g;s/{{email}}/$useremail/g;" "$YODA_PATH/templates/Dockerfile" > "$yoda_dir/images/Dockerfile-base"
+cp "$YODA_PATH/templates/gitignore" "$yoda_dir/.gitignore"
+cp "$YODA_PATH/templates/dockerignore" "$yoda_dir/.dockerignore"
+sed "s/{{name}}/$project_name/g;s/{{yoda_version}}/$YODA_VERSION/g" "$YODA_PATH/templates/yodarc" > "$yoda_dir/.yodarc"

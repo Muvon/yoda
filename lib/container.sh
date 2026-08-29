@@ -27,7 +27,7 @@ get_stack() {
 
       line=$(string_trim "${line##*\:}")
       if [[ -n "$line" ]]; then
-        stack=( $line )
+        read -ra stack <<< "$line"
         break
       fi
       parse=1
@@ -39,13 +39,13 @@ get_stack() {
 get_containers() {
   local containers=()
   for service in "$@"; do
-    service=$(echo $service | sed "s|^$COMPOSE_PROJECT_NAME\.||")
+    service=${service/#"$COMPOSE_PROJECT_NAME".}
 
     # Get real name of container
     container=$service
     if [[ "$service" =~ ^.*\.[0-9]+$ ]]; then
       container=${service%.*}
-      containers+=($service)
+      containers+=("$service")
     else
 
       service=$(get_stack | grep -oE "\b$service(=[0-9]+)?\b" | cat)
@@ -57,10 +57,10 @@ get_containers() {
       service=$(get_service "$service")
       if (( count > 1 )); then
         for n in $(seq 0 $((count - 1))); do
-          containers+=($service.$n)
+          containers+=("$service.$n")
         done
       else
-        containers+=($service)
+        containers+=("$service")
       fi
     fi
 
@@ -69,8 +69,8 @@ get_containers() {
       container_file="$DOCKER_ROOT/containers/${container//./\/}.yml";
     fi
 
-    image=$(grep image: $container_file | cut -d':' -f2 | tr -d ' ')
-    images+=($image)
+    image=$(grep image: "$container_file" | cut -d':' -f2 | tr -d ' ')
+    images+=("$image")
   done
 
   echo "${containers[@]}"

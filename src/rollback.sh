@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # env vars are exported by the parent yoda process
 set -e
 for p in "$@"; do
   case $p in
@@ -25,22 +26,22 @@ fi
 # Gather servers
 servers=()
 if [[ -n "$host" ]]; then
-  servers=(`grep -E "^(\w+@)?$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  mapfile -t servers < <(grep -E "^(\w+@)?$host:" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 else
-  servers=(`grep -E ":\s*$env\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  mapfile -t servers < <(grep -E ":\s*$env\b" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 fi
 
 # Get last revision
 declare -A revisions
-for server in ${servers[*]}; do
-  revisions[$server]=$(ssh -o ControlPath=none -AT $server "
+for server in "${servers[@]}"; do
+  revisions[$server]=$(ssh -o ControlPath=none -AT "$server" "
     if test -f .deploy/$COMPOSE_PROJECT_NAME.revision; then
       tail -n 2 .deploy/$COMPOSE_PROJECT_NAME.revision | head -n 1
     fi
   ")
 done
 
-rev=$(printf "%s\n" ${revisions[*]} | sort -u)
+rev=$(printf "%s\n" "${revisions[@]}" | sort -u)
 if [[ -z "$rev" ]]; then
   >&2 echo 'No revisions found to rollback.'
 fi
@@ -64,4 +65,4 @@ if [[ -n "$rev" ]]; then
   echo "Revision: $rev"
 fi
 
-$YODA_CMD deploy "$@" --rev=$rev
+"$YODA_CMD" deploy "$@" "--rev=$rev"

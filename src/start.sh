@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # env vars are exported by the parent yoda process
 set -e
 # shellcheck disable=SC1091 source=../lib/container.sh
 source "$YODA_PATH/lib/container.sh"
@@ -41,11 +42,11 @@ if [[ -n "$recreate" ]]; then
 fi
 
 service_stop() {
-  docker compose stop -t $STOP_WAIT_TIMEOUT $1 || true
+  docker compose stop -t "$STOP_WAIT_TIMEOUT" "$1" || true
 }
 
 service_up() {
-  docker compose up ${compose_args[*]} -d $1
+  docker compose up "${compose_args[@]}" -d "$1"
 }
 
 get_config() {
@@ -55,8 +56,9 @@ get_config() {
 validate_services() {
   local section=$1
   services=$(get_config "$section")
-  pool=( $(get_stack) )
-  for service in $services; do
+  read -ra pool <<< "$(get_stack)"
+  read -ra service_list <<< "$services"
+  for service in "${service_list[@]}"; do
     if echo -n "${pool[*]}" | grep -Eo "\b$service\b" > /dev/null; then
       continue
     fi
@@ -67,22 +69,22 @@ validate_services() {
   echo -n "$services"
 }
 
-$YODA_CMD compose > "$COMPOSE_FILE"
+"$YODA_CMD" compose > "$COMPOSE_FILE"
 containers=$(get_containers "$@")
 
 # Build images on start only when no registry setted
 if [[ -z "$REGISTRY_URL" || -n "$rebuild" ]]; then
-  images=$(grep image: "$COMPOSE_FILE" | sed -r 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
-  $YODA_CMD build ${build_args[*]} $images
+  mapfile -t image_list < <(grep image: "$COMPOSE_FILE" | sed -r 's|[ ]*image:(.*/)?([^:]*)(:.*)?|\2|' | tr -d ' ' | sort | uniq)
+  "$YODA_CMD" build "${build_args[@]}" "${image_list[@]}"
 else # Pull images otherwise
   docker compose pull
 fi
 
 if [[ -z "$force" ]]; then
   running_containers=()
-  flow=( $(validate_services "flow") )
-  wait=( $(validate_services "wait") )
-  stop=( $(validate_services "stop") )
+  read -ra flow <<< "$(validate_services "flow")"
+  read -ra wait <<< "$(validate_services "wait")"
+  read -ra stop <<< "$(validate_services "stop")"
   array_flip wait_index "${wait[@]}"
 
   # Stopping services first before recreating
@@ -90,7 +92,8 @@ if [[ -z "$force" ]]; then
     echo "Stopping: ${stop[*]}"
     stop_containers=()
     for service in "${stop[@]}"; do
-      stop_containers+=( $(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ') )
+      mapfile -t matches < <(grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" "$COMPOSE_FILE" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ')
+      stop_containers+=("${matches[@]}")
     done
     service_stop "${stop_containers[*]}"
   fi
@@ -101,10 +104,11 @@ if [[ -z "$force" ]]; then
     for service in "${flow[@]}"; do
       count=$(get_count "$service" 0)
       service=$(get_service "$service")
-      service_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ')
+      service_containers=$(grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" "$COMPOSE_FILE" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ')
       if (( count > 0 )); then
-        printf -v join_string "%.0s- " $(seq 1 $count)
-        echo "$service_containers" | paste -d ' ' $join_string | while read chunk; do
+        printf -v join_string "%.0s- " $(seq 1 "$count")
+        read -ra join_args <<< "$join_string"
+        echo "$service_containers" | paste -d ' ' "${join_args[@]}" | while read -r chunk; do
           echo "Starting chunks of $service by $count: $chunk"
           service_up "$chunk"
         done
@@ -116,23 +120,25 @@ if [[ -z "$force" ]]; then
       # We should wait for this container?
       if [[ -n "${wait_index[$service]}" ]]; then
         echo "Waiting for: ${service_containers[*]}"
-        wait_containers=$(cat $COMPOSE_FILE | grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" | cut -d':' -f2-3 | tr -d ' ' | tr $'\n' ' ')
-        exit_code=$(docker wait $wait_containers)
+        wait_containers=$(grep -E "container_name: $COMPOSE_PROJECT_NAME\.$service(\.[0-9]+)?$" "$COMPOSE_FILE" | cut -d':' -f2-3 | tr -d ' ' | tr $'\n' ' ')
+        read -ra wait_list <<< "$wait_containers"
+        exit_code=$(docker wait "${wait_list[@]}")
         if [[ $exit_code != 0 ]]; then
           echo "Failed to wait containers: $wait_containers"
-          docker logs $wait_containers
+          docker logs "${wait_list[@]}"
           echo "Start is aborted due to one of containers exited with exit code $exit_code != 0 while waiting"
           exit 1
         fi
       fi
-      running_containers+=($service_containers)
+      mapfile -t started <<< "$service_containers"
+      running_containers+=("${started[@]}")
     done
   fi
 
   # Start rest of containers
   if [[ -n "${running_containers[*]}" ]]; then
     exclude_list=$(echo "${running_containers[*]}" | tr ' ' $'\n')
-    other=$(cat $COMPOSE_FILE | grep -E 'container_name: [A-Za-z_\.0-9]+$' | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ' | grep -v "$exclude_list" | tr $'\n' ' ')
+    other=$(grep -E 'container_name: [A-Za-z_\.0-9]+$' "$COMPOSE_FILE" | cut -d':' -f2 | cut -d'.' -f2-3 | tr -d ' ' | grep -v "$exclude_list" | tr $'\n' ' ')
     if [[ -n "$other" ]]; then
       echo "Starting rest of containers: $other"
       service_up "$other"

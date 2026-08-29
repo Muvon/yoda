@@ -6,7 +6,7 @@ source "$YODA_PATH/lib/string.sh"
 
 compose_container() {
   if [[ -x "$COMPOSE_SCRIPT" ]]; then
-    cat - | $COMPOSE_SCRIPT --name=$1 --sequence=$2
+    cat - | "$COMPOSE_SCRIPT" --name="$1" --sequence="$2"
   else
     cat -
   fi
@@ -60,14 +60,14 @@ compile_config() {
     fi
 
     printf "%s\n" "${compiled[@]}"
-  } | string_replace "${replaces[@]}" | compose_container $p $i
+  } | string_replace "${replaces[@]}" | compose_container "$p" "$i"
 }
 
 # Parse map
 declare -A SCALE_MAP
 for p in "$@"; do
-  service=$(echo $p | cut -d'=' -f1)
-  count=$(echo $p | cut -d'=' -f2)
+  service=$(echo "$p" | cut -d'=' -f1)
+  count=$(echo "$p" | cut -d'=' -f2)
   if [[ "$service" == "$count" ]]; then
     count=1
   fi
@@ -81,10 +81,10 @@ fi
 
 # Parse Buildfile to get imagenames
 declare -A IMAGE_MAP
-mapfile -t lines < $DOCKER_ROOT/Buildfile
+mapfile -t lines < "$DOCKER_ROOT/Buildfile"
 for line in "${lines[@]}"; do
-  k=$(echo $line | cut -d: -f1)
-  v=$(echo $line | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
+  k=$(echo "$line" | cut -d: -f1)
+  v=$(echo "$line" | grep -Eo '\-t [^ ]+' | cut -d' ' -f2)
   # @TODO: this logic used twice: compose and build
   [[ $k =~ ^([^\[]*)(\[(.*)\])?$ ]]
   k=${BASH_REMATCH[1]}
@@ -99,7 +99,9 @@ echo "# Build args: $*"
 
 # Common services and possibility to use Yaml merge anchors
 # Stick to env operated file only
-test -f "$DOCKER_ROOT/containers/compose.yml" && cat "$_" || true
+if [[ -f "$DOCKER_ROOT/containers/compose.yml" ]]; then
+  cat "$DOCKER_ROOT/containers/compose.yml"
+fi
 echo
 
 echo 'services:'

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # YODA_CMD and c_* colors are exported by the parent yoda process
 cat <<EOF
 Usage: $YODA_CMD command arguments
 
@@ -27,7 +28,7 @@ Usage:
 
   ${c_bold}$YODA_CMD init [folder]${c_normal}
     Prepare dockerized skeleton in project directory
-    folder    Initialize all structure in folder with that name. Default: yoda
+    folder    Initialize all structure in folder with that name. Default: docker
 
   ${c_bold}$YODA_CMD upgrade${c_normal}
     Upgrade to new version of initialized Yoda in project
@@ -43,7 +44,7 @@ Usage:
     Options are:
       --rebuild     Force build also if image exists already. Default: not set.
       --no-cache    Dont use Dockerfile cache when building images. Default: not set.
-      --push        Should we push builded images to repository if we have REPOSITORY_URL defined in env.sh file. Default: not set
+      --push        Should we push built images to registry if we have REGISTRY_URL defined in env.sh file. Default: not set
 
   ${c_bold}$YODA_CMD compose [COMPOSE_SCRIPT]${c_normal}
     Display generated docker compose file in stdout.
@@ -78,8 +79,8 @@ Usage:
     Display current status of services
 
   ${c_bold}$YODA_CMD setup [options]${c_normal}
-    Setup server before it can be used for environment. You can use only Centos 8 distribution. Otherwise you have to setup it in manual mode. Before deploy put your authorized_keys to server folder.
-    Optitons are:
+    Setup server before it can be used for environment. Setup scripts are available for Rocky Linux 9/10, CentOS Stream 9 and CentOS 8; other distributions require manual setup. Before setup put your authorized_keys to docker/.ssh/ folder.
+    Options are:
       --host=host         Setup single host or use host regexp pattern (Envfile will be used)
       --env=environment   Setup all servers in environment (Envfile will be used)
 
@@ -90,7 +91,7 @@ Usage:
       --env=environment   Deploy on all nodes with that environment (Envfile will be used)
       --stack=stack       Deploy only this stack in current environment
       --rev=revision      Set custom revision to be deployed or rollback to
-      --branch=gitbranch  What branch will be deployed. Default is master
+      --branch=gitbranch  What branch will be deployed. Default is the current branch
       --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.
       --force             Should start containers excluding Startenv file
 

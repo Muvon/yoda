@@ -9,14 +9,12 @@ source "$YODA_PATH/lib/template.sh"
 
 lock_file="$DOCKER_ROOT/.build.lock"
 lock() {
-  touch $lock_file
+  touch "$lock_file"
 }
 
 unlock() {
-  test -f $lock_file && rm -f $_
+  test -f "$lock_file" && rm -f "$_"
 }
-
-original_args=$@
 
 for p in "$@"; do
   case $p in
@@ -84,14 +82,15 @@ for line in "${lines[@]}"; do
   if [[ -z "$docker_image_id" || -n "$rebuild" ]]; then
     echo 'building.'
 
-    build_args=$(eval echo ${line#*:})
+    build_args=$(eval echo "${line#*:}")
     extra_args=()
     if [[ -n "$no_cache" ]]; then
       extra_args+=('--no-cache')
     fi
 
+    read -ra build_args_list <<< "$(eval echo "$build_args")"
     template_build "$DOCKER_ROOT/images/Dockerfile-$name" | \
-      docker build --network host ${extra_args[*]} $(eval echo "$build_args") -f - "$context"
+      docker build --network host "${extra_args[@]}" "${build_args_list[@]}" -f - "$context"
   else
     echo 'built already.'
   fi

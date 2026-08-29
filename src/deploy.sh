@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # env vars and c_* colors are exported by the parent yoda process
 set -e
 for p in "$@"; do
   case $p in
@@ -58,7 +59,7 @@ deploy() {
     exit 1
   fi
 
-  env=$(grep $host: $DOCKER_ROOT/Envfile | cut -d':' -f2 | tr -d ' ')
+  env=$(grep "$host:" "$DOCKER_ROOT/Envfile" | cut -d':' -f2 | tr -d ' ')
 
   if [[ -z "$env" ]]; then
     >&2 echo "Cant define environment for host '$host' using '$DOCKER_ROOT/Envfile'."
@@ -73,12 +74,12 @@ deploy() {
   fi
 
   # First check known hosts
-  grep ${host##*@} ~/.ssh/known_hosts || ssh-keyscan ${host##*@} >> $_
+  grep "${host##*@}" ~/.ssh/known_hosts || ssh-keyscan "${host##*@}" >> "$_"
 
   # Detect git host to do keyscan check
-  git_host=$(echo $GIT_URL | cut -d'@' -f2 | cut -d':' -f1)
-  yoda_git_url=$(cd ${BASH_SOURCE%/*} && git remote get-url origin || true)
-  yoda_git_host=$(echo $yoda_git_url | cut -d'@' -f2 | cut -d':' -f1)
+  git_host=$(echo "$GIT_URL" | cut -d'@' -f2 | cut -d':' -f1)
+  yoda_git_url=$(cd "${BASH_SOURCE%/*}" && git remote get-url origin) || true
+  yoda_git_host=$(echo "$yoda_git_url" | cut -d'@' -f2 | cut -d':' -f1)
 
   # Get custom args for start command
   start_args=()
@@ -86,8 +87,10 @@ deploy() {
     start_args+=('--force')
   fi
 
+  # shellcheck disable=SC2016  # $HOME/$PATH stay literal: expanded on the remote host
   yoda_remote_path='PATH=$HOME/.yoda:$PATH'
-  ssh -o ControlPath=none -AT $host <<EOF
+  # shellcheck disable=SC2087  # heredoc is expanded locally on purpose to pass values to the remote
+  ssh -o ControlPath=none -AT "$host" <<EOF
     set -e
     if [[ ! -d ~/.yoda ]]; then
       if [[ ! -f ~/.ssh/known_hosts ]]; then
@@ -129,7 +132,7 @@ EOF
 
 pids=()
 servers=()
-mkdir -p $DOCKER_ROOT/log
+mkdir -p "$DOCKER_ROOT/log"
 # This is dirty hack same in container.yml
 # @TODO: fix it
 env_stack="$env"
@@ -138,14 +141,14 @@ if [[ -n "$stack" ]]; then
 fi
 
 if [[ -n "$host" ]]; then
-  servers=(`grep -E "^(\w+@)?$host:" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  mapfile -t servers < <(grep -E "^(\w+@)?$host:" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 else
-  servers=(`grep -E ":\s*$env_stack\b" $DOCKER_ROOT/Envfile | cut -d':' -f1`)
+  mapfile -t servers < <(grep -E ":\s*$env_stack\b" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 fi
 
-for server in ${servers[*]}; do
-  ( deploy $server >> $DOCKER_ROOT/log/${server//@/_}.log 2>&1 ) &
-  pids+=($!)
+for server in "${servers[@]}"; do
+  ( deploy "$server" >> "$DOCKER_ROOT/log/${server//@/_}.log" 2>&1 ) &
+  pids+=("$!")
 done
 
 echo "Nodes: ${#servers[*]}"
@@ -169,9 +172,9 @@ failed=()
 while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   if [[ -n "$clear" ]]; then
     sleep 1
-    elapsed=$((`date +%s` - $start_ts))
+    elapsed=$(( $(date +%s) - start_ts ))
     tput cuu1
-    seq ${#pids[@]} | xargs -I0 tput cuu1
+    seq "${#pids[@]}" | xargs -I0 tput cuu1
   fi
 
   tput el
@@ -180,9 +183,9 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
     pid=${pids[$idx]}
 
     status=
-    if ! ps -p $pid >/dev/null ; then
+    if ! ps -p "$pid" >/dev/null ; then
       # Check array first to prevent "not a child of this shell"
-      if is_succeed $pid || wait $pid; then
+      if is_succeed "$pid" || wait "$pid"; then
         status="${c_green}${c_bold}succeed${c_normal}"
         finished[$pid]=0
       else
@@ -200,7 +203,7 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
   done
 done
 echo "Finished: $(date -u)"
-for server in ${failed[*]}; do
+for server in "${failed[@]}"; do
   echo "${c_red}${c_bold}$server${c_normal} log:"
   tail -n 5 "$DOCKER_ROOT/log/${server//@/_}.log" | sed 's/^/  /'
 done

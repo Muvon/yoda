@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154  # YODA_VAR_REGEX is exported by the parent yoda process
 set -e
 
 template_build() {
@@ -8,7 +9,7 @@ template_build() {
   fi
 
   content=$(cat "$file")
-  matches=( $(echo "$content" | grep -Eo "$YODA_VAR_REGEX" | cat) )
+  mapfile -t matches < <(grep -Eo "$YODA_VAR_REGEX" <<< "$content")
 
   for match in "${matches[@]}"; do
     var=$(eval echo "\$${match:2:-1}")
