@@ -42,11 +42,15 @@ if [[ -n "$recreate" ]]; then
 fi
 
 service_stop() {
-  docker compose stop -t "$STOP_WAIT_TIMEOUT" "$1" || true
+  local services=()
+  [[ -n "$1" ]] && services=("$1")
+  docker compose stop -t "$STOP_WAIT_TIMEOUT" "${services[@]}" || true
 }
 
 service_up() {
-  docker compose up "${compose_args[@]}" -d "$1"
+  local services=()
+  [[ -n "$1" ]] && services=("$1")
+  docker compose up "${compose_args[@]}" -d "${services[@]}"
 }
 
 get_config() {
