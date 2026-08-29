@@ -99,3 +99,48 @@ teardown() {
   [ "$status" -eq 1 ]
   grep -q "No services to build" <<<"$output"
 }
+
+@test "start brings up every service when none is named" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+
+  DOCKER_LOG="$PROJECT_DIR/docker.log"
+  mkdir "$PROJECT_DIR/bin"
+  printf '#!/usr/bin/env bash\necho "$*" >> %q\n' "$DOCKER_LOG" > "$PROJECT_DIR/bin/docker"
+  chmod +x "$PROJECT_DIR/bin/docker"
+  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+
+  run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "compose up --no-build --remove-orphans -d" "$DOCKER_LOG"
+}
+
+@test "start brings up only the named service" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+
+  DOCKER_LOG="$PROJECT_DIR/docker.log"
+  mkdir "$PROJECT_DIR/bin"
+  printf '#!/usr/bin/env bash\necho "$*" >> %q\n' "$DOCKER_LOG" > "$PROJECT_DIR/bin/docker"
+  chmod +x "$PROJECT_DIR/bin/docker"
+  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+
+  run "$YODA" start nginx
+  [ "$status" -eq 0 ]
+  grep -qx "compose up --no-build --remove-orphans -d nginx" "$DOCKER_LOG"
+}
+
+@test "stop stops every service when none is named" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+
+  DOCKER_LOG="$PROJECT_DIR/docker.log"
+  mkdir "$PROJECT_DIR/bin"
+  printf '#!/usr/bin/env bash\necho "$*" >> %q\n' "$DOCKER_LOG" > "$PROJECT_DIR/bin/docker"
+  chmod +x "$PROJECT_DIR/bin/docker"
+  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+
+  run "$YODA" stop
+  [ "$status" -eq 0 ]
+  grep -qx "compose stop -t 10" "$DOCKER_LOG"
+}

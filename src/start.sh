@@ -59,9 +59,10 @@ get_config() {
 
 validate_services() {
   local section=$1
-  services=$(get_config "$section")
+  local section_services
+  section_services=$(get_config "$section")
   read -ra pool <<< "$(get_stack)"
-  read -ra service_list <<< "$services"
+  read -ra service_list <<< "$section_services"
   for service in "${service_list[@]}"; do
     if echo -n "${pool[*]}" | grep -Eo "\b$service\b" > /dev/null; then
       continue
@@ -70,7 +71,7 @@ validate_services() {
     exit 1
   done
 
-  echo -n "$services"
+  echo -n "$section_services"
 }
 
 "$YODA_CMD" compose > "$COMPOSE_FILE"
