@@ -5,7 +5,7 @@ for user in admin box; do
   useradd "$user"
   mkdir "/home/$user/.ssh" && chown "$user:$user" "$_" && chmod 700 "$_"
   cp "$SERVER_ROOT/authorized_keys" "/home/$user/.ssh/"
-  echo 'HISTTIMEFORMAT="%Y-%m-%d %T "' >> "$user/.bashrc"
+  echo 'HISTTIMEFORMAT="%Y-%m-%d %T "' >> "/home/$user/.bashrc"
   chown "$user:$user" "/home/$user"/{.ssh/authorized_keys,.bashrc} && chmod 600 "$_"
 done
 

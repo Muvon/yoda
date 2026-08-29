@@ -13,7 +13,7 @@ for p in "$@"; do
       stack=${p#*=}
       ;;
     --rev=*)
-      shift
+      rev=${p#*=}
       ;;
   esac
 done
@@ -31,28 +31,30 @@ else
   mapfile -t servers < <(grep -E ":\s*$env\b" "$DOCKER_ROOT/Envfile" | cut -d':' -f1)
 fi
 
-# Get last revision
+# Get last revision unless it was passed explicitly
 declare -A revisions
-for server in "${servers[@]}"; do
-  revisions[$server]=$(ssh -o ControlPath=none -AT "$server" "
-    if test -f .deploy/$COMPOSE_PROJECT_NAME.revision; then
-      tail -n 2 .deploy/$COMPOSE_PROJECT_NAME.revision | head -n 1
-    fi
-  ")
-done
-
-rev=$(printf "%s\n" "${revisions[@]}" | sort -u)
 if [[ -z "$rev" ]]; then
-  >&2 echo 'No revisions found to rollback.'
-fi
-
-if [[ $(echo "$rev" | wc -l | tr -d ' ') -gt 1 ]]; then
-  >&2 echo 'Found inconsistency in revisions on all servers:'
-
-  for host in "${!revisions[@]}"; do
-    >&2 echo "$host:${revisions[$host]}"
+  for server in "${servers[@]}"; do
+    revisions[$server]=$(ssh -o ControlPath=none -AT "$server" "
+      if test -f .deploy/$COMPOSE_PROJECT_NAME.revision; then
+        tail -n 2 .deploy/$COMPOSE_PROJECT_NAME.revision | head -n 1
+      fi
+    ")
   done
-  exit 1
+
+  rev=$(printf "%s\n" "${revisions[@]}" | sort -u)
+  if [[ -z "$rev" ]]; then
+    >&2 echo 'No revisions found to rollback.'
+  fi
+
+  if [[ $(echo "$rev" | wc -l | tr -d ' ') -gt 1 ]]; then
+    >&2 echo 'Found inconsistency in revisions on all servers:'
+
+    for host in "${!revisions[@]}"; do
+      >&2 echo "$host:${revisions[$host]}"
+    done
+    exit 1
+  fi
 fi
 
 echo "Host: $host"
