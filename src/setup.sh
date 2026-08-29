@@ -21,7 +21,14 @@ if [[ ! -f "$DOCKER_ROOT/.ssh/authorized_keys" ]]; then
   exit 1
 fi
 
-control_path=$DOCKER_ROOT/.ssh/connections/%C
+# %C expands to a 40-char hash and ssh appends a ~17-char random suffix
+# while binding, so the directory must be short enough to keep the whole
+# path under the 104-char sun_path limit (macOS). $DOCKER_ROOT is usually
+# too deep, and so is TMPDIR on macOS - hence the length check.
+for runtime_dir in "${XDG_RUNTIME_DIR:-}" "${TMPDIR:-}" /tmp; do
+  [[ -n "$runtime_dir" && ${#runtime_dir} -le 40 ]] && break
+done
+control_path="${runtime_dir%/}/yoda-%C"
 setup() {
   local host=$1
   if [[ -z "$host" ]]; then
@@ -82,7 +89,7 @@ for server in ${servers[*]}; do
   ssh -o ControlPath="$control_path" -o ControlPersist=1800 -o ConnectTimeout=5 -AT "root@${server#*@}" "echo '...ok'"
 done
 
-echo "Setup has been started"s
+echo "Setup has been started"
 for server in ${servers[*]}; do
   ( setup "${server#*@}" >> "$DOCKER_ROOT/log/setup/${server#*@}.log" 2>&1 ) &
   pids+=($!)
