@@ -49,7 +49,8 @@ if [[ -n "$rev" ]]; then
 fi
 
 if [[ -n "$custom_args" ]]; then
-  echo "Custom arguments: $custom_args"
+  # Names only: values are often secrets
+  echo "Custom arguments: $(echo "$custom_args" | sed -E 's/=[^ ]*//g')"
 fi
 
 deploy() {
@@ -121,7 +122,7 @@ deploy() {
     git checkout -f $git_branch && git reset --hard origin/$git_branch
     git pull --rebase origin $git_branch
     git clean -fdx
-    PATH=\$PATH:~/.yoda ENV=$env STACK=$stack REVISION=$rev $custom_args yoda start ${start_args[*]}
+    PATH=~/.yoda:\$PATH ENV=$env STACK=$stack REVISION=$rev $custom_args yoda start ${start_args[*]}
     {
       source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
       echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision
