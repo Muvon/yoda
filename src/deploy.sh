@@ -90,8 +90,11 @@ deploy() {
 
   # shellcheck disable=SC2016  # $HOME/$PATH stay literal: expanded on the remote host
   yoda_remote_path='PATH=$HOME/.yoda:$PATH'
-  # shellcheck disable=SC2087  # heredoc is expanded locally on purpose to pass values to the remote
-  ssh -o ControlPath=none -AT "$host" <<EOF
+  # The remote script is expanded locally on purpose to pass values to the remote.
+  # It is piped from a forked printf rather than fed as a heredoc: bash 5.x writes a
+  # heredoc into a pipe before ssh starts reading, which hangs once the script
+  # outgrows the pipe buffer macOS hands out under pipe-memory pressure.
+  script="
     set -e
     if [[ ! -d ~/.yoda ]]; then
       if [[ ! -f ~/.ssh/known_hosts ]]; then
@@ -107,8 +110,8 @@ deploy() {
       echo 'Changing remote origin url of yoda git repository'
       cd ~/.yoda
       remote_url=\$(git remote get-url origin)
-      if [[ "\$remote_url" =~ 'dmitrykuzmenkov' ]]; then
-        git remote set-url origin "\${remote_url//dmitrykuzmenkov/muvon}"
+      if [[ \"\$remote_url\" =~ 'dmitrykuzmenkov' ]]; then
+        git remote set-url origin \"\${remote_url//dmitrykuzmenkov/muvon}\"
       fi
       cd ~/
     fi
@@ -127,7 +130,8 @@ deploy() {
       source ~/.deploy/$COMPOSE_PROJECT_NAME/*/.yodarc
       echo ${rev:-$REVISION} >> ~/.deploy/$COMPOSE_PROJECT_NAME.revision
     }
-EOF
+"
+  printf '%s' "$script" | ssh -o ControlPath=none -AT "$host"
   echo "Deploy to $host with environment $env and git branch $git_branch finished."
 }
 
