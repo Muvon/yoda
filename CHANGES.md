@@ -8,6 +8,7 @@
 4. `yoda compose COMPOSE_SCRIPT` fails when the script is missing or not executable instead of silently skipping it
 5. Add `yoda start --wait` to return only once started containers are running and healthy (Compose `up --wait`)
 6. Stop grace belongs to the service: with an empty `STOP_WAIT_TIMEOUT` (new default in `.yodarc`) stop omits `-t`, so each service's `stop_grace_period` applies (Compose default 10 s, as before)
+7. Fix Startfile `stop`/`flow`/`wait` for project and container names with dots: names are taken by stripping the project prefix instead of cutting on dots
 
 ## Version 2.4
 

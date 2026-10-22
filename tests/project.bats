@@ -231,6 +231,21 @@ stub_deploy() {
   grep -qx "<compose><stop><-t><30><nginx>" "$DOCKER_ARGV"
 }
 
+@test "start resolves Startfile services of a dotted project name" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx php >/dev/null
+  printf 'dev: nginx=2 php\n' > docker/Envfile
+  printf 'dev:\n  stop: nginx\n  flow: nginx\n  wait:\n' > docker/Startfile
+  stub_docker
+  export COMPOSE_PROJECT_NAME=my.app
+
+  STOP_WAIT_TIMEOUT= run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><stop><nginx.0><nginx.1>" "$DOCKER_ARGV"
+  grep -qx "<compose><up><--no-build><--remove-orphans><-d><nginx.0><nginx.1>" "$DOCKER_ARGV"
+  grep -qx "<compose><up><--no-build><--remove-orphans><-d><php>" "$DOCKER_ARGV"
+}
+
 @test "stop leaves the grace to each service when STOP_WAIT_TIMEOUT is empty" {
   "$YODA" init >/dev/null
   "$YODA" add nginx >/dev/null
