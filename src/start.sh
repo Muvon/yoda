@@ -28,6 +28,10 @@ for p in "$@"; do
       keep_orphans=1
       shift
       ;;
+    --wait)
+      compose_wait=1
+      shift
+      ;;
   esac
 done
 
@@ -47,12 +51,15 @@ fi
 if [[ -n "$recreate" ]]; then
   compose_args+=('--force-recreate')
 fi
+if [[ -n "$compose_wait" ]]; then
+  compose_args+=('--wait')
+fi
 
 # Containers are passed as one space or newline separated string
 service_stop() {
   local services=()
   read -ra services <<< "${1//$'\n'/ }"
-  docker compose stop -t "$STOP_WAIT_TIMEOUT" "${services[@]}" || true
+  compose_stop "${services[@]}" || true
 }
 
 service_up() {

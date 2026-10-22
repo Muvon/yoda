@@ -92,3 +92,12 @@ get_count() {
 get_service() {
   echo "$1" | cut -d'=' -f1
 }
+
+# Stop containers; with no STOP_WAIT_TIMEOUT each service's stop_grace_period applies
+compose_stop() {
+  local stop_args=()
+  if [[ -n "$STOP_WAIT_TIMEOUT" ]]; then
+    stop_args+=('-t' "$STOP_WAIT_TIMEOUT")
+  fi
+  docker compose stop "${stop_args[@]}" "$@"
+}

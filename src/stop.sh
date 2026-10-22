@@ -7,4 +7,4 @@ containers=$(get_containers "$@")
 
 $YODA_CMD compose > "$COMPOSE_FILE"
 read -ra container_list <<< "$containers"
-docker compose stop -t "$STOP_WAIT_TIMEOUT" "${container_list[@]}"
+compose_stop "${container_list[@]}"

@@ -265,6 +265,7 @@ Start all containers, or only the ones passed as arguments. Options go before co
 | --recreate | Force recreate containers | omitted |
 | --force | Start containers ignoring the Startfile flow | omitted |
 | --keep-orphans | Don't remove containers that are no longer in the compose file (drops `--remove-orphans`) | omitted |
+| --wait | Return once started containers are running and healthy (their `healthcheck`); fail if one exits or turns unhealthy (Compose `up --wait`) | omitted |
 
 You can manage the start/restart flow with the [Startfile](#startfile).
 
@@ -273,6 +274,8 @@ You can manage the start/restart flow with the [Startfile](#startfile).
 ### yoda stop [CONTAINER...]
 
 Stop all containers, or only the ones passed as arguments.
+
+`STOP_WAIT_TIMEOUT` sets how many seconds a container gets to exit before it is killed. Empty (the default for new projects) leaves it to each service's own `stop_grace_period`, which Compose defaults to 10 seconds. Set it per call to override every service, e.g. `STOP_WAIT_TIMEOUT=60 yoda stop app`.
 
 ### yoda status
 

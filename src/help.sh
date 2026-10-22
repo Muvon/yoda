@@ -58,9 +58,11 @@ Usage:
       --recreate    Force recreate containers. Default: not set.
       --force       Should start containers excluding Startfile flow description. Default: not set.
       --keep-orphans  Keep running containers that are no longer in the compose file instead of removing them. Default: not set.
+      --wait        Wait until started containers are running and healthy; fail if one exits or turns unhealthy. Default: not set.
 
   ${c_bold}$YODA_CMD stop [CONTAINER...]${c_normal}
     Stop all containers or only passed with arguments
+    Waits STOP_WAIT_TIMEOUT seconds before killing; when empty each service's stop_grace_period applies.
 
   ${c_bold}$YODA_CMD log [options] [SERVICE...]${c_normal}
     View output from containers.

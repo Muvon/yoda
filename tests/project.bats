@@ -199,14 +199,46 @@ stub_deploy() {
   ! grep -q -- "--remove-orphans" "$DOCKER_LOG"
 }
 
-@test "stop stops every service when none is named" {
+@test "start --wait waits for started containers to be running and healthy" {
   "$YODA" init >/dev/null
   "$YODA" add nginx >/dev/null
   stub_docker
 
-  run "$YODA" stop
+  run "$YODA" start --wait nginx
   [ "$status" -eq 0 ]
-  grep -qx "compose stop -t 10" "$DOCKER_LOG"
+  grep -qx "compose up --no-build --remove-orphans --wait -d nginx" "$DOCKER_LOG"
+}
+
+@test "start stops Startfile stop services with each service's own grace" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf 'dev:\n  stop: nginx\n  flow:\n  wait:\n' > docker/Startfile
+  stub_docker
+
+  STOP_WAIT_TIMEOUT= run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><stop><nginx>" "$DOCKER_ARGV"
+}
+
+@test "start stops Startfile stop services within STOP_WAIT_TIMEOUT" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf 'dev:\n  stop: nginx\n  flow:\n  wait:\n' > docker/Startfile
+  stub_docker
+
+  STOP_WAIT_TIMEOUT=30 run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><stop><-t><30><nginx>" "$DOCKER_ARGV"
+}
+
+@test "stop leaves the grace to each service when STOP_WAIT_TIMEOUT is empty" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  stub_docker
+
+  STOP_WAIT_TIMEOUT= run "$YODA" stop
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><stop>" "$DOCKER_ARGV"
 }
 
 @test "stop waits STOP_WAIT_TIMEOUT for only the named container" {
@@ -216,7 +248,7 @@ stub_deploy() {
 
   STOP_WAIT_TIMEOUT=90 run "$YODA" stop nginx
   [ "$status" -eq 0 ]
-  grep -qx "compose stop -t 90 nginx" "$DOCKER_LOG"
+  grep -qx "<compose><stop><-t><90><nginx>" "$DOCKER_ARGV"
 }
 
 @test "deploy checks out the passed revision" {

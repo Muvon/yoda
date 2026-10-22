@@ -8,6 +8,7 @@ DOCKER_ROOT=$(cd "${BASH_SOURCE%/*}" && pwd)
 ENV=${ENV:-dev}
 commit=${commit:0:7}
 
+# STOP_WAIT_TIMEOUT: seconds to wait on stop before SIGKILL; empty = each service's stop_grace_period
 export \
   YODA_VERSION="{{yoda_version}}" \
   YODA_VAR_REGEX='%(\{[A-Z_]+\})' \
@@ -22,6 +23,6 @@ export \
   COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-"{{name}}"} \
   COMPOSE_HTTP_TIMEOUT=${COMPOSE_HTTP_TIMEOUT:-300} \
   COMPOSE_FILE="$DOCKER_ROOT/docker-compose.$ENV.yml" \
-  STOP_WAIT_TIMEOUT=${STOP_WAIT_TIMEOUT:-10} \
+  STOP_WAIT_TIMEOUT=${STOP_WAIT_TIMEOUT:-} \
   REGISTRY_URL=${REGISTRY_URL:-''} \
   GIT_SECRET_PASSWORD=${GIT_SECRET_PASSWORD:-''}

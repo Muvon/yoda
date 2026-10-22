@@ -6,6 +6,8 @@
 2. Fix `yoda start` and Startfile `stop` with several containers: each container is passed to compose as its own argument
 3. `yoda deploy --rev` (and `yoda rollback`) checks out that git revision instead of deploying the branch head tagged with it
 4. `yoda compose COMPOSE_SCRIPT` fails when the script is missing or not executable instead of silently skipping it
+5. Add `yoda start --wait` to return only once started containers are running and healthy (Compose `up --wait`)
+6. Stop grace belongs to the service: with an empty `STOP_WAIT_TIMEOUT` (new default in `.yodarc`) stop omits `-t`, so each service's `stop_grace_period` applies (Compose default 10 s, as before)
 
 ## Version 2.4
 
