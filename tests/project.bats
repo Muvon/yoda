@@ -120,6 +120,37 @@ stub_deploy() {
   grep -Fq "hostname: nginx" <<<"$output"
 }
 
+@test "compose pipes each container template through the compose script" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf '#!/usr/bin/env bash\nsed "s/role=nginx/role=$1 $2/"\n' > docker/compose-slot
+  chmod +x docker/compose-slot
+
+  run "$YODA" compose "$PROJECT_DIR/docker/compose-slot"
+  [ "$status" -eq 0 ]
+  grep -Fq "role=--name=nginx --sequence=0" <<<"$output"
+}
+
+@test "compose fails when the compose script is not executable" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf '#!/usr/bin/env bash\ncat\n' > docker/compose-slot
+
+  run "$YODA" compose "$PROJECT_DIR/docker/compose-slot"
+  [ "$status" -eq 1 ]
+  grep -Fq "compose-slot is found but its not executable" <<<"$output"
+  ! grep -q "^services:" <<<"$output"
+}
+
+@test "compose fails when the compose script is missing" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+
+  run "$YODA" compose "$PROJECT_DIR/docker/compose-slot"
+  [ "$status" -eq 1 ]
+  grep -Fq "Compose script $PROJECT_DIR/docker/compose-slot is not found." <<<"$output"
+}
+
 @test "compose fails when the stack has no services" {
   "$YODA" init >/dev/null
   run "$YODA" compose

@@ -4,8 +4,17 @@ set -e
 # shellcheck disable=SC1091 source=../lib/array.sh
 source "$YODA_PATH/lib/string.sh"
 
+if [[ -n "$COMPOSE_SCRIPT" && ! -x "$COMPOSE_SCRIPT" ]]; then
+  if [[ -e "$COMPOSE_SCRIPT" ]]; then
+    >&2 echo "$COMPOSE_SCRIPT is found but its not executable. Run 'chmod +x $COMPOSE_SCRIPT' to make it work."
+  else
+    >&2 echo "Compose script $COMPOSE_SCRIPT is not found."
+  fi
+  exit 1
+fi
+
 compose_container() {
-  if [[ -x "$COMPOSE_SCRIPT" ]]; then
+  if [[ -n "$COMPOSE_SCRIPT" ]]; then
     cat - | "$COMPOSE_SCRIPT" --name="$1" --sequence="$2"
   else
     cat -
