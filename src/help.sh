@@ -57,6 +57,7 @@ Usage:
       --no-cache    Dont use Dockerfile cache on building images stage. It passes internally to build command. Default: not set.
       --recreate    Force recreate containers. Default: not set.
       --force       Should start containers excluding Startfile flow description. Default: not set.
+      --keep-orphans  Keep running containers that are no longer in the compose file instead of removing them. Default: not set.
 
   ${c_bold}$YODA_CMD stop [CONTAINER...]${c_normal}
     Stop all containers or only passed with arguments
@@ -90,7 +91,7 @@ Usage:
       --host=host         Deploy on single host or using host regexp pattern (Envfile will be used)
       --env=environment   Deploy on all nodes with that environment (Envfile will be used)
       --stack=stack       Deploy only this stack in current environment
-      --rev=revision      Set custom revision to be deployed or rollback to
+      --rev=revision      Git revision (commit or tag) to check out and deploy, or rollback to
       --branch=gitbranch  What branch will be deployed. Default is the current branch
       --args=arguments    Custom environment arguments that will be passed to 'yoda start' command on each remote server to be deployed.
       --force             Should start containers excluding Startenv file

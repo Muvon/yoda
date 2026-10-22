@@ -256,7 +256,7 @@ Display the generated docker-compose file in stdout.
 
 ### yoda start [options] [CONTAINER...]
 
-Start all containers, or only the ones passed as arguments.
+Start all containers, or only the ones passed as arguments. Options go before container names.
 
 | Option | Description | Default |
 |---|---|:---:|
@@ -264,8 +264,11 @@ Start all containers, or only the ones passed as arguments.
 | --no-cache | Don't use Dockerfile cache when building (passed to build internally) | omitted |
 | --recreate | Force recreate containers | omitted |
 | --force | Start containers ignoring the Startfile flow | omitted |
+| --keep-orphans | Don't remove containers that are no longer in the compose file (drops `--remove-orphans`) | omitted |
 
 You can manage the start/restart flow with the [Startfile](#startfile).
+
+`--keep-orphans` lets you replace containers one by one. For example, scaling `app` to `app=2` turns the running `app` into an orphan; `yoda start --keep-orphans app.1` starts the new container while the old one keeps serving, and you stop it when you are ready.
 
 ### yoda stop [CONTAINER...]
 
@@ -309,7 +312,7 @@ Deploy a single node or the whole cluster in parallel. Exits with code 0 on succ
 | --host | Deploy on a single host or hosts matching a regexp pattern (Envfile is used) | - |
 | --env | Deploy on all nodes with this environment (Envfile is used) | - |
 | --stack | Deploy only this stack in the current environment | - |
-| --rev | Set a custom revision to deploy or rollback to | - |
+| --rev | Git revision (commit or tag) to check out and deploy, or rollback to; also used as `REVISION` | branch head |
 | --branch | Branch to deploy | current branch |
 | --args | Custom environment arguments passed to `yoda start` on each remote server | - |
 | --force | Pass this flag to [yoda start](#yoda-start-options-container) | omitted |

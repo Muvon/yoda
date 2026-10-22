@@ -9,6 +9,33 @@ teardown() {
   rm -rf "$PROJECT_DIR"
 }
 
+# Record every docker call instead of running it: joined in $DOCKER_LOG,
+# one <arg> per argument in $DOCKER_ARGV
+stub_docker() {
+  DOCKER_LOG="$PROJECT_DIR/docker.log"
+  DOCKER_ARGV="$PROJECT_DIR/docker.argv"
+  mkdir -p "$PROJECT_DIR/bin"
+  printf '#!/usr/bin/env bash\necho "$*" >> %q\nprintf "<%%s>" "$@" >> %q\necho >> %q\n' \
+    "$DOCKER_LOG" "$DOCKER_ARGV" "$DOCKER_ARGV" > "$PROJECT_DIR/bin/docker"
+  chmod +x "$PROJECT_DIR/bin/docker"
+  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+}
+
+# Record the script deploy sends over ssh in $SSH_LOG instead of running it
+stub_deploy() {
+  SSH_LOG="$PROJECT_DIR/ssh.log"
+  mkdir -p "$PROJECT_DIR/bin" "$PROJECT_DIR/home/.ssh"
+  printf '#!/usr/bin/env bash\ncat >> %q\n' "$SSH_LOG" > "$PROJECT_DIR/bin/ssh"
+  printf '#!/usr/bin/env bash\n' > "$PROJECT_DIR/bin/tput"
+  chmod +x "$PROJECT_DIR/bin/ssh" "$PROJECT_DIR/bin/tput"
+  printf 'node.example.com\ngit.example.com\n' > "$PROJECT_DIR/home/.ssh/known_hosts"
+  export HOME="$PROJECT_DIR/home" PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+
+  git init -q .
+  git remote add origin git@git.example.com:acme/app.git
+  printf 'box@node.example.com: production\nproduction: nginx\n' >> docker/Envfile
+}
+
 @test "init creates the deployment skeleton" {
   run "$YODA" init
   [ "$status" -eq 0 ]
@@ -103,12 +130,7 @@ teardown() {
 @test "start brings up every service when none is named" {
   "$YODA" init >/dev/null
   "$YODA" add nginx >/dev/null
-
-  DOCKER_LOG="$PROJECT_DIR/docker.log"
-  mkdir "$PROJECT_DIR/bin"
-  printf '#!/usr/bin/env bash\necho "$*" >> %q\n' "$DOCKER_LOG" > "$PROJECT_DIR/bin/docker"
-  chmod +x "$PROJECT_DIR/bin/docker"
-  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+  stub_docker
 
   run "$YODA" start
   [ "$status" -eq 0 ]
@@ -118,29 +140,70 @@ teardown() {
 @test "start brings up only the named service" {
   "$YODA" init >/dev/null
   "$YODA" add nginx >/dev/null
-
-  DOCKER_LOG="$PROJECT_DIR/docker.log"
-  mkdir "$PROJECT_DIR/bin"
-  printf '#!/usr/bin/env bash\necho "$*" >> %q\n' "$DOCKER_LOG" > "$PROJECT_DIR/bin/docker"
-  chmod +x "$PROJECT_DIR/bin/docker"
-  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+  stub_docker
 
   run "$YODA" start nginx
   [ "$status" -eq 0 ]
   grep -qx "compose up --no-build --remove-orphans -d nginx" "$DOCKER_LOG"
 }
 
+@test "start passes every named container to compose as its own argument" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx php >/dev/null
+  stub_docker
+
+  run "$YODA" start nginx php
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><up><--no-build><--remove-orphans><-d><nginx><php>" "$DOCKER_ARGV"
+}
+
+@test "start --keep-orphans leaves orphan containers running" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  stub_docker
+
+  run "$YODA" start --rebuild --keep-orphans nginx
+  [ "$status" -eq 0 ]
+  grep -qx "compose up --no-build -d nginx" "$DOCKER_LOG"
+  ! grep -q -- "--remove-orphans" "$DOCKER_LOG"
+}
+
 @test "stop stops every service when none is named" {
   "$YODA" init >/dev/null
   "$YODA" add nginx >/dev/null
-
-  DOCKER_LOG="$PROJECT_DIR/docker.log"
-  mkdir "$PROJECT_DIR/bin"
-  printf '#!/usr/bin/env bash\necho "$*" >> %q\n' "$DOCKER_LOG" > "$PROJECT_DIR/bin/docker"
-  chmod +x "$PROJECT_DIR/bin/docker"
-  export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
+  stub_docker
 
   run "$YODA" stop
   [ "$status" -eq 0 ]
   grep -qx "compose stop -t 10" "$DOCKER_LOG"
+}
+
+@test "stop waits STOP_WAIT_TIMEOUT for only the named container" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx php >/dev/null
+  stub_docker
+
+  STOP_WAIT_TIMEOUT=90 run "$YODA" stop nginx
+  [ "$status" -eq 0 ]
+  grep -qx "compose stop -t 90 nginx" "$DOCKER_LOG"
+}
+
+@test "deploy checks out the passed revision" {
+  "$YODA" init >/dev/null
+  stub_deploy
+
+  run "$YODA" deploy --env=production --branch=master --rev=abc1234
+  [ "$status" -eq 0 ]
+  grep -qx "    git checkout -qf --detach abc1234" "$SSH_LOG"
+  grep -Fq "REVISION=abc1234 " "$SSH_LOG"
+}
+
+@test "deploy without a revision deploys the branch head" {
+  "$YODA" init >/dev/null
+  stub_deploy
+
+  run "$YODA" deploy --env=production --branch=master
+  [ "$status" -eq 0 ]
+  grep -Fq "git checkout -f master && git reset --hard origin/master" "$SSH_LOG"
+  ! grep -q -- "--detach" "$SSH_LOG"
 }

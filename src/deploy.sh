@@ -88,6 +88,12 @@ deploy() {
     start_args+=('--force')
   fi
 
+  # Deploy the passed revision itself, not the branch head tagged with it
+  checkout_rev=
+  if [[ -n "$rev" ]]; then
+    checkout_rev="git checkout -qf --detach $rev"
+  fi
+
   # shellcheck disable=SC2016  # $HOME/$PATH stay literal: expanded on the remote host
   yoda_remote_path='PATH=$HOME/.yoda:$PATH'
   # The remote script is expanded locally on purpose to pass values to the remote.
@@ -124,6 +130,7 @@ deploy() {
     cd $COMPOSE_PROJECT_NAME && git fetch -p
     git checkout -f $git_branch && git reset --hard origin/$git_branch
     git pull --rebase origin $git_branch
+    $checkout_rev
     git clean -fdx
     PATH=~/.yoda:\$PATH ENV=$env STACK=$stack REVISION=$rev $custom_args yoda start ${start_args[*]}
     {

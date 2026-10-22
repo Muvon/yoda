@@ -24,6 +24,10 @@ for p in "$@"; do
       force=1
       shift
       ;;
+    --keep-orphans)
+      keep_orphans=1
+      shift
+      ;;
   esac
 done
 
@@ -36,20 +40,24 @@ if [[ -n "$no_cache" ]]; then
   build_args+=('--no-cache')
 fi
 
-compose_args=('--no-build' '--remove-orphans')
+compose_args=('--no-build')
+if [[ -z "$keep_orphans" ]]; then
+  compose_args+=('--remove-orphans')
+fi
 if [[ -n "$recreate" ]]; then
   compose_args+=('--force-recreate')
 fi
 
+# Containers are passed as one space or newline separated string
 service_stop() {
   local services=()
-  [[ -n "$1" ]] && services=("$1")
+  read -ra services <<< "${1//$'\n'/ }"
   docker compose stop -t "$STOP_WAIT_TIMEOUT" "${services[@]}" || true
 }
 
 service_up() {
   local services=()
-  [[ -n "$1" ]] && services=("$1")
+  read -ra services <<< "${1//$'\n'/ }"
   docker compose up "${compose_args[@]}" -d "${services[@]}"
 }
 
