@@ -132,11 +132,11 @@ while [[ "${#finished[@]}" != "${#pids[@]}" ]]; do
       # Check array first to prevent "not a child of this shell"
       if is_succeed "$pid" || wait "$pid"; then
         status="${c_green}${c_bold}succeed${c_normal}"
-        finished[$pid]=0
+        finished[pid]=0
       else
         exit_code=1
         status="${c_red}${c_bold}failed${c_normal}"
-        finished[$pid]=$exit_code
+        finished[pid]=$exit_code
       fi
     else
       status="${c_yellow}${c_bold}processing${c_normal}"

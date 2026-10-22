@@ -126,7 +126,7 @@ get_container_name() {
 }
 
 for p in ${!SCALE_MAP[*]}; do
-  for i in $(seq 0 ${SCALE_MAP[$p]:-0}); do
+  for i in $(seq 0 "${SCALE_MAP[$p]:-0}"); do
     output=()
     container_name=$(get_container_name "$p" "$i")
     container_path=${p//./\/}
