@@ -16,7 +16,7 @@ You have an app and a server. Yoda closes the gap: it scaffolds a Docker setup i
 - **Rollback built-in** — `yoda rollback` returns every node to the previous revision
 - **Fully hackable** — override build, compose, start, or deploy with your own executable script
 
-Runs on macOS and Linux. Current version: **2.4** — see [CHANGES.md](CHANGES.md) for the full history.
+Runs on macOS and Linux. Current version: **2.5** — see [CHANGES.md](CHANGES.md) for the full history.
 
 ## Quick Start
 

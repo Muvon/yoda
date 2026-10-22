@@ -1,5 +1,12 @@
 # Yoda change log
 
+## Version 2.5
+
+1. Add `yoda start --keep-orphans` to keep containers that are no longer in the compose file running (drops `--remove-orphans`)
+2. Fix `yoda start` and Startfile `stop` with several containers: each container is passed to compose as its own argument
+3. `yoda deploy --rev` (and `yoda rollback`) checks out that git revision instead of deploying the branch head tagged with it
+4. `yoda compose COMPOSE_SCRIPT` fails when the script is missing or not executable instead of silently skipping it
+
 ## Version 2.4
 
 Coming soon :)
