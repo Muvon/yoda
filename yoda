@@ -28,26 +28,31 @@ fi
 cmd=$1
 shift
 
+# True when Yoda runs from its own git clone, not from a release tarball
+# that happens to sit inside another repository (e.g. Homebrew's)
+is_yoda_clone() {
+  local top
+  top=$(git -C "$YODA_PATH" rev-parse --show-toplevel 2>/dev/null) || return 1
+  [[ "$top" == "$(cd "$YODA_PATH" && pwd -P)" ]]
+}
+
 # Auto version switch and update
 yodarc_file=$(ls ./*/.yodarc 2>/dev/null || true)
 # shellcheck source=/dev/null
 test -f "$yodarc_file" && source "$_"
 if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && "$cmd" != upgrade ]]; then
-  (
-    set +e
-    echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
-    echo "Switching to project Yoda version: '$YODA_VERSION'."
-    cd "$YODA_PATH"
-    git fetch
-    git pull --rebase origin master
-    git checkout "$YODA_VERSION" || git checkout master
-    switched_version=$(grep "YODA_VERSION=$YODA_VERSION" "$YODA_BIN")
-    if [[ "$switched_version" == "$YODA_VERSION" ]]; then
+  # Messages go to stderr: commands like 'yoda compose' are read from stdout
+  >&2 echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
+  >&2 echo "Switching to project Yoda version: '$YODA_VERSION'."
+  # Check out the tag only when it holds that version, so a failed switch leaves files as they are
+  if is_yoda_clone; then
+    git -C "$YODA_PATH" fetch -q --tags --force origin 2>/dev/null || true
+    if git -C "$YODA_PATH" show "$YODA_VERSION:yoda" 2>/dev/null | grep -qx "YODA_SOURCE_VERSION='$YODA_VERSION'" \
+      && git -C "$YODA_PATH" checkout -q "$YODA_VERSION" 2>/dev/null; then
       exec "$YODA_BIN" "$cmd" "$@"
-    else
-      >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
     fi
-  ) 2> /dev/null
+  fi
+  >&2 echo "Failed to switch version to '$YODA_VERSION'. Using '$YODA_SOURCE_VERSION'."
 fi
 
 for p in "$@"; do
@@ -62,9 +67,8 @@ custom_run() {
   script=$1
   shift
 
-  # Stop recursion here get parent caller
-  called_by=$(ps -o command -p "$PPID" | tail -n 1 | cut -d' ' -f2)
-  if [[ "$called_by" == "$DOCKER_ROOT/$script" ]]; then
+  # Stop recursion here: the hook calls 'yoda $script' to run the built-in step
+  if [[ "${YODA_HOOK:-}" == "$script" ]]; then
     return 0
   fi
 
@@ -74,6 +78,7 @@ custom_run() {
   fi
 
   if [[ -x "$DOCKER_ROOT/$script" ]]; then
+    export YODA_HOOK=$script
     # shellcheck disable=SC2093  # intentional: replace the yoda process with the project script
     exec "$DOCKER_ROOT/$script" "$@"
   fi

@@ -10,22 +10,31 @@ teardown() {
 }
 
 # Record every docker call instead of running it: joined in $DOCKER_LOG,
-# one <arg> per argument in $DOCKER_ARGV
+# one <arg> per argument in $DOCKER_ARGV. 'docker wait' prints
+# $DOCKER_WAIT_CODE (default 0) once per container.
 stub_docker() {
   DOCKER_LOG="$PROJECT_DIR/docker.log"
   DOCKER_ARGV="$PROJECT_DIR/docker.argv"
   mkdir -p "$PROJECT_DIR/bin"
   printf '#!/usr/bin/env bash\necho "$*" >> %q\nprintf "<%%s>" "$@" >> %q\necho >> %q\n' \
     "$DOCKER_LOG" "$DOCKER_ARGV" "$DOCKER_ARGV" > "$PROJECT_DIR/bin/docker"
+  printf '[[ $1 == wait ]] && for _ in "${@:2}"; do echo "${DOCKER_WAIT_CODE:-0}"; done\nexit 0\n' \
+    >> "$PROJECT_DIR/bin/docker"
   chmod +x "$PROJECT_DIR/bin/docker"
   export PATH="$YODA_ROOT:$PROJECT_DIR/bin:$PATH"
 }
 
-# Record the script deploy sends over ssh in $SSH_LOG instead of running it
+# Record the script deploy sends over ssh in $SSH_LOG instead of running it;
+# a command passed as an argument (rollback) runs locally in the fake $HOME
 stub_deploy() {
   SSH_LOG="$PROJECT_DIR/ssh.log"
   mkdir -p "$PROJECT_DIR/bin" "$PROJECT_DIR/home/.ssh"
-  printf '#!/usr/bin/env bash\ncat >> %q\n' "$SSH_LOG" > "$PROJECT_DIR/bin/ssh"
+  cat > "$PROJECT_DIR/bin/ssh" <<EOF
+#!/usr/bin/env bash
+while [[ \$1 == -* ]]; do [[ \$1 == -o ]] && shift; shift; done
+shift
+if [[ \$# -gt 0 ]]; then cd "\$HOME" && bash -c "\$*"; else cat >> "$SSH_LOG"; fi
+EOF
   printf '#!/usr/bin/env bash\n' > "$PROJECT_DIR/bin/tput"
   chmod +x "$PROJECT_DIR/bin/ssh" "$PROJECT_DIR/bin/tput"
   printf 'node.example.com\ngit.example.com\n' > "$PROJECT_DIR/home/.ssh/known_hosts"
@@ -34,6 +43,13 @@ stub_deploy() {
   git init -q .
   git remote add origin git@git.example.com:acme/app.git
   printf 'box@node.example.com: production\nproduction: nginx\n' >> docker/Envfile
+}
+
+# Copy Yoda without its .git, the way a release tarball (e.g. Homebrew) installs it
+release_copy() {
+  YODA_RELEASE="$PROJECT_DIR/release"
+  mkdir -p "$YODA_RELEASE"
+  cp -R "$YODA_ROOT"/{yoda,lib,src,templates,upgrades} "$YODA_RELEASE"
 }
 
 @test "init creates the deployment skeleton" {
@@ -284,4 +300,215 @@ stub_deploy() {
   [ "$status" -eq 0 ]
   grep -Fq "git checkout -f master && git reset --hard origin/master" "$SSH_LOG"
   ! grep -q -- "--detach" "$SSH_LOG"
+}
+
+@test "add creates a nested container in a nested folder that compose finds" {
+  "$YODA" init >/dev/null
+  "$YODA" add worker worker.mail >/dev/null
+  [ -f docker/containers/worker/mail/container.yml ]
+  [ -f docker/containers/worker/mail/entrypoint ]
+  grep -Fq "entrypoint: /src/docker/containers/worker/mail/entrypoint" docker/containers/worker/mail/container.yml
+  grep -Fq "role=worker.mail" docker/containers/worker/mail/container.yml
+
+  run "$YODA" compose
+  [ "$status" -eq 0 ]
+  grep -Fq "  worker.mail:" <<<"$output"
+  grep -Fq "x-worker_mail: &worker_mail" <<<"$output"
+}
+
+@test "add appends to a block list dev environment" {
+  "$YODA" init >/dev/null
+  printf 'dev:\n  - nginx\nproduction: nginx\n' > docker/Envfile
+  "$YODA" add php >/dev/null
+  [ "$(cat docker/Envfile)" = "$(printf 'dev:\n  - nginx\n  - php\nproduction: nginx')" ]
+}
+
+@test "delete removes only the exact container name from every environment" {
+  "$YODA" init >/dev/null
+  printf 'box@node: production\ndev: webapp web=2 php\nproduction:\n  - web\n  - webapp\n' > docker/Envfile
+  run "$YODA" delete web
+  [ "$status" -eq 0 ]
+  [ "$(cat docker/Envfile)" = "$(printf 'box@node: production\ndev: webapp php\nproduction:\n  - webapp')" ]
+}
+
+@test "start reads the Startfile of a custom yoda folder" {
+  "$YODA" init deploy >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf 'dev:\n  stop: nginx\n  flow:\n  wait:\n' > deploy/Startfile
+  stub_docker
+
+  STOP_WAIT_TIMEOUT= run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><stop><nginx>" "$DOCKER_ARGV"
+}
+
+@test "start prefers the env.stack section of the Startfile" {
+  "$YODA" init >/dev/null
+  "$YODA" add web worker >/dev/null
+  printf 'production.front: web\nproduction.back: worker\n' > docker/Envfile
+  printf 'production:\n  stop: worker\n  flow:\n  wait:\nproduction.front:\n  stop: web\n  flow:\n  wait:\n' > docker/Startfile
+  stub_docker
+
+  ENV=production STACK=front STOP_WAIT_TIMEOUT= run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><stop><web>" "$DOCKER_ARGV"
+}
+
+@test "start applies a shared env section only to the services a stack runs" {
+  "$YODA" init >/dev/null
+  "$YODA" add web worker >/dev/null
+  printf 'production.front: web\nproduction.back: worker\n' > docker/Envfile
+  printf 'production:\n  stop: worker\n  flow: web\n  wait:\n' > docker/Startfile
+  stub_docker
+
+  ENV=production STACK=front STOP_WAIT_TIMEOUT= run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -q "Skipping service 'worker' of section 'stop'" <<<"$output"
+  grep -q "Starting services by flow: web" <<<"$output"
+  ! grep -q "<compose><stop>" "$DOCKER_ARGV"
+}
+
+@test "start aborts on a Startfile service that does not exist" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf 'dev:\n  stop:\n  flow: nginz\n  wait:\n' > docker/Startfile
+  stub_docker
+
+  run "$YODA" start
+  [ "$status" -eq 1 ]
+  grep -q "No service 'nginz' of section 'flow'" <<<"$output"
+  ! grep -q "compose up" "$DOCKER_LOG"
+}
+
+@test "start starts flow chunks whatever the Envfile count" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  printf 'dev: nginx=4\n' > docker/Envfile
+  printf 'dev:\n  stop:\n  flow: nginx=2\n  wait:\n' > docker/Startfile
+  stub_docker
+
+  run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<compose><up><--no-build><--remove-orphans><-d><nginx.0><nginx.1>" "$DOCKER_ARGV"
+  grep -qx "<compose><up><--no-build><--remove-orphans><-d><nginx.2><nginx.3>" "$DOCKER_ARGV"
+}
+
+@test "start waits for every container of a scaled wait service" {
+  "$YODA" init >/dev/null
+  "$YODA" add job web >/dev/null
+  printf 'dev: job=2 web\n' > docker/Envfile
+  printf 'dev:\n  stop:\n  flow: job web\n  wait: job\n' > docker/Startfile
+  stub_docker
+
+  run "$YODA" start
+  [ "$status" -eq 0 ]
+  grep -qx "<wait><${PROJECT_DIR##*/}.job.0><${PROJECT_DIR##*/}.job.1>" "$DOCKER_ARGV"
+  grep -qx "<compose><up><--no-build><--remove-orphans><-d><web>" "$DOCKER_ARGV"
+}
+
+@test "start aborts when a wait container exits with an error" {
+  "$YODA" init >/dev/null
+  "$YODA" add job web >/dev/null
+  printf 'dev: job web\n' > docker/Envfile
+  printf 'dev:\n  stop:\n  flow: job web\n  wait: job\n' > docker/Startfile
+  stub_docker
+
+  DOCKER_WAIT_CODE=3 run "$YODA" start
+  [ "$status" -eq 1 ]
+  grep -q "Start is aborted" <<<"$output"
+  ! grep -q "<web>" "$DOCKER_ARGV"
+}
+
+@test "a hook that execs yoda runs the built-in step once" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  export PATH="$YODA_ROOT:$PATH"
+  printf '#!/usr/bin/env bash\necho run >> %q\n[[ $(wc -l < %q) -gt 1 ]] && exit 1\nexec yoda compose "$@"\n' \
+    "$PROJECT_DIR/hook.runs" "$PROJECT_DIR/hook.runs" > docker/compose
+  chmod +x docker/compose
+
+  run "$YODA" compose
+  [ "$status" -eq 0 ]
+  grep -q "^services:" <<<"$output"
+  [ "$(wc -l < hook.runs | tr -d ' ')" -eq 1 ]
+}
+
+@test "a hook that calls yoda as a child runs the built-in step once" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  export PATH="$YODA_ROOT:$PATH"
+  printf '#!/usr/bin/env bash\necho run >> %q\n[[ $(wc -l < %q) -gt 1 ]] && exit 1\nyoda compose "$@"\n' \
+    "$PROJECT_DIR/hook.runs" "$PROJECT_DIR/hook.runs" > docker/compose
+  chmod +x docker/compose
+
+  run "$YODA" compose
+  [ "$status" -eq 0 ]
+  grep -q "^services:" <<<"$output"
+  [ "$(wc -l < hook.runs | tr -d ' ')" -eq 1 ]
+}
+
+@test "deploy clones Yoda from its own origin and trusts the git host key" {
+  [ "$(git -C "$YODA_ROOT" rev-parse --show-toplevel 2>/dev/null)" = "$(cd "$YODA_ROOT" && pwd -P)" ] \
+    || skip "Yoda is not a git clone here"
+  "$YODA" init >/dev/null
+  stub_deploy
+
+  run "$YODA" deploy --env=production --branch=master
+  [ "$status" -eq 0 ]
+  grep -Fq "git clone -q $(git -C "$YODA_ROOT" remote get-url origin) ~/.yoda" "$SSH_LOG"
+  grep -Fq "ssh-keyscan 'git.example.com'" "$SSH_LOG"
+}
+
+@test "deploy from a release install clones Yoda from upstream" {
+  "$YODA" init >/dev/null
+  stub_deploy
+  release_copy
+
+  run "$YODA_RELEASE/yoda" deploy --env=production --branch=master
+  [ "$status" -eq 0 ]
+  grep -Fq "git clone -q https://github.com/Muvon/yoda.git ~/.yoda" "$SSH_LOG"
+  ! grep -q "ssh-keyscan 'https" "$SSH_LOG"
+}
+
+@test "rollback refuses to run without two recorded deploys" {
+  "$YODA" init >/dev/null
+  stub_deploy
+  mkdir -p home/.deploy
+  printf 'aaa1111\n' > "home/.deploy/${PROJECT_DIR##*/}.revision"
+
+  run "$YODA" rollback --env=production --branch=master
+  [ "$status" -eq 1 ]
+  grep -q "No revisions found to rollback" <<<"$output"
+  [ ! -s "$SSH_LOG" ]
+}
+
+@test "rollback deploys the previous recorded revision" {
+  "$YODA" init >/dev/null
+  stub_deploy
+  mkdir -p home/.deploy
+  printf 'aaa1111\nbbb2222\n' > "home/.deploy/${PROJECT_DIR##*/}.revision"
+
+  run "$YODA" rollback --env=production --branch=master
+  [ "$status" -eq 0 ]
+  grep -qx "    git checkout -qf --detach aaa1111" "$SSH_LOG"
+}
+
+@test "a failed version switch warns on stderr and leaves other repositories alone" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  release_copy
+  # The release copy sits inside a repository that has a matching tag
+  printf "YODA_SOURCE_VERSION='0.1'\n" > yoda
+  git init -q . && git add -A && git -c user.name=t -c user.email=t@t commit -qm one && git tag 0.1
+  git rm -q yoda && git -c user.name=t -c user.email=t@t commit -qm two
+  local head
+  head=$(git rev-parse HEAD)
+  sed -i.bak 's/^  YODA_VERSION=.*/  YODA_VERSION="0.1" \\/' docker/.yodarc
+
+  "$YODA_RELEASE/yoda" compose > out.yml 2> err.log
+  grep -q "^services:" out.yml
+  [ "$(grep -c "Yoda version" out.yml)" -eq 0 ]
+  grep -q "Failed to switch version to '0.1'" err.log
+  [ "$(git rev-parse HEAD)" = "$head" ]
+  git symbolic-ref -q HEAD
 }

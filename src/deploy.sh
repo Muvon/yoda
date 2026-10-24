@@ -53,6 +53,26 @@ if [[ -n "$custom_args" ]]; then
   echo "Custom arguments: $(echo "$custom_args" | sed -E 's/=[^ ]*//g')"
 fi
 
+# Remote command that trusts the SSH host key of a git URL; none for http(s) URLs
+keyscan_command() {
+  local url=$1 host
+  case "$url" in
+    ''|http://*|https://*)
+      return 0
+      ;;
+    ssh://*)
+      host=${url#ssh://}
+      host=${host#*@}
+      host=${host%%[:/]*}
+      ;;
+    *)
+      host=${url#*@}
+      host=${host%%:*}
+      ;;
+  esac
+  echo "grep -q '$host' ~/.ssh/known_hosts || ssh-keyscan '$host' >> ~/.ssh/known_hosts"
+}
+
 deploy() {
   host=$1
   if [[ -z "$host" ]]; then
@@ -77,10 +97,14 @@ deploy() {
   # First check known hosts
   grep "${host##*@}" ~/.ssh/known_hosts || ssh-keyscan "${host##*@}" >> "$_"
 
-  # Detect git host to do keyscan check
-  git_host=$(echo "$GIT_URL" | cut -d'@' -f2 | cut -d':' -f1)
-  yoda_git_url=$(cd "${BASH_SOURCE%/*}" && git remote get-url origin) || true
-  yoda_git_host=$(echo "$yoda_git_url" | cut -d'@' -f2 | cut -d':' -f1)
+  # Servers clone Yoda from the origin of the local clone; release installs
+  # (e.g. Homebrew) have no clone of their own, so they use upstream
+  yoda_git_url=https://github.com/Muvon/yoda.git
+  if [[ "$(git -C "$YODA_PATH" rev-parse --show-toplevel 2>/dev/null)" == "$(cd "$YODA_PATH" && pwd -P)" ]]; then
+    yoda_git_url=$(git -C "$YODA_PATH" remote get-url origin 2>/dev/null || echo "$yoda_git_url")
+  fi
+  yoda_keyscan=$(keyscan_command "$yoda_git_url")
+  git_keyscan=$(keyscan_command "$GIT_URL")
 
   # Get custom args for start command
   start_args=()
@@ -106,12 +130,10 @@ deploy() {
       if [[ ! -f ~/.ssh/known_hosts ]]; then
         touch ~/.ssh/known_hosts
       fi
-      grep $yoda_git_host ~/.ssh/known_hosts || ssh-keyscan $yoda_git_host >> \$_
+      $yoda_keyscan
       git clone -q $yoda_git_url ~/.yoda
 
-      if grep -qV $yoda_remote_path ~/.bashrc; then
-        echo $yoda_remote_path >> ~/.bashrc
-      fi
+      grep -qxF '$yoda_remote_path' ~/.bashrc 2>/dev/null || echo '$yoda_remote_path' >> ~/.bashrc
     else
       echo 'Changing remote origin url of yoda git repository'
       cd ~/.yoda
@@ -124,7 +146,7 @@ deploy() {
 
     mkdir -p ~/.deploy && cd \$_
     if [[ ! -d $COMPOSE_PROJECT_NAME ]]; then
-      grep $git_host ~/.ssh/known_hosts || ssh-keyscan $git_host >> \$_
+      $git_keyscan
       git clone -q $GIT_URL $COMPOSE_PROJECT_NAME
     fi
     cd $COMPOSE_PROJECT_NAME && git fetch -p

@@ -2,6 +2,6 @@ image: base
 labels:
   - role={{name}}
 working_dir: /src
-entrypoint: /src/docker/containers/{{name}}/entrypoint
+entrypoint: /src/docker/containers/{{path}}/entrypoint
 cap_drop:
   - ALL

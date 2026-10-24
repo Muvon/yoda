@@ -68,25 +68,70 @@ service_up() {
   docker compose up "${compose_args[@]}" -d "${services[@]}"
 }
 
-get_config() {
-  grep -A 3 "^$ENV:$" docker/Startfile | grep "$1:" | head -n 1 | cut -d ':' -f 2
+startfile="$DOCKER_ROOT/Startfile"
+
+# Startfile section for this run: <env>.<stack> when declared, otherwise <env>
+startfile_section() {
+  local name line
+  test -f "$startfile" || return 0
+  for name in ${STACK:+"$ENV.$STACK"} "$ENV"; do
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      if [[ "$line" =~ ^([^[:space:]#].*):[[:space:]]*$ && "${BASH_REMATCH[1]}" == "$name" ]]; then
+        echo "$name"
+        return 0
+      fi
+    done < "$startfile"
+  done
 }
 
-validate_services() {
-  local section=$1
-  local section_services
-  section_services=$(get_config "$section")
-  read -ra pool <<< "$(get_stack)"
-  read -ra service_list <<< "$section_services"
-  for service in "${service_list[@]}"; do
-    if echo -n "${pool[*]}" | grep -Eo "\b$service\b" > /dev/null; then
+# Value of key $1 in the Startfile section of this run
+get_config() {
+  local line in_section=0 values=()
+  test -n "$section" || return 0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ ^[[:space:]]*(#.*)?$ ]]; then
       continue
     fi
-    >&2 echo "No service '$service' of section '$section' in pool of services: '${pool[*]}'. Check Startfile"
-    exit 1
+    if [[ "$line" =~ ^[^[:space:]] ]]; then
+      in_section=0
+      if [[ "$line" =~ ^(.*):[[:space:]]*$ && "${BASH_REMATCH[1]}" == "$section" ]]; then
+        in_section=1
+      fi
+      continue
+    fi
+    if (( in_section )) && [[ "$line" =~ ^[[:space:]]+$1:(.*)$ ]]; then
+      read -ra values <<< "${BASH_REMATCH[1]}"
+      echo "${values[*]}"
+      return 0
+    fi
+  done < "$startfile"
+}
+
+# Services of Startfile key $1 that run in this stack. An unknown service
+# aborts the start, except in an <env> section shared by stacks that run
+# different services: there it only applies to the stacks that have it.
+validate_services() {
+  local key=$1 entry service
+  local pool=() section_services=() stack_entries=() result=()
+  read -ra section_services <<< "$(get_config "$key")"
+  read -ra stack_entries <<< "$(get_stack)"
+  for entry in "${stack_entries[@]}"; do
+    pool+=("$(get_service "$entry")")
   done
 
-  echo -n "$section_services"
+  for entry in "${section_services[@]}"; do
+    service=$(get_service "$entry")
+    if [[ " ${pool[*]} " == *" $service "* ]]; then
+      result+=("$entry")
+    elif [[ -n "$STACK" && "$section" == "$ENV" ]]; then
+      >&2 echo "Skipping service '$service' of section '$key': not in stack '$ENV.$STACK'."
+    else
+      >&2 echo "No service '$service' of section '$key' in pool of services: '${pool[*]}'. Check Startfile"
+      exit 1
+    fi
+  done
+
+  echo -n "${result[*]}"
 }
 
 # Compose services of the container $1 (itself and its scaled $1.<n>), every service when no container passed
@@ -114,9 +159,14 @@ fi
 
 if [[ -z "$force" ]]; then
   running_containers=()
-  read -ra flow <<< "$(validate_services "flow")"
-  read -ra wait <<< "$(validate_services "wait")"
-  read -ra stop <<< "$(validate_services "stop")"
+  section=$(startfile_section)
+  # Assigned first so that an invalid Startfile aborts the start (set -e)
+  flow_services=$(validate_services "flow")
+  wait_services=$(validate_services "wait")
+  stop_services=$(validate_services "stop")
+  read -ra flow <<< "$flow_services"
+  read -ra wait <<< "$wait_services"
+  read -ra stop <<< "$stop_services"
   array_flip wait_index "${wait[@]}"
 
   # Stopping services first before recreating
@@ -154,11 +204,12 @@ if [[ -z "$force" ]]; then
         echo "Waiting for: ${service_containers[*]}"
         read -ra wait_list <<< "${service_containers//$'\n'/ }"
         wait_list=("${wait_list[@]/#/$COMPOSE_PROJECT_NAME.}")
-        exit_code=$(docker wait "${wait_list[@]}")
-        if [[ $exit_code != 0 ]]; then
+        exit_codes=$(docker wait "${wait_list[@]}")
+        # One exit code per line: every container must exit with 0
+        if grep -qvx 0 <<< "$exit_codes"; then
           echo "Failed to wait containers: ${wait_list[*]}"
           docker logs "${wait_list[@]}"
-          echo "Start is aborted due to one of containers exited with exit code $exit_code != 0 while waiting"
+          echo "Start is aborted due to one of containers exited with exit code $(echo "$exit_codes" | tr '\n' ' ')!= 0 while waiting"
           exit 1
         fi
       fi

@@ -1,5 +1,20 @@
 # Yoda change log
 
+## Unreleased
+
+1. License Yoda under the Apache License 2.0
+2. Fix the version switch to the project's pinned Yoda version: it checks out the tag only when it holds that version, runs only inside Yoda's own git clone (never a parent repository such as Homebrew's), and prints its messages to stderr so they no longer end up in `yoda compose` output
+3. `yoda deploy` from a release install (e.g. Homebrew) clones Yoda on new servers from upstream instead of an unrelated or empty URL; `ssh-keyscan` is skipped for http(s) git URLs; the `~/.bashrc` PATH line is added only once
+4. Startfile is read from the configured Yoda folder instead of `docker/` only
+5. Startfile supports `<env>.<stack>` sections; a shared `<env>` section applies to each stack only for the services it runs
+6. (!) An unknown service in the Startfile aborts `yoda start` instead of silently skipping the whole flow
+7. Fix Startfile `flow` chunks (`web=2`) failing validation when the Envfile count differs, and `wait` on scaled services
+8. Hooks may `exec yoda <command>` without looping; the recursion guard uses `YODA_HOOK` instead of the parent process
+9. `yoda add worker.mail` creates the nested `containers/worker/mail/` folder that compose expects, and keeps a block-list `dev` environment in the Envfile as a list
+10. `yoda delete` removes only exact container names (deleting `web` no longer turns `webapp` into `app`)
+11. `yoda rollback` fails with fewer than two recorded deploys instead of redeploying the current revision or the branch head
+12. `make check` requires the Docker Compose plugin v2
+
 ## Version 2.5
 
 1. Add `yoda start --keep-orphans` to keep containers that are no longer in the compose file running (drops `--remove-orphans`)

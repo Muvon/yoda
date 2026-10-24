@@ -35,9 +35,11 @@ fi
 declare -A revisions
 if [[ -z "$rev" ]]; then
   for server in "${servers[@]}"; do
+    # The previous revision exists only after two deploys
     revisions[$server]=$(ssh -o ControlPath=none -AT "$server" "
-      if test -f .deploy/$COMPOSE_PROJECT_NAME.revision; then
-        tail -n 2 .deploy/$COMPOSE_PROJECT_NAME.revision | head -n 1
+      file=.deploy/$COMPOSE_PROJECT_NAME.revision
+      if test -f \$file && test \$(wc -l < \$file) -ge 2; then
+        tail -n 2 \$file | head -n 1
       fi
     ")
   done
@@ -45,6 +47,7 @@ if [[ -z "$rev" ]]; then
   rev=$(printf "%s\n" "${revisions[@]}" | sort -u)
   if [[ -z "$rev" ]]; then
     >&2 echo 'No revisions found to rollback.'
+    exit 1
   fi
 
   if [[ $(echo "$rev" | wc -l | tr -d ' ') -gt 1 ]]; then

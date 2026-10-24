@@ -5,6 +5,7 @@
 [![Homebrew](https://img.shields.io/badge/brew-muvon%2Ftap%2Fyoda-FBB040?logo=homebrew&logoColor=white)](https://github.com/Muvon/homebrew-tap)
 [![Bash 4+](https://img.shields.io/badge/bash-4%2B-4EAA25?logo=gnubash&logoColor=white)](#prerequisites)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey)](#prerequisites)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 > Dockerize any project and deploy it to your servers — with pure Bash.
 
@@ -101,10 +102,7 @@ cd yoda && make check && sudo make install
 brew install muvon/tap/yoda
 ```
 
-Homebrew installs the release tarball, not a git checkout. That is fine for local work. Two features need a git clone, so use the [source install](#from-source-recommended) on any machine you deploy from:
-
-- the first `yoda deploy` to a new server, which clones Yoda onto the server from your local clone's `origin`;
-- automatic switching to a project's pinned Yoda version.
+Homebrew installs the release tarball, not a git checkout. Local work and deploys both work. Only automatic switching to a project's pinned Yoda version needs a git clone. Without one, Yoda warns and runs the installed version.
 
 Check the install:
 
@@ -114,7 +112,7 @@ yoda version   # Yoda version: 2.5
 
 ### Version pinning
 
-`yoda init` writes the current Yoda version into `docker/.yodarc`. If you run a different Yoda version in that project, Yoda tries to check out the project's version tag in its own git clone. Run `yoda upgrade` in the `dev` environment to move a project to the version you have installed.
+`yoda init` writes the current Yoda version into `docker/.yodarc`. If you run a different Yoda version in that project, Yoda checks out the project's version tag in its own git clone and runs the command again. If it cannot switch, for example with a Homebrew install or a missing tag, it prints a warning and continues with the installed version. Run `yoda upgrade` in the `dev` environment to move a project to the version you have installed. On servers, deploys use this same mechanism to run the project's pinned version.
 
 ## Quick start
 
@@ -235,13 +233,13 @@ yoda rollback --env=production               # the previous revision on every no
 yoda rollback --env=production --rev=abc1234 # a specific revision
 ```
 
-Without `--rev`, Yoda reads the second-to-last entry of each server's revision file. All target servers must agree on that revision. If they do not, Yoda lists each host's revision and exits with code 1. In that case, pass `--rev`. Automatic rollback needs at least two recorded deploys.
+Without `--rev`, Yoda reads the second-to-last entry of each server's revision file. All target servers must agree on that revision. If they do not, Yoda lists each host's revision and exits with code 1. In that case, pass `--rev`. Automatic rollback needs at least two recorded deploys. With fewer, it exits with `No revisions found to rollback.`
 
 A rollback redeploys the code at that revision. It does not undo database migrations or changes inside volumes.
 
 ## Configuration
 
-`yoda init` creates the files below. You can pass a different folder name to `yoda init`, but `Startfile` support needs the default name `docker`.
+`yoda init` creates the files below. To use a different folder name, pass it to `yoda init`, for example `yoda init deploy`.
 
 ```text
 your-project/
@@ -344,7 +342,7 @@ environment:
   APP_ENV: %{ENV}
 ```
 
-**Nested containers.** A file at `containers/worker/mail.yml` (or `containers/worker/mail/container.yml`) defines the container `worker.mail`. It inherits everything from `containers/worker/container.yml` and overrides only the keys it sets. Create these files by hand. `yoda add worker.mail` creates a flat `worker.mail/` folder, and Yoda does not find that.
+**Nested containers.** `yoda add worker.mail` creates `containers/worker/mail/` and the container `worker.mail`. You can also write a single file at `containers/worker/mail.yml`. A nested container inherits everything from `containers/worker/container.yml` and overrides only the keys it sets.
 
 **Rendered config files.** Before each build, Yoda renders every `*.yoda` file under `docker/` to the same path without the `.yoda` suffix, with `%{VAR}` replaced. For example, `nginx.conf.yoda` becomes `nginx.conf`. Add the rendered files to `.gitignore`.
 
@@ -369,7 +367,7 @@ dev: web worker
 
 ### Startfile
 
-The `Startfile` sets the start order for an environment:
+The `Startfile` sets the start order for an environment, or for one stack of it:
 
 ```yaml
 production:
@@ -385,14 +383,16 @@ production:
 
 Some rules apply:
 
-- Put the three keys directly under the environment line.
-- Sections apply to a whole environment, not to a stack. Yoda reads `production:` for every `production.*` stack and ignores sections such as `production.front:`. Only list services that every stack runs. If a stack lacks a listed service, Yoda prints `No service '<name>' of section '<section>' in pool of services` and starts everything without the flow.
-- In `production`, set `restart: "no"` on the services in `wait`. Otherwise the `always` restart default reruns a finished migration.
-- `yoda start --force` ignores the `Startfile`.
+- **Sections.** For a stack, Yoda uses the `production.front:` section if it exists, and otherwise the shared `production:` section.
+- **Shared sections.** A shared section applies to each stack only for the services that stack runs. Yoda prints `Skipping service …` for the others.
+- **Unknown services.** A service that doesn't exist stops the start with `No service '<name>' of section '<key>' in pool of services`. This catches typos.
+- **Chunks.** In `flow`, `web=2` sets the chunk size. It does not need to match the count in `Envfile`.
+- **One-shot services in production.** Set `restart: "no"` on the services in `wait`. Otherwise the `always` restart default reruns a finished migration.
+- **Skipping the Startfile.** `yoda start --force` ignores it.
 
 ### Hooks: custom scripts
 
-To replace a built-in step, add an executable file named `build`, `compose`, `start`, `stop`, `destroy` or `deploy` to `docker/`. Yoda runs your script with all Yoda variables in its environment. `build`, `start`, `stop` and `deploy` hooks also get the command's arguments. To run the built-in step from your script, call `yoda <command>`. Hooks live in your repository, so a `start` hook also runs on every server during a deploy.
+To replace a built-in step, add an executable file named `build`, `compose`, `start`, `stop`, `destroy` or `deploy` to `docker/`. Yoda runs your script with all Yoda variables in its environment. `build`, `start`, `stop` and `deploy` hooks also get the command's arguments. To run the built-in step from your script, call `yoda <command>` or `exec yoda <command>`. Hooks live in your repository, so a `start` hook also runs on every server during a deploy.
 
 ```bash
 #!/usr/bin/env bash
@@ -401,9 +401,6 @@ set -e
 make test
 yoda deploy "$@"
 ```
-
-> [!WARNING]
-> Call `yoda <command>` as a child process. Do not use `exec yoda <command>`: Yoda then cannot tell it was called from the hook, and the hook calls itself in an endless loop.
 
 ## CLI reference
 
@@ -684,3 +681,7 @@ CI runs lint on Ubuntu and the Bats suite on Ubuntu and macOS. Commit messages f
 To release, bump `YODA_SOURCE_VERSION` in `yoda`, add `upgrades/version-X.Y`, update [CHANGES.md](CHANGES.md), and push the tag `X.Y`. The [Release workflow](.github/workflows/release.yml) checks that the tag matches the version, creates the GitHub release and updates the Homebrew formula.
 
 See [CHANGES.md](CHANGES.md) for the full history and [FLOW.md](FLOW.md) for how the commands work inside.
+
+## License
+
+Yoda is licensed under the [Apache License 2.0](LICENSE).
