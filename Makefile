@@ -1,4 +1,4 @@
-.PHONY: check lint test
+.PHONY: check lint test release
 BASH_EXISTS := $(shell which bash)
 SHELL := $(shell which bash)
 YODA_DIR := $(shell pwd)
@@ -32,3 +32,8 @@ lint:
 
 test:
 	bats -r tests/
+
+# Bumps VERSION from the conventional commits, writes CHANGES.md, commits and tags.
+# Then: git push origin master --follow-tags
+release:
+	octocode release --changelog CHANGES.md

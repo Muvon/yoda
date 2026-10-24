@@ -107,7 +107,7 @@ Homebrew installs the release tarball, not a git checkout. Local work and deploy
 Check the install:
 
 ```bash
-yoda version   # Yoda version: 2.5
+yoda version   # prints the installed version, e.g. Yoda version: 2.6.0
 ```
 
 ### Version pinning
@@ -678,7 +678,14 @@ make test    # bats test suite (tests/)
 
 CI runs lint on Ubuntu and the Bats suite on Ubuntu and macOS. Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-To release, bump `YODA_SOURCE_VERSION` in `yoda`, add `upgrades/version-X.Y`, update [CHANGES.md](CHANGES.md), and push the tag `X.Y`. The [Release workflow](.github/workflows/release.yml) checks that the tag matches the version, creates the GitHub release and updates the Homebrew formula.
+The version lives in [`VERSION`](VERSION) and follows [SemVer](https://semver.org/). Releases are cut with [octocode](https://github.com/Muvon/octocode), which picks the bump from the Conventional Commits since the last tag:
+
+```bash
+make release                           # bump VERSION, write CHANGES.md, commit and tag
+git push origin master --follow-tags   # CI publishes the release
+```
+
+The [Release workflow](.github/workflows/release.yml) checks that the tag matches `VERSION`, creates the GitHub release with the tag's changelog and updates the Homebrew formula. Add an `upgrades/version-X.Y.Z` script only when projects need a migration or a notice on `yoda upgrade`.
 
 See [CHANGES.md](CHANGES.md) for the full history and [FLOW.md](FLOW.md) for how the commands work inside.
 

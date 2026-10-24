@@ -49,7 +49,7 @@ EOF
 release_copy() {
   YODA_RELEASE="$PROJECT_DIR/release"
   mkdir -p "$YODA_RELEASE"
-  cp -R "$YODA_ROOT"/{yoda,lib,src,templates,upgrades} "$YODA_RELEASE"
+  cp -R "$YODA_ROOT"/{yoda,VERSION,lib,src,templates,upgrades} "$YODA_RELEASE"
 }
 
 @test "init creates the deployment skeleton" {
@@ -69,7 +69,7 @@ release_copy() {
   run "$YODA" init
   [ "$status" -eq 0 ]
   local version
-  version=$(sed -n "s/^YODA_SOURCE_VERSION='\(.*\)'$/\1/p" "$YODA")
+  version=$(< "$YODA_ROOT/VERSION")
   grep -Fq "\"${PROJECT_DIR##*/}\"" docker/.yodarc
   grep -Fq "YODA_VERSION=\"$version\"" docker/.yodarc
 }
@@ -511,4 +511,16 @@ release_copy() {
   grep -q "Failed to switch version to '0.1'" err.log
   [ "$(git rev-parse HEAD)" = "$head" ]
   git symbolic-ref -q HEAD
+}
+
+@test "a project pinned to x.y runs on x.y.0 without switching" {
+  "$YODA" init >/dev/null
+  "$YODA" add nginx >/dev/null
+  release_copy
+  printf '3.1.0\n' > "$YODA_RELEASE/VERSION"
+  sed -i.bak 's/^  YODA_VERSION=.*/  YODA_VERSION="3.1" \\/' docker/.yodarc
+
+  "$YODA_RELEASE/yoda" compose > out.yml 2> err.log
+  grep -q "^services:" out.yml
+  [ ! -s err.log ]
 }

@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -e
 YODA_CMD='yoda'
-YODA_SOURCE_VERSION='2.5'
-# YODA_VERSION redefined when you are in project dir
-YODA_VERSION=$YODA_SOURCE_VERSION
 YODA_BIN=$(test -h "$0" && readlink "$0" || echo "$0")
 YODA_PATH=${YODA_BIN%/*}
+# VERSION is the single source of the version: the release tool bumps it
+YODA_SOURCE_VERSION=$(< "$YODA_PATH/VERSION")
+# YODA_VERSION redefined when you are in project dir
+YODA_VERSION=$YODA_SOURCE_VERSION
 
 export YODA_CMD YODA_SOURCE_VERSION YODA_VERSION YODA_BIN YODA_PATH
 
@@ -15,6 +16,9 @@ source "$YODA_PATH/lib/color.sh"
 
 # shellcheck source=lib/container.sh
 source "$YODA_PATH/lib/container.sh"
+
+# shellcheck source=lib/version.sh
+source "$YODA_PATH/lib/version.sh"
 
 # Forbid to run as root
 if [[ "$(id -u)" -eq 0 ]]; then
@@ -36,18 +40,24 @@ is_yoda_clone() {
   [[ "$top" == "$(cd "$YODA_PATH" && pwd -P)" ]]
 }
 
+# Yoda version a git revision holds: its VERSION file, or the constant in yoda in older releases
+revision_version() {
+  git -C "$YODA_PATH" show "$1:VERSION" 2>/dev/null \
+    || git -C "$YODA_PATH" show "$1:yoda" 2>/dev/null | sed -n "s/^YODA_SOURCE_VERSION='\(.*\)'$/\1/p"
+}
+
 # Auto version switch and update
 yodarc_file=$(ls ./*/.yodarc 2>/dev/null || true)
 # shellcheck source=/dev/null
 test -f "$yodarc_file" && source "$_"
-if [[ "$YODA_SOURCE_VERSION" != "$YODA_VERSION" && "$cmd" != upgrade ]]; then
+if [[ "$(version_normalize "$YODA_SOURCE_VERSION")" != "$(version_normalize "$YODA_VERSION")" && "$cmd" != upgrade ]]; then
   # Messages go to stderr: commands like 'yoda compose' are read from stdout
   >&2 echo "Current Yoda version: '$YODA_SOURCE_VERSION'."
   >&2 echo "Switching to project Yoda version: '$YODA_VERSION'."
   # Check out the tag only when it holds that version, so a failed switch leaves files as they are
   if is_yoda_clone; then
     git -C "$YODA_PATH" fetch -q --tags --force origin 2>/dev/null || true
-    if git -C "$YODA_PATH" show "$YODA_VERSION:yoda" 2>/dev/null | grep -qx "YODA_SOURCE_VERSION='$YODA_VERSION'" \
+    if [[ "$(version_normalize "$(revision_version "$YODA_VERSION")")" == "$(version_normalize "$YODA_VERSION")" ]] \
       && git -C "$YODA_PATH" checkout -q "$YODA_VERSION" 2>/dev/null; then
       exec "$YODA_BIN" "$cmd" "$@"
     fi

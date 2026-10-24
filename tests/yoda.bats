@@ -17,7 +17,7 @@ teardown() {
 
 @test "version prints the current source version" {
   local version
-  version=$(sed -n "s/^YODA_SOURCE_VERSION='\(.*\)'$/\1/p" "$YODA")
+  version=$(< "$YODA_ROOT/VERSION")
   run "$YODA" version
   [ "$status" -eq 0 ]
   [ "$output" = "Yoda version: $version" ]

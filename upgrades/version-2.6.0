@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+echo '(!!!) Breaking changes:'
+echo '  - Startfile: an unknown service aborts yoda start'
+echo '    instead of silently skipping the whole flow'
+echo '  - Startfile: stacks use their <env>.<stack> section when declared;'
+echo '    a shared <env> section applies only to the services a stack runs'
+echo '  - Versions are x.y.z now and live in the VERSION file of Yoda'
