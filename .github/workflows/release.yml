@@ -49,9 +49,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Dispatch update to homebrew-tap
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
         run: |
-          curl -X POST \
+          if [[ -z "$TAP_GITHUB_TOKEN" ]]; then
+            echo "::error::TAP_GITHUB_TOKEN secret is not available to this repository"
+            exit 1
+          fi
+          curl --fail-with-body -sS -X POST \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.TAP_GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer $TAP_GITHUB_TOKEN" \
             https://api.github.com/repos/muvon/homebrew-tap/dispatches \
             -d "{\"event_type\":\"yoda-release\",\"client_payload\":{\"version\":\"${{ needs.release.outputs.version }}\"}}"
