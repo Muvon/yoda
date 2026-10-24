@@ -1,5 +1,27 @@
 # Yoda change log
 
+## [2.6.0] - 2026-10-24
+
+### 📋 Release Summary
+
+Semantic-versioned upgrades are now supported. Container management and deployment flows have been fixed, and project and deployment documentation has been expanded.
+
+### ✨ New Features & Enhancements
+
+- **versioning**: support semantic versioned upgrades `1bc5a66e`
+
+### 🔧 Improvements & Optimizations
+
+- **release**: rename changelog file `b3dcd238`
+
+### 🐛 Bug Fixes & Stability
+
+- **runtime**: fix container management and deployment flows `2aab45a9`
+
+### 📚 Documentation & Examples
+
+- expand project and deployment documentation `9d28f58e`
+
 ## Version 2.5
 
 1. Add `yoda start --keep-orphans` to keep containers that are no longer in the compose file running (drops `--remove-orphans`)
