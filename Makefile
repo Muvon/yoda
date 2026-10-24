@@ -33,7 +33,7 @@ lint:
 test:
 	bats -r tests/
 
-# Bumps VERSION from the conventional commits, writes CHANGES.md, commits and tags.
+# Bumps VERSION from the conventional commits, writes CHANGELOG.md, commits and tags.
 # Then: git push origin master --follow-tags
 release:
-	octocode release --changelog CHANGES.md
+	octocode release --changelog CHANGELOG.md
